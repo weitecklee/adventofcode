@@ -36,7 +36,7 @@ func part1(input []int) int {
 	for i := preambleLen; i < len(input); i++ {
 		valid := false
 		for n := range preamble {
-			if preamble[input[i]-n] {
+			if preamble[input[i]-n] && n != input[i]-n {
 				valid = true
 				break
 			}
