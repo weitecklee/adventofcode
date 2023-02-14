@@ -11,7 +11,7 @@ import (
 
 type Instruction struct {
 	dir  string
-	dist int
+	dist float64
 }
 
 func main() {
@@ -26,32 +26,23 @@ func main() {
 		matches := re.FindStringSubmatch(line)
 		instruc := Instruction{}
 		instruc.dir = matches[1]
-		instruc.dist, _ = strconv.Atoi(matches[2])
+		instruc.dist, _ = strconv.ParseFloat(matches[2], 64)
 		parsedInput = append(parsedInput, instruc)
 	}
 	fmt.Println(part1(parsedInput))
 	fmt.Println(part2(parsedInput))
 }
 
-func turn(dir int, angle int, facing [2]int) [2]int {
-	if angle == 90 {
-		facing2 := [2]int{}
-		facing2[0] = facing[1] * dir
-		facing2[1] = -facing[0] * dir
-		return facing2
-	} else if angle == 180 {
-		return [2]int{-facing[0], -facing[1]}
-	} else {
-		facing2 := [2]int{}
-		facing2[0] = -facing[1] * dir
-		facing2[1] = facing[0] * dir
-		return facing2
-	}
+func turn(dir float64, angle float64, facing [2]float64) [2]float64 {
+	facing2 := [2]float64{}
+	facing2[0] = facing[0]*math.Cos(angle*dir/180*math.Pi) + facing[1]*math.Sin(angle*dir/180*math.Pi)
+	facing2[1] = facing[1]*math.Cos(angle*dir/180*math.Pi) - facing[0]*math.Sin(angle*dir/180*math.Pi)
+	return facing2
 }
 
 func part1(input []Instruction) int {
-	pos := [2]int{0, 0}
-	facing := [2]int{1, 0}
+	pos := [2]float64{0, 0}
+	facing := [2]float64{1, 0}
 	for _, instruc := range input {
 		switch instruc.dir {
 		case "N":
@@ -71,12 +62,12 @@ func part1(input []Instruction) int {
 			pos[1] += instruc.dist * facing[1]
 		}
 	}
-	return int(math.Abs(float64((pos[0]))) + math.Abs(float64(pos[1])))
+	return int(math.Abs((pos[0])) + math.Abs(pos[1]))
 }
 
 func part2(input []Instruction) int {
-	pos := [2]int{0, 0}
-	waypoint := [2]int{10, 1}
+	pos := [2]float64{0, 0}
+	waypoint := [2]float64{10, 1}
 	for _, instruc := range input {
 		switch instruc.dir {
 		case "N":
@@ -96,5 +87,5 @@ func part2(input []Instruction) int {
 			pos[1] += instruc.dist * waypoint[1]
 		}
 	}
-	return int(math.Abs(float64((pos[0]))) + math.Abs(float64(pos[1])))
+	return int(math.Abs((pos[0])) + math.Abs(pos[1]))
 }
