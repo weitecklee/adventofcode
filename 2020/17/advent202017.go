@@ -15,11 +15,11 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	parsedInput := parseInput(input)
 	fmt.Println(part1(parsedInput))
-	fmt.Println(part2(parseInput2(input)))
+	fmt.Println(part2(parsedInput))
 }
 
-func convertCoords(x int, y int, z int) string {
-	return strconv.Itoa(x) + "," + strconv.Itoa(y) + "," + strconv.Itoa(z)
+func convertCoords(x int, y int, z int, w int) string {
+	return strconv.Itoa(x) + "," + strconv.Itoa(y) + "," + strconv.Itoa(z) + "," + strconv.Itoa(w)
 }
 
 func parseInput(input []string) map[string]bool {
@@ -27,89 +27,14 @@ func parseInput(input []string) map[string]bool {
 	for i, row := range input {
 		for j, c := range row {
 			if string(c) == "#" {
-				cubes[convertCoords(i, j, 0)] = true
+				cubes[convertCoords(i, j, 0, 0)] = true
 			}
 		}
 	}
 	return cubes
 }
 
-func coordsOfInterest(cubes map[string]bool) (map[string]bool, map[string]bool) {
-	neighbors := map[string]int{}
-	twoActiveNeighbors := map[string]bool{}
-	threeActiveNeighbors := map[string]bool{}
-	for coords := range cubes {
-		splitCoords := strings.Split(coords, ",")
-		x, _ := strconv.Atoi(splitCoords[0])
-		y, _ := strconv.Atoi(splitCoords[1])
-		z, _ := strconv.Atoi(splitCoords[2])
-		for i := -1; i <= 1; i++ {
-			for j := -1; j <= 1; j++ {
-				for k := -1; k <= 1; k++ {
-					if i == 0 && j == 0 && k == 0 {
-						continue
-					}
-					x2 := x + i
-					y2 := y + j
-					z2 := z + k
-					convCoords := convertCoords(x2, y2, z2)
-					neighbors[convCoords]++
-					if neighbors[convCoords] == 2 {
-						twoActiveNeighbors[convCoords] = true
-					} else if neighbors[convCoords] == 3 {
-						threeActiveNeighbors[convCoords] = true
-						delete(twoActiveNeighbors, convCoords)
-					} else if neighbors[convCoords] == 4 {
-						delete(threeActiveNeighbors, convCoords)
-					}
-				}
-			}
-		}
-	}
-	return twoActiveNeighbors, threeActiveNeighbors
-}
-
-func simulate(cubes map[string]bool) map[string]bool {
-	cubes2 := map[string]bool{}
-	twoActiveNeighbors, threeActiveNeighbors := coordsOfInterest(cubes)
-	for coords := range cubes {
-		if twoActiveNeighbors[coords] || threeActiveNeighbors[coords] {
-			cubes2[coords] = true
-		}
-	}
-	for coords := range threeActiveNeighbors {
-		cubes2[coords] = true
-	}
-	return cubes2
-}
-
-func part1(input map[string]bool) int {
-	cubes := input
-	i := 0
-	for i < 6 {
-		cubes = simulate(cubes)
-		i++
-	}
-	return len(cubes)
-}
-
-func convertCoords2(x int, y int, z int, w int) string {
-	return strconv.Itoa(x) + "," + strconv.Itoa(y) + "," + strconv.Itoa(z) + "," + strconv.Itoa(w)
-}
-
-func parseInput2(input []string) map[string]bool {
-	cubes := map[string]bool{}
-	for i, row := range input {
-		for j, c := range row {
-			if string(c) == "#" {
-				cubes[convertCoords2(i, j, 0, 0)] = true
-			}
-		}
-	}
-	return cubes
-}
-
-func coordsOfInterest2(cubes map[string]bool) (map[string]bool, map[string]bool) {
+func coordsOfInterest(cubes map[string]bool, forPart2 bool) (map[string]bool, map[string]bool) {
 	neighbors := map[string]int{}
 	twoActiveNeighbors := map[string]bool{}
 	threeActiveNeighbors := map[string]bool{}
@@ -122,15 +47,34 @@ func coordsOfInterest2(cubes map[string]bool) (map[string]bool, map[string]bool)
 		for i := -1; i <= 1; i++ {
 			for j := -1; j <= 1; j++ {
 				for k := -1; k <= 1; k++ {
-					for h := -1; h <= 1; h++ {
-						if i == 0 && j == 0 && k == 0 && h == 0 {
+					if forPart2 {
+						for h := -1; h <= 1; h++ {
+							if i == 0 && j == 0 && k == 0 && h == 0 {
+								continue
+							}
+							x2 := x + i
+							y2 := y + j
+							z2 := z + k
+							w2 := w + h
+							convCoords := convertCoords(x2, y2, z2, w2)
+							neighbors[convCoords]++
+							if neighbors[convCoords] == 2 {
+								twoActiveNeighbors[convCoords] = true
+							} else if neighbors[convCoords] == 3 {
+								threeActiveNeighbors[convCoords] = true
+								delete(twoActiveNeighbors, convCoords)
+							} else if neighbors[convCoords] == 4 {
+								delete(threeActiveNeighbors, convCoords)
+							}
+						}
+					} else {
+						if i == 0 && j == 0 && k == 0 {
 							continue
 						}
 						x2 := x + i
 						y2 := y + j
 						z2 := z + k
-						w2 := w + h
-						convCoords := convertCoords2(x2, y2, z2, w2)
+						convCoords := convertCoords(x2, y2, z2, 0)
 						neighbors[convCoords]++
 						if neighbors[convCoords] == 2 {
 							twoActiveNeighbors[convCoords] = true
@@ -148,9 +92,9 @@ func coordsOfInterest2(cubes map[string]bool) (map[string]bool, map[string]bool)
 	return twoActiveNeighbors, threeActiveNeighbors
 }
 
-func simulate2(cubes map[string]bool) map[string]bool {
+func simulate(cubes map[string]bool, forPart2 bool) map[string]bool {
 	cubes2 := map[string]bool{}
-	twoActiveNeighbors, threeActiveNeighbors := coordsOfInterest2(cubes)
+	twoActiveNeighbors, threeActiveNeighbors := coordsOfInterest(cubes, forPart2)
 	for coords := range cubes {
 		if twoActiveNeighbors[coords] || threeActiveNeighbors[coords] {
 			cubes2[coords] = true
@@ -162,11 +106,21 @@ func simulate2(cubes map[string]bool) map[string]bool {
 	return cubes2
 }
 
+func part1(input map[string]bool) int {
+	cubes := input
+	i := 0
+	for i < 6 {
+		cubes = simulate(cubes, false)
+		i++
+	}
+	return len(cubes)
+}
+
 func part2(input map[string]bool) int {
 	cubes := input
 	i := 0
 	for i < 6 {
-		cubes = simulate2(cubes)
+		cubes = simulate(cubes, true)
 		i++
 	}
 	return len(cubes)
