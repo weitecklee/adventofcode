@@ -159,3 +159,99 @@ for (let n = 0; n < 2022; n++) {
 }
 
 console.log(height);
+
+// Find cycle by tracking height profile after each block has dropped
+// Combine this with which block just dropped and place in input
+// These three parameters form a cycleID
+// In a map, use the cycleID as the key and [n, maxHeight] as the value
+// where n = number of blocks dropped, maxHeight = ... you know
+// Keep dropping blocks until a repeat cycleID has been found
+// From there, you can determine how many blocks have been dropped (the period of the cycle)
+// and the height that has been added (the amplitude?)
+// Calculate how many cycles were run within 1000000000000 rock drops
+// and how many leftover rocks need to be dropped to get to that big number
+// Simulate those leftover rock drops and don't forget to add the height from all those cycles
+
+const profile = (h) => {
+  const prof = new Array(7).fill(0);
+  for (let i = 0; i < 7; i++) {
+    let y = h;
+    while (y > 0 && !chamber.has((i + 1) + ',' + y)) {
+      y--;
+    }
+    prof[i] = h - y;
+  }
+  return prof.join('.');
+}
+
+chamber.clear();
+i = 0;
+height = 0;
+
+const cycles = new Map();
+let cycleFound = false;
+let cycleProfile;
+let n = 0;
+
+while (!cycleFound) {
+  const currBlock = newBlock(n, height + 4);
+  while (true) {
+    if (input[i] === '<') {
+      currBlock.moveLeft();
+    } else if (input[i] === '>') {
+      currBlock.moveRight();
+    }
+    i++;
+    if (i >= input.length) {
+      i = 0;
+    }
+    if (!currBlock.moveDown()) {
+      for (const pos of currBlock.space) {
+        chamber.add(pos.join(','));
+      }
+      height = Math.max(height, currBlock.height);
+      break;
+    }
+  }
+  const cycleID = (n %  5) + '|' + i + '|' + profile(height);
+  if (!cycleFound && !cycles.has(cycleID)) {
+    cycles.set(cycleID, [n, height]);
+  } else if (!cycleFound && cycles.has(cycleID)) {
+    cycleProfile = cycleID;
+    cycleFound = true;
+  }
+  n++;
+}
+
+const [firstN, firstH] = cycles.get(cycleProfile);
+const cycleN = n - firstN - 1;
+const cycleH = height - firstH;
+
+const simulationN = 1000000000000;
+const cyclesRan = Math.floor((simulationN - n) / cycleN);
+const leftOverN = simulationN - n - cyclesRan * cycleN;
+const heightToAdd = cyclesRan * cycleH;
+
+for (let j = 0; j < leftOverN; j++) {
+  const currBlock = newBlock(n + j, height + 4);
+  while (true) {
+    if (input[i] === '<') {
+      currBlock.moveLeft();
+    } else if (input[i] === '>') {
+      currBlock.moveRight();
+    }
+    i++;
+    if (i >= input.length) {
+      i = 0;
+    }
+    if (!currBlock.moveDown()) {
+      for (const pos of currBlock.space) {
+        chamber.add(pos.join(','));
+      }
+      height = Math.max(height, currBlock.height);
+      break;
+    }
+  }
+}
+
+console.log(height + heightToAdd)
