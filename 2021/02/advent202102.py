@@ -1,4 +1,4 @@
-file1 = open('input202102.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 
 horizontal = 0

@@ -1,4 +1,4 @@
-file1 = open('input202202.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 score = 0
 

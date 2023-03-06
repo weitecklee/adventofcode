@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-let input = fs.readFileSync(path.resolve(__dirname, 'input202112.txt'), 'utf-8', (err, data) => {
+let input = fs.readFileSync(path.resolve(__dirname, 'input.txt'), 'utf-8', (err, data) => {
   if (err) {
     console.log(err)
   } else {

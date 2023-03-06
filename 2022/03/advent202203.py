@@ -1,4 +1,4 @@
-file1 = open('input202203.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 sum = 0
 prio = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'

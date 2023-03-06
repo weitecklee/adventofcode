@@ -1,4 +1,4 @@
-file1 = open('input202112.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 
 from collections import defaultdict, deque

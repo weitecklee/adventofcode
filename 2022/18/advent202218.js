@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-let input = fs.readFileSync('input202218.txt', 'utf-8', (err, data) => {
+let input = fs.readFileSync('input.txt', 'utf-8', (err, data) => {
   if (err) {
     console.log(err)
   } else {
