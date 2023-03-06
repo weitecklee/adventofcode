@@ -1,6 +1,6 @@
 import re
 
-file1 = open('input202214.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 
 rocks = set()

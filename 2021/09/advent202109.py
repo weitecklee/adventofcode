@@ -1,4 +1,4 @@
-file1 = open('input202109.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 
 grid = [list(map(int, list(line.strip()))) for line in lines]

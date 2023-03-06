@@ -1,4 +1,4 @@
-file1 = open('input202208.txt','r')
+file1 = open('input.txt','r')
 lines = list(map(str.strip, file1.readlines()))
 
 grid = [[0]*len(lines) for i in range(len(lines))]

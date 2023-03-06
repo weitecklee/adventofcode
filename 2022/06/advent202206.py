@@ -1,4 +1,4 @@
-file1 = open('input202206.txt','r')
+file1 = open('input.txt','r')
 text = file1.read()
 
 letters = {}

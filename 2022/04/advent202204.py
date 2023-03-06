@@ -1,6 +1,6 @@
 import re
 
-file1 = open('input202204.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 n = 0
 

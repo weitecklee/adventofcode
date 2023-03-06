@@ -1,4 +1,4 @@
-file1 = open('input202111.txt','r')
+file1 = open('input.txt','r')
 lines = file1.readlines()
 lines = list(map(str.strip, lines))
 lines = [list(map(int, list(line))) for line in lines]
