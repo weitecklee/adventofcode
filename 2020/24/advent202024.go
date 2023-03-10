@@ -13,12 +13,24 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(input))
+	tiles := part1(input)
+	fmt.Println(len(tiles))
+	fmt.Println(part2(tiles))
 }
 
-func part1(input []string) int {
+func stringCoord(c [2]int) string {
+	return strconv.Itoa(c[0]) + "," + strconv.Itoa(c[1])
+}
+
+func deStringCoord(coord string) [2]int {
+	s := strings.Split(coord, ",")
+	a, _ := strconv.Atoi(s[0])
+	b, _ := strconv.Atoi(s[1])
+	return [2]int{a, b}
+}
+
+func part1(input []string) map[string]bool {
 	tiles := map[string]bool{} // black is true, white is false
-	count := 0
 	for _, line := range input {
 		coord := [2]int{0, 0}
 		i := 0
@@ -50,13 +62,45 @@ func part1(input []string) int {
 			}
 			i++
 		}
-		coordStr := strconv.Itoa(coord[0]) + "," + strconv.Itoa(coord[1])
+		coordStr := stringCoord(coord)
 		tiles[coordStr] = !tiles[coordStr]
-		if tiles[coordStr] {
-			count++
-		} else {
-			count--
+		if !tiles[coordStr] {
+			delete(tiles, coordStr)
 		}
 	}
-	return count
+	return tiles
+}
+
+func part2(tiles map[string]bool) int {
+	checkAdjacent := [6][2]int{{1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {2, 0}, {-2, 0}}
+	for i := 0; i < 100; i++ {
+		adjacentTiles := map[string]int{}
+		tilesWith2BlackAdj := map[string]bool{}
+		for coordStr := range tiles {
+			coord := deStringCoord(coordStr)
+			for _, check := range checkAdjacent {
+				coordAdj := [2]int{coord[0] + check[0], coord[1] + check[1]}
+				coordS := stringCoord(coordAdj)
+				adjacentTiles[coordS]++
+				if adjacentTiles[coordS] == 2 {
+					tilesWith2BlackAdj[coordS] = true
+				} else if adjacentTiles[coordS] > 2 {
+					delete(tilesWith2BlackAdj, coordS)
+				}
+			}
+		}
+		tiles2 := map[string]bool{}
+		for coordStr := range tiles {
+			if adjacentTiles[coordStr] == 1 || adjacentTiles[coordStr] == 2 {
+				tiles2[coordStr] = true
+			}
+		}
+		for coordStr := range tilesWith2BlackAdj {
+			if !tiles[coordStr] {
+				tiles2[coordStr] = true
+			}
+		}
+		tiles = tiles2
+	}
+	return len(tiles)
 }
