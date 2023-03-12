@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -13,10 +14,12 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(input))
+	count, allergens := part1(input)
+	fmt.Println(count)
+	fmt.Println(part2(allergens))
 }
 
-func part1(input []string) int {
+func part1(input []string) (int, map[string]map[string]bool) {
 	re := regexp.MustCompile(`\w+`)
 	allergens := map[string]map[string]bool{}
 	masterIngredients := map[string]int{}
@@ -63,5 +66,37 @@ func part1(input []string) int {
 			count += n
 		}
 	}
-	return count
+	return count, allergens
+}
+
+func part2(allergens map[string]map[string]bool) string {
+	determined := map[string]string{}
+	determined2 := map[string]string{}
+	n := len(allergens)
+	for len(determined) < n {
+		for allergen, ingredients := range allergens {
+			for ingredient := range ingredients {
+				if _, ok := determined[ingredient]; ok {
+					delete(ingredients, ingredient)
+				}
+			}
+			if len(ingredients) == 1 {
+				for ingredient := range ingredients {
+					determined[ingredient] = allergen
+					determined2[allergen] = ingredient
+				}
+				delete(allergens, allergen)
+			}
+		}
+	}
+	toSort := []string{}
+	for _, allergen := range determined {
+		toSort = append(toSort, allergen)
+	}
+	sort.Strings(toSort)
+	ans := []string{}
+	for _, allergen := range toSort {
+		ans = append(ans, determined2[allergen])
+	}
+	return strings.Join(ans, ",")
 }
