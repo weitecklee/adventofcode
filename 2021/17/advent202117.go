@@ -14,6 +14,7 @@ func main() {
 	}
 	parsedInput := parseInput(string(data))
 	fmt.Println(part1(parsedInput))
+	fmt.Println(part2(parsedInput))
 }
 
 func parseInput(input string) []int {
@@ -74,4 +75,23 @@ func part1(input []int) int {
 		}
 	}
 	return maxHt
+}
+
+func part2(input []int) int {
+	xMin := input[0]
+	xMax := input[1]
+	yMin := input[2]
+	yMax := input[3]
+	count := 0
+	// do the same thing as part 1 but yVel can be negative now
+	for xVel := 1; xVel < 1000; xVel++ {
+		for yVel := -1000; yVel < 1000; yVel++ {
+			currMaxHt := fireAway(xVel, yVel, xMin, xMax, yMin, yMax)
+			if currMaxHt >= 0 {
+				// fmt.Println(xVel, yVel, currMaxHt)
+				count++
+			}
+		}
+	}
+	return count
 }
