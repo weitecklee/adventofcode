@@ -14,6 +14,7 @@ func main() {
 	input := string(data)
 	parsedInput := parseInput(input)
 	fmt.Println(part1(parsedInput))
+	fmt.Println(part2(parsedInput))
 }
 
 func parseInput(input string) []int {
@@ -32,6 +33,18 @@ func part1(input []int) int {
 	}
 	for i := 0; i < len(input)-1; i++ {
 		if input[i] == input[i+1] {
+			res += input[i]
+		}
+	}
+	return res
+}
+
+func part2(input []int) int {
+	res := 0
+	n := len(input)
+	input = append(input, input...)
+	for i := 0; i < n; i++ {
+		if input[i] == input[i+n/2] {
 			res += input[i]
 		}
 	}
