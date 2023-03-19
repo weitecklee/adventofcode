@@ -16,6 +16,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	parsedInput := parseInput(input)
 	fmt.Println(part1(parsedInput))
+	fmt.Println(part2(parsedInput))
 }
 
 func parseInput(input []string) [][]int {
@@ -47,6 +48,31 @@ func part1(input [][]int) int {
 			}
 		}
 		res += max - min
+	}
+	return res
+}
+
+func part2(input [][]int) int {
+	res := 0
+	for _, row := range input {
+		found := false
+		for i := 0; i < len(row); i++ {
+			for j := i + 1; j < len(row); j++ {
+				if row[i]%row[j] == 0 {
+					res += row[i] / row[j]
+					found = true
+					break
+				}
+				if row[j]%row[i] == 0 {
+					res += row[j] / row[i]
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
 	}
 	return res
 }
