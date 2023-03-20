@@ -14,6 +14,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 func parseInput(input []string) []int {
@@ -32,6 +33,22 @@ func part1(input []int) int {
 		step++
 		input[row]++
 		row += input[row] - 1
+	}
+	return step
+}
+
+func part2(input []int) int {
+	step := 0
+	row := 0
+	for row >= 0 && row < len(input) {
+		step++
+		oldRow := row
+		row += input[row]
+		if input[oldRow] >= 3 {
+			input[oldRow]--
+		} else {
+			input[oldRow]++
+		}
 	}
 	return step
 }
