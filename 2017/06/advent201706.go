@@ -14,8 +14,9 @@ func main() {
 		panic(err)
 	}
 	input := string(data)
-	fmt.Println(part1(parseInput(input)))
-	fmt.Println(part2(parseInput(input)))
+	part1, part2 := solve(parseInput(input))
+	fmt.Println(part1)
+	fmt.Println(part2)
 }
 
 func parseInput(input string) []int {
@@ -38,40 +39,7 @@ func recordHistory(input []int) string {
 	return strings.Join(str, ",")
 }
 
-func part1(input []int) int {
-	n := len(input)
-	history := map[string]bool{}
-	history[recordHistory(input)] = true
-	steps := 0
-	for {
-		steps++
-		most := input[0]
-		iMost := 0
-		for i := 1; i < n; i++ {
-			if input[i] > most {
-				most = input[i]
-				iMost = i
-			}
-		}
-		input[iMost] = 0
-		for most > 0 {
-			iMost++
-			if iMost >= n {
-				iMost = 0
-			}
-			input[iMost]++
-			most--
-		}
-		hist := recordHistory(input)
-		if history[hist] {
-			break
-		}
-		history[hist] = true
-	}
-	return steps
-}
-
-func part2(input []int) int {
+func solve(input []int) (int, int) {
 	n := len(input)
 	history := map[string]int{}
 	history[recordHistory(input)] = 1
@@ -97,7 +65,7 @@ func part2(input []int) int {
 		}
 		hist := recordHistory(input)
 		if history[hist] > 0 {
-			return steps - history[hist]
+			return steps - 1, steps - history[hist]
 		}
 		history[hist] = steps
 	}
