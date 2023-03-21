@@ -15,6 +15,7 @@ func main() {
 	}
 	input := string(data)
 	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 func parseInput(input string) []int {
@@ -68,4 +69,36 @@ func part1(input []int) int {
 		history[hist] = true
 	}
 	return steps
+}
+
+func part2(input []int) int {
+	n := len(input)
+	history := map[string]int{}
+	history[recordHistory(input)] = 1
+	steps := 1
+	for {
+		steps++
+		most := input[0]
+		iMost := 0
+		for i := 1; i < n; i++ {
+			if input[i] > most {
+				most = input[i]
+				iMost = i
+			}
+		}
+		input[iMost] = 0
+		for most > 0 {
+			iMost++
+			if iMost >= n {
+				iMost = 0
+			}
+			input[iMost]++
+			most--
+		}
+		hist := recordHistory(input)
+		if history[hist] > 0 {
+			return steps - history[hist]
+		}
+		history[hist] = steps
+	}
 }
