@@ -13,11 +13,14 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(input))
+	part1, part2 := solve(input)
+	fmt.Println(part1)
+	fmt.Println(part2)
 }
 
-func part1(input []string) int {
+func solve(input []string) (int, int) {
 	regMap := map[string]int{}
+	runningMax := 0
 	for _, line := range input {
 		parts := strings.Split(line, " ")
 		reg := parts[0]
@@ -46,6 +49,9 @@ func part1(input []string) int {
 		}
 		if check {
 			regMap[reg] += incN
+			if regMap[reg] > runningMax {
+				runningMax = regMap[reg]
+			}
 		}
 	}
 	max := 0
@@ -54,5 +60,5 @@ func part1(input []string) int {
 			max = v
 		}
 	}
-	return max
+	return max, runningMax
 }
