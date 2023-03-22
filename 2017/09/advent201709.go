@@ -12,30 +12,36 @@ func main() {
 		panic(err)
 	}
 	input := string(data)
-	fmt.Println(part1(input))
+	part1, part2 := solve(input)
+	fmt.Println(part1)
+	fmt.Println(part2)
 }
 
-func cleanGarbage(input string) string {
+func cleanGarbage(input string) (string, int) {
 	var cleaned strings.Builder
 	i := 0
+	count := 0
 	for i < len(input) {
 		if string(input[i]) == "<" {
 			for string(input[i]) != ">" {
 				if string(input[i]) == "!" {
 					i++
+					count--
 				}
+				count++
 				i++
 			}
+			count--
 		} else {
 			cleaned.WriteByte(input[i])
 		}
 		i++
 	}
-	return cleaned.String()
+	return cleaned.String(), count
 }
 
-func part1(input string) int {
-	cleaned := cleanGarbage(input)
+func solve(input string) (int, int) {
+	cleaned, garbageCount := cleanGarbage(input)
 	totalScore := 0
 	currScore := 0
 	for _, c := range cleaned {
@@ -46,5 +52,5 @@ func part1(input string) int {
 			currScore--
 		}
 	}
-	return totalScore
+	return totalScore, garbageCount
 }
