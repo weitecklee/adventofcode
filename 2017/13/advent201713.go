@@ -16,6 +16,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	parsedInput := parseInput(input)
 	fmt.Println(part1(parsedInput))
+	fmt.Println(part2(parsedInput))
 }
 
 func parseInput(input []string) *[][]int {
@@ -41,4 +42,22 @@ func part1(input *[][]int) int {
 		}
 	}
 	return severity
+}
+
+func part2(input *[][]int) int {
+	delay := 0
+	for {
+		delay++
+		caught := false
+		for _, layer := range *input {
+			if (layer[0]+delay)%((layer[1]-1)*2) == 0 {
+				caught = true
+				break
+			}
+		}
+		if !caught {
+			break
+		}
+	}
+	return delay
 }
