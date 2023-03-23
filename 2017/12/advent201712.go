@@ -14,11 +14,12 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(parseInput(input)))
-	fmt.Println(part2(parseInput(input)))
+	parsedInput := parseInput(input)
+	fmt.Println(part1(parsedInput))
+	fmt.Println(part2(parsedInput))
 }
 
-func parseInput(input []string) [][]int {
+func parseInput(input []string) *[][]int {
 	parsed := [][]int{}
 	re := regexp.MustCompile(`\d+`)
 	for _, line := range input {
@@ -30,47 +31,41 @@ func parseInput(input []string) [][]int {
 		}
 		parsed = append(parsed, tmp)
 	}
-	return parsed
+	return &parsed
 }
 
-func part1(input [][]int) int {
-	visited := map[int]bool{}
-	visited[0] = true
-	queue := []int{0}
+func bfs(queue []int, input *[][]int, visited *map[int]bool) {
 	for len(queue) > 0 {
 		pipe := queue[0]
-		connectingPipes := input[pipe][1:]
+		connectingPipes := (*input)[pipe][1:]
 		for _, connectingPipe := range connectingPipes {
-			if !visited[connectingPipe] {
+			if !(*visited)[connectingPipe] {
 				queue = append(queue, connectingPipe)
-				visited[connectingPipe] = true
+				(*visited)[connectingPipe] = true
 			}
 		}
 		queue = queue[1:]
 	}
+}
+
+func part1(input *[][]int) int {
+	visited := map[int]bool{}
+	visited[0] = true
+	queue := []int{0}
+	bfs(queue, input, &visited)
 	return len(visited)
 }
 
-func part2(input [][]int) int {
+func part2(input *[][]int) int {
 	visited := map[int]bool{}
 	groups := 0
-	for _, line := range input {
+	for _, line := range *input {
 		if visited[line[0]] {
 			continue
 		}
 		queue := []int{line[0]}
 		visited[line[0]] = true
-		for len(queue) > 0 {
-			pipe := queue[0]
-			connectingPipes := input[pipe][1:]
-			for _, connectingPipe := range connectingPipes {
-				if !visited[connectingPipe] {
-					queue = append(queue, connectingPipe)
-					visited[connectingPipe] = true
-				}
-			}
-			queue = queue[1:]
-		}
+		bfs(queue, input, &visited)
 		groups++
 	}
 	return groups
