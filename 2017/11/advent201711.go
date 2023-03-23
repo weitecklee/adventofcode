@@ -13,11 +13,24 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), ",")
-	fmt.Println(part1(input))
+	part1, part2 := solve(input)
+	fmt.Println(part1)
+	fmt.Println(part2)
 }
 
-func part1(input []string) int {
+func calculateSteps(pos [2]float64) int {
+	a := int(math.Abs(pos[0]))
+	b := int(math.Abs(pos[1]))
+	if a > b {
+		return (a-b)/2 + b
+	} else {
+		return (b-a)/2 + a
+	}
+}
+
+func solve(input []string) (int, int) {
 	pos := [2]float64{0, 0}
+	maxDist := 0
 	for _, step := range input {
 		switch step {
 		case "n":
@@ -39,12 +52,10 @@ func part1(input []string) int {
 		default:
 			panic("What is this? " + step)
 		}
+		dist := calculateSteps(pos)
+		if dist > maxDist {
+			maxDist = dist
+		}
 	}
-	a := int(math.Abs(pos[0]))
-	b := int(math.Abs(pos[1]))
-	if a > b {
-		return (a-b)/2 + b
-	} else {
-		return (b-a)/2 + a
-	}
+	return calculateSteps(pos), maxDist
 }
