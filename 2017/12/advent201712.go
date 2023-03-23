@@ -15,7 +15,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(parseInput(input)))
-
+	fmt.Println(part2(parseInput(input)))
 }
 
 func parseInput(input []string) [][]int {
@@ -49,4 +49,29 @@ func part1(input [][]int) int {
 		queue = queue[1:]
 	}
 	return len(visited)
+}
+
+func part2(input [][]int) int {
+	visited := map[int]bool{}
+	groups := 0
+	for _, line := range input {
+		if visited[line[0]] {
+			continue
+		}
+		queue := []int{line[0]}
+		visited[line[0]] = true
+		for len(queue) > 0 {
+			pipe := queue[0]
+			connectingPipes := input[pipe][1:]
+			for _, connectingPipe := range connectingPipes {
+				if !visited[connectingPipe] {
+					queue = append(queue, connectingPipe)
+					visited[connectingPipe] = true
+				}
+			}
+			queue = queue[1:]
+		}
+		groups++
+	}
+	return groups
 }
