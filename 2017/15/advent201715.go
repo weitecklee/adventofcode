@@ -12,7 +12,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(part1(parseInput(strings.Split(string(data), "\n"))))
+	parsedInput := parseInput(strings.Split(string(data), "\n"))
+	fmt.Println(part1(parsedInput))
+	fmt.Println(part2(parsedInput))
 }
 
 func parseInput(input []string) []int {
@@ -34,6 +36,32 @@ func part1(input []int) int {
 	for i := 0; i < 40000000; i++ {
 		genA = (genA * factorA) % 2147483647
 		genB = (genB * factorB) % 2147483647
+		if genA%65536 == genB%65536 {
+			count++
+		}
+	}
+	return count
+}
+
+func generator(val int, f int, m int) int {
+	for {
+		val = (val * f) % 2147483647
+		if val%m == 0 {
+			break
+		}
+	}
+	return val
+}
+
+func part2(input []int) int {
+	count := 0
+	factorA := 16807
+	factorB := 48271
+	genA := input[0]
+	genB := input[1]
+	for i := 0; i < 5000000; i++ {
+		genA = generator(genA, factorA, 4)
+		genB = generator(genB, factorB, 8)
 		if genA%65536 == genB%65536 {
 			count++
 		}
