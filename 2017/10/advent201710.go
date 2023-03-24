@@ -97,7 +97,7 @@ func part2(input []byte) string {
 		for i := 1; i < 16; i++ {
 			curr ^= circListMap[block*16+i].Value.(int)
 		}
-		knotHash += fmt.Sprintf("%x", curr)
+		knotHash += fmt.Sprintf("%02x", curr)
 	}
 	return knotHash
 }
