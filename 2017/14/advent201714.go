@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -12,10 +13,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(part1(data))
+	count, hash := part1(data)
+	fmt.Println(count)
+	fmt.Println(part2(hash))
 }
 
-func part1(input []byte) int {
+func part1(input []byte) (int, *[][]string) {
 	lengths := []int{}
 	for _, b := range input {
 		lengths = append(lengths, int(b))
@@ -23,6 +26,7 @@ func part1(input []byte) int {
 	lengths = append(lengths, int('-'))
 	listLen := 256
 	count := 0
+	hash := [][]string{}
 	for i := 0; i < 128; i++ {
 		str := strconv.Itoa(i)
 		lengths2 := lengths[:]
@@ -73,6 +77,40 @@ func part1(input []byte) int {
 		for _, c := range knotHash2 {
 			if c == '1' {
 				count++
+			}
+		}
+		hash = append(hash, strings.Split(knotHash2, ""))
+	}
+	return count, &hash
+}
+
+func marker(hash *[][]string, i int, j int) {
+	if i > 0 && (*hash)[i-1][j] == "1" {
+		(*hash)[i-1][j] = "X"
+		marker(hash, i-1, j)
+	}
+	if j > 0 && (*hash)[i][j-1] == "1" {
+		(*hash)[i][j-1] = "X"
+		marker(hash, i, j-1)
+	}
+	if i < len(*hash)-1 && (*hash)[i+1][j] == "1" {
+		(*hash)[i+1][j] = "X"
+		marker(hash, i+1, j)
+	}
+	if j < len((*hash)[0])-1 && (*hash)[i][j+1] == "1" {
+		(*hash)[i][j+1] = "X"
+		marker(hash, i, j+1)
+	}
+}
+
+func part2(hash *[][]string) int {
+	count := 0
+	for i := range *hash {
+		for j := range (*hash)[i] {
+			if (*hash)[i][j] == "1" {
+				count++
+				(*hash)[i][j] = "X"
+				marker(hash, i, j)
 			}
 		}
 	}
