@@ -47,18 +47,14 @@ func part1(input int) int {
 }
 
 func part2(input int) int {
-	spinlock := ring.New(1)
-	spinlock.Value = 0
-	spinzero := spinlock
+	// only need to keep track of insert position, record whenever it is right after zero (pos = 1)
+	pos := 0
+	res := 0
 	for i := 1; i <= 50000000; i++ {
-		tmp := ring.New(1)
-		tmp.Value = i
-		spins := input % i
-		for j := 0; j < spins; j++ {
-			spinlock = spinlock.Next()
+		pos = (pos+input)%i + 1
+		if pos == 1 {
+			res = i
 		}
-		spinlock.Link(tmp)
-		spinlock = tmp
 	}
-	return spinzero.Next().Value.(int)
+	return res
 }
