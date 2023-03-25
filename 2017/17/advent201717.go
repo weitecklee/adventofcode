@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -16,18 +15,6 @@ func main() {
 	input, _ := strconv.Atoi(string(data))
 	fmt.Println(part1(input))
 	fmt.Println(part2(input))
-}
-
-func printRing(ring *ring.Ring) {
-	v := ring.Value
-	var res strings.Builder
-	res.WriteString(strconv.Itoa(v.(int)))
-	ring = ring.Next()
-	for ring.Value != v {
-		res.WriteString(strconv.Itoa(ring.Value.(int)))
-		ring = ring.Next()
-	}
-	fmt.Println(res.String())
 }
 
 func part1(input int) int {
