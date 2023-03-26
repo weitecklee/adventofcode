@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -13,7 +14,70 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part1(input))
+	fmt.Println(part1v2(parseInput(input)))
+}
+
+func track(msg string) (string, time.Time) {
+	return msg, time.Now()
+}
+
+func duration(msg string, start time.Time) {
+	fmt.Printf("%v: %v\n", msg, time.Since(start))
+}
+
+func part1(input []string) int {
+	defer duration(track("part1"))
+	registers := map[string]int{}
+	snd := 0
+	i := 0
+loop:
+	for i < len(input)-1 && i >= 0 {
+		parts := strings.Split(input[i], " ")
+		switch parts[0] {
+		case "snd":
+			snd = registers[parts[1]]
+		case "set":
+			if n, err := strconv.Atoi(parts[2]); err != nil {
+				registers[parts[1]] = registers[parts[2]]
+			} else {
+				registers[parts[1]] = n
+			}
+		case "add":
+			if n, err := strconv.Atoi(parts[2]); err != nil {
+				registers[parts[1]] += registers[parts[2]]
+			} else {
+				registers[parts[1]] += n
+			}
+		case "mul":
+			if n, err := strconv.Atoi(parts[2]); err != nil {
+				registers[parts[1]] *= registers[parts[2]]
+			} else {
+				registers[parts[1]] *= n
+			}
+		case "mod":
+			if n, err := strconv.Atoi(parts[2]); err != nil {
+				registers[parts[1]] %= registers[parts[2]]
+			} else {
+				registers[parts[1]] %= n
+			}
+		case "rcv":
+			if registers[parts[1]] != 0 {
+				break loop
+			}
+		case "jgz":
+			if registers[parts[1]] > 0 {
+				if n, err := strconv.Atoi(parts[2]); err != nil {
+					i += registers[parts[2]]
+				} else {
+					i += n
+				}
+				continue loop
+			}
+		}
+		i++
+	}
+	return snd
 }
 
 type Instruction struct {
@@ -87,7 +151,8 @@ func execute(i int, snd int, instructions *[]Instruction, registers *map[string]
 	return i + 1, snd
 }
 
-func part1(instructions *[]Instruction) int {
+func part1v2(instructions *[]Instruction) int {
+	defer duration(track("part1v2"))
 	registers := map[string]int{}
 	snd := 0
 	i := 0
