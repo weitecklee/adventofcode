@@ -16,14 +16,16 @@ func main() {
 	fmt.Println(part1(input))
 }
 
-func part1(input []string) string {
+func part1(input []string) (string, int) {
 	pos := [2]int{0, 0}
 	pos[1] = strings.Index(input[0], "|")
 	dir := [2]int{1, 0}
 	res := ""
 	re := regexp.MustCompile(`[A-Z]`)
+	steps := 0
 loop:
 	for {
+		steps++
 		pos[0] += dir[0]
 		pos[1] += dir[1]
 		curr := string(input[pos[0]][pos[1]])
@@ -52,5 +54,5 @@ loop:
 			break loop
 		}
 	}
-	return res
+	return res, steps
 }
