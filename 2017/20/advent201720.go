@@ -16,13 +16,15 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 type Particle struct {
-	p []int
-	v []int
-	a []int
-	d int
+	p   []int
+	v   []int
+	a   []int
+	d   int
+	pos string
 }
 
 func (p *Particle) move() {
@@ -35,7 +37,7 @@ func (p *Particle) move() {
 	p.d = d
 }
 
-func parseInput(input []string) []Particle {
+func parseInput(input []string) *[]Particle {
 	particles := []Particle{}
 	re := regexp.MustCompile(`-?\d+`)
 	for _, line := range input {
@@ -56,19 +58,19 @@ func parseInput(input []string) []Particle {
 		particle.d = d
 		particles = append(particles, particle)
 	}
-	return particles
+	return &particles
 }
 
-func part1(input []Particle) int {
+func part1(particles *[]Particle) int {
 	chosen := -1
 	streak := 0
 	for {
 		minDist := math.MaxInt
 		currChosen := -1
-		for i, particle := range input {
-			particle.move()
-			if particle.d < minDist {
-				minDist = particle.d
+		for i := range *particles {
+			(*particles)[i].move()
+			if (*particles)[i].d < minDist {
+				minDist = (*particles)[i].d
 				currChosen = i
 			}
 		}
@@ -83,4 +85,32 @@ func part1(input []Particle) int {
 		chosen = currChosen
 	}
 	return chosen
+}
+
+func part2(particles *[]Particle) int {
+	streak := 0
+	for {
+		remainingParticles := []Particle{}
+		posMap := map[string]int{}
+		for i := range *particles {
+			(*particles)[i].move()
+			(*particles)[i].pos = fmt.Sprintf("%d,%d,%d", (*particles)[i].p[0], (*particles)[i].p[1], (*particles)[i].p[2])
+			posMap[(*particles)[i].pos]++
+		}
+		for _, particle := range *particles {
+			if posMap[particle.pos] == 1 {
+				remainingParticles = append(remainingParticles, particle)
+			}
+		}
+		if len(remainingParticles) == len(*particles) {
+			streak++
+			if streak >= 100 {
+				break
+			}
+		} else {
+			streak = 0
+		}
+		particles = &remainingParticles
+	}
+	return len(*particles)
 }
