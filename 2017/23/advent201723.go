@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	instructions := parseInput(input)
 	fmt.Println(part1(instructions))
+	fmt.Println(part2(instructions))
 }
 
 type Instruction struct {
@@ -86,4 +88,47 @@ func part1(instructions *[]Instruction) int {
 		i = execute(i, &mul, instructions, &registers)
 	}
 	return mul
+}
+
+func part2(instructions *[]Instruction) int {
+	// analysis of assembly code is necessary
+	// (if you try and run the actual code it would take forever)
+	// run the first 8 lines of codes to get the starting values
+	registers := map[string]int{}
+	registers["1"] = 1
+	registers["a"] = 1
+	i := 0
+	mul := 0
+	for i < 8 {
+		i = execute(i, &mul, instructions, &registers)
+	}
+	// now have starting values for b, c
+	b := registers["b"]
+	c := registers["c"]
+	h := 0
+
+	// code loops from b to c in increments of 17
+	// in each loop, initialize d = 2, e = 2, f = 1
+	// then it's two nested loops from e to b inside d to b
+	// checking if d * e == b then set f = 0
+	// at the end, if f == 0, increment h
+	// basically, incredibly inefficient method to check if b is prime or composite
+	// loop is counting the number of composite numbers from b to c (inclusive) with increments of 17
+
+	for b <= c {
+		if b%2 != 0 {
+			max := int(math.Sqrt(float64(b)))
+			for j := 3; j <= max; j += 2 {
+				if b%j == 0 {
+					h++
+					break
+				}
+			}
+		} else {
+			h++
+		}
+		b += 17
+	}
+
+	return h
 }
