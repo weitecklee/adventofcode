@@ -34,32 +34,40 @@ func parseInput(input []string) (map[string]string, map[int]string, int) {
 	return rules, pots, potLen
 }
 
-func part1(rules map[string]string, pots map[int]string, potLen int) int {
-	potRange := [2]int{0, potLen - 1}
-	for generations := 0; generations < 20; generations++ {
-		pots2 := map[int]string{}
-		potRange[0]--
-		potRange[1]++
-		for i := potRange[0]; i <= potRange[1]; i++ {
-			potState := ""
-			for j := -2; j <= 2; j++ {
-				if pots[i+j] == "" || pots[i+j] == "." {
-					potState += "."
-				} else {
-					potState += "#"
-				}
+func newGeneration(rules *map[string]string, pots *map[int]string, potRange *[2]int) map[int]string {
+	pots2 := map[int]string{}
+	(*potRange)[0]--
+	(*potRange)[1]++
+	for i := (*potRange)[0]; i <= (*potRange)[1]; i++ {
+		potState := ""
+		for j := -2; j <= 2; j++ {
+			if (*pots)[i+j] == "" || (*pots)[i+j] == "." {
+				potState += "."
+			} else {
+				potState += "#"
 			}
-			pots2[i] = rules[potState]
 		}
-		pots = pots2
+		pots2[i] = (*rules)[potState]
 	}
+	return pots2
+}
+
+func countPots(pots *map[int]string) int {
 	count := 0
-	for i, s := range pots {
+	for i, s := range *pots {
 		if s == "#" {
 			count += i
 		}
 	}
 	return count
+}
+
+func part1(rules map[string]string, pots map[int]string, potLen int) int {
+	potRange := [2]int{0, potLen - 1}
+	for generations := 0; generations < 20; generations++ {
+		pots = newGeneration(&rules, &pots, &potRange)
+	}
+	return countPots(&pots)
 }
 
 func part2(rules map[string]string, pots map[int]string, potLen int) int {
@@ -72,35 +80,11 @@ func part2(rules map[string]string, pots map[int]string, potLen int) int {
 		enough, for mine at least)
 	*/
 	potRange := [2]int{0, potLen - 1}
-	count := 0
-	for i, s := range pots {
-		if s == "#" {
-			count += i
-		}
-	}
+	count := countPots(&pots)
 	diff := 0
 	for generations := 1; generations < 1000; generations++ {
-		pots2 := map[int]string{}
-		potRange[0]--
-		potRange[1]++
-		for i := potRange[0]; i <= potRange[1]; i++ {
-			potState := ""
-			for j := -2; j <= 2; j++ {
-				if pots[i+j] == "" || pots[i+j] == "." {
-					potState += "."
-				} else {
-					potState += "#"
-				}
-			}
-			pots2[i] = rules[potState]
-		}
-		pots = pots2
-		count2 := 0
-		for i, s := range pots {
-			if s == "#" {
-				count2 += i
-			}
-		}
+		pots = newGeneration(&rules, &pots, &potRange)
+		count2 := countPots(&pots)
 		diff2 := count2 - count
 		if diff2 == diff {
 			return (50000000000-generations)*diff + count2
