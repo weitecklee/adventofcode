@@ -13,8 +13,8 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	tracks, carts := parseInput(input)
-	fmt.Println(part1(tracks, carts))
+	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 type Cart struct {
@@ -50,10 +50,6 @@ func (c *Cart) move(tracks *map[[2]int]string) {
 			}
 			c.turn = 0
 		}
-	case "|":
-	case "-":
-	default:
-		panic("What happened?")
 	}
 }
 
@@ -125,6 +121,32 @@ func part1(tracks *map[[2]int]string, carts *[]*Cart) string {
 			cart.move(tracks)
 			locs[cart.loc] = true
 		}
+	}
+	return ""
+}
+
+func part2(tracks *map[[2]int]string, carts *[]*Cart) string {
+	for {
+		sort.Slice(*carts, func(i, j int) bool {
+			return (*carts)[i].loc[1] < (*carts)[j].loc[1]
+		})
+		locs := map[[2]int]int{}
+		for _, cart := range *carts {
+			if locs[cart.loc] == 0 {
+				cart.move(tracks)
+			}
+			locs[cart.loc]++
+		}
+		carts2 := []*Cart{}
+		for _, cart := range *carts {
+			if locs[cart.loc] == 1 {
+				carts2 = append(carts2, cart)
+			}
+		}
+		if len(carts2) == 1 {
+			return fmt.Sprintf("%d,%d", carts2[0].loc[0], carts2[0].loc[1])
+		}
+		carts = &carts2
 	}
 	return ""
 }
