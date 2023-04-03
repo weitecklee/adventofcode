@@ -15,24 +15,35 @@ func main() {
 	fmt.Println(part1(input))
 }
 
-func part1(input int) string {
+func recipeChannel(recipeChan chan int) {
 	elf1 := 0
 	elf2 := 1
 	recipes := map[int]int{}
 	recipes[0] = 3
 	recipes[1] = 7
-	for len(recipes) < input+10 {
+	recipeLen := 2
+	for {
 		currentRecipe := recipes[elf1] + recipes[elf2]
 		for _, c := range strconv.Itoa(currentRecipe) {
 			n, _ := strconv.Atoi(string(c))
-			recipes[len(recipes)] = n
+			recipeChan <- n
+			recipes[recipeLen] = n
+			recipeLen++
 		}
-		elf1 = (elf1 + recipes[elf1] + 1) % len(recipes)
-		elf2 = (elf2 + recipes[elf2] + 1) % len(recipes)
+		elf1 = (elf1 + recipes[elf1] + 1) % recipeLen
+		elf2 = (elf2 + recipes[elf2] + 1) % recipeLen
+	}
+}
+
+func part1(input int) string {
+	recipeChan := make(chan int, 10000)
+	go recipeChannel(recipeChan)
+	for i := 2; i < input; i++ {
+		<-recipeChan
 	}
 	res := ""
-	for i := input; i < input+10; i++ {
-		res += strconv.Itoa(recipes[i])
+	for i := 0; i < 10; i++ {
+		res += strconv.Itoa(<-recipeChan)
 	}
 	return res
 }
