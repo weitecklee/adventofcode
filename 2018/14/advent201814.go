@@ -13,6 +13,7 @@ func main() {
 	}
 	input, _ := strconv.Atoi(string(data))
 	fmt.Println(part1(input))
+	fmt.Println(part2(string(data)))
 }
 
 func recipeChannel(recipeChan chan int) {
@@ -22,6 +23,8 @@ func recipeChannel(recipeChan chan int) {
 	recipes[0] = 3
 	recipes[1] = 7
 	recipeLen := 2
+	recipeChan <- 3
+	recipeChan <- 7
 	for {
 		currentRecipe := recipes[elf1] + recipes[elf2]
 		for _, c := range strconv.Itoa(currentRecipe) {
@@ -38,7 +41,7 @@ func recipeChannel(recipeChan chan int) {
 func part1(input int) string {
 	recipeChan := make(chan int, 10000)
 	go recipeChannel(recipeChan)
-	for i := 2; i < input; i++ {
+	for i := 0; i < input; i++ {
 		<-recipeChan
 	}
 	res := ""
@@ -46,4 +49,19 @@ func part1(input int) string {
 		res += strconv.Itoa(<-recipeChan)
 	}
 	return res
+}
+
+func part2(input string) int {
+	recipeChan := make(chan int, 10000)
+	go recipeChannel(recipeChan)
+	sequence := ""
+	for i := 0; i < len(input); i++ {
+		sequence += strconv.Itoa(<-recipeChan)
+	}
+	i := 0
+	for sequence != input {
+		i++
+		sequence = sequence[1:] + strconv.Itoa(<-recipeChan)
+	}
+	return i
 }
