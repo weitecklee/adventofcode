@@ -17,8 +17,8 @@ func main() {
 	fmt.Println(part1v2(input))
 	fmt.Println(part1vA(input))
 	fmt.Println(part1v2A(input))
-	// fmt.Println(part2(string(data)))
-	// fmt.Println(part2vA(string(data)))
+	fmt.Println(part2(string(data)))
+	fmt.Println(part2vA(string(data)))
 }
 
 // Comparison between original method and using channel.
