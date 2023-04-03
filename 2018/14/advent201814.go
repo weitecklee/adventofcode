@@ -19,10 +19,7 @@ func main() {
 func recipeChannel(recipeChan chan int) {
 	elf1 := 0
 	elf2 := 1
-	recipes := map[int]int{}
-	recipes[0] = 3
-	recipes[1] = 7
-	recipeLen := 2
+	recipes := []int{3, 7}
 	recipeChan <- 3
 	recipeChan <- 7
 	for {
@@ -30,11 +27,10 @@ func recipeChannel(recipeChan chan int) {
 		for _, c := range strconv.Itoa(currentRecipe) {
 			n, _ := strconv.Atoi(string(c))
 			recipeChan <- n
-			recipes[recipeLen] = n
-			recipeLen++
+			recipes = append(recipes, n)
 		}
-		elf1 = (elf1 + recipes[elf1] + 1) % recipeLen
-		elf2 = (elf2 + recipes[elf2] + 1) % recipeLen
+		elf1 = (elf1 + recipes[elf1] + 1) % len(recipes)
+		elf2 = (elf2 + recipes[elf2] + 1) % len(recipes)
 	}
 }
 
