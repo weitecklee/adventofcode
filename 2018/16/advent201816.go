@@ -14,10 +14,10 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(parseInput(input)))
+	fmt.Println(solve(parseInput(input)))
 }
 
-func parseInput(input []string) [][3][4]int {
+func parseInput(input []string) ([][3][4]int, [][4]int) {
 	i := 0
 	samples := [][3][4]int{}
 	re := regexp.MustCompile(`\d+`)
@@ -38,7 +38,21 @@ func parseInput(input []string) [][3][4]int {
 		samples = append(samples, sample)
 		i += 4
 	}
-	return samples
+	for len(input[i]) == 0 {
+		i++
+	}
+	testProgram := [][4]int{}
+	for i < len(input) {
+		nums := re.FindAllString(input[i], -1)
+		row := [4]int{}
+		for k, num := range nums {
+			n, _ := strconv.Atoi(num)
+			row[k] = n
+		}
+		testProgram = append(testProgram, row)
+		i++
+	}
+	return samples, testProgram
 }
 
 func execute(opcode int, instruc [4]int, before [4]int) [4]int {
@@ -103,8 +117,12 @@ func execute(opcode int, instruc [4]int, before [4]int) [4]int {
 	return before
 }
 
-func part1(samples [][3][4]int) int {
+func solve(samples [][3][4]int, testProgram [][4]int) (int, int) {
 	count := 0
+	opcode := map[int]map[int]bool{}
+	for i := 0; i < 16; i++ {
+		opcode[i] = map[int]bool{}
+	}
 	for _, sample := range samples {
 		before := sample[0]
 		instruc := sample[1]
@@ -121,11 +139,34 @@ func part1(samples [][3][4]int) int {
 			}
 			if same {
 				matches++
+				opcode[instruc[0]][i] = true
 			}
 		}
 		if matches >= 3 {
 			count++
 		}
 	}
-	return count
+	opcodemap := map[int]int{}
+	for len(opcodemap) < 16 {
+		determined := []int{}
+		for i, poss := range opcode {
+			if len(poss) == 1 {
+				for j := range poss {
+					opcodemap[i] = j
+					determined = append(determined, j)
+				}
+				delete(opcode, i)
+			}
+		}
+		for _, n := range determined {
+			for i := range opcode {
+				delete(opcode[i], n)
+			}
+		}
+	}
+	before := [4]int{0, 0, 0, 0}
+	for _, instruc := range testProgram {
+		before = execute(opcodemap[instruc[0]], instruc, before)
+	}
+	return count, before[0]
 }
