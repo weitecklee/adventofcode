@@ -15,6 +15,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 func parseInput(input []string) (*ring.Ring, int) {
@@ -38,13 +39,40 @@ func part1(file *ring.Ring, length int) int {
 	for i := 0; i < length; i++ {
 		prev := originalOrder[i].Prev()
 		curr := prev.Unlink(1)
-		prev = prev.Move(curr.Value.(int))
+		prev = prev.Move(curr.Value.(int) % (length - 1))
 		prev.Link(curr)
 	}
 	fileZero := valueMap[0]
 	sum := 0
 	for i := 0; i < 3; i++ {
-		fileZero = fileZero.Move(1000)
+		fileZero = fileZero.Move(1000 % length)
+		sum += fileZero.Value.(int)
+	}
+	return sum
+}
+
+func part2(file *ring.Ring, length int) int {
+	k := 811589153
+	originalOrder := map[int]*ring.Ring{}
+	valueMap := map[int]*ring.Ring{}
+	for i := 0; i < length; i++ {
+		file.Value = file.Value.(int) * k
+		originalOrder[i] = file
+		valueMap[file.Value.(int)] = file
+		file = file.Next()
+	}
+	for j := 0; j < 10; j++ {
+		for i := 0; i < length; i++ {
+			prev := originalOrder[i].Prev()
+			curr := prev.Unlink(1)
+			prev = prev.Move(curr.Value.(int) % (length - 1))
+			prev.Link(curr)
+		}
+	}
+	fileZero := valueMap[0]
+	sum := 0
+	for i := 0; i < 3; i++ {
+		fileZero = fileZero.Move(1000 % length)
 		sum += fileZero.Value.(int)
 	}
 	return sum
