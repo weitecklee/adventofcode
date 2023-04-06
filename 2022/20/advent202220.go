@@ -28,6 +28,15 @@ func parseInput(input []string) (*ring.Ring, int) {
 	return file, len(input)
 }
 
+func mix(file *ring.Ring, originalOrder *map[int]*ring.Ring, length int) {
+	for i := 0; i < length; i++ {
+		prev := (*originalOrder)[i].Prev()
+		curr := prev.Unlink(1)
+		prev = prev.Move(curr.Value.(int) % (length - 1))
+		prev.Link(curr)
+	}
+}
+
 func part1(file *ring.Ring, length int) int {
 	originalOrder := map[int]*ring.Ring{}
 	valueMap := map[int]*ring.Ring{}
@@ -36,12 +45,7 @@ func part1(file *ring.Ring, length int) int {
 		valueMap[file.Value.(int)] = file
 		file = file.Next()
 	}
-	for i := 0; i < length; i++ {
-		prev := originalOrder[i].Prev()
-		curr := prev.Unlink(1)
-		prev = prev.Move(curr.Value.(int) % (length - 1))
-		prev.Link(curr)
-	}
+	mix(file, &originalOrder, length)
 	fileZero := valueMap[0]
 	sum := 0
 	for i := 0; i < 3; i++ {
@@ -62,12 +66,7 @@ func part2(file *ring.Ring, length int) int {
 		file = file.Next()
 	}
 	for j := 0; j < 10; j++ {
-		for i := 0; i < length; i++ {
-			prev := originalOrder[i].Prev()
-			curr := prev.Unlink(1)
-			prev = prev.Move(curr.Value.(int) % (length - 1))
-			prev.Link(curr)
-		}
+		mix(file, &originalOrder, length)
 	}
 	fileZero := valueMap[0]
 	sum := 0
