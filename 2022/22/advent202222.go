@@ -13,8 +13,9 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(parseInput(input)))
-	// fmt.Println(parseInput(input))
+	board, path, rowRange, colRange := parseInput(input)
+	fmt.Println(part1(board, path, rowRange, colRange))
+	fmt.Println(part2(board, path, rowRange, colRange))
 }
 
 func notOpenSpace(r rune) bool {
@@ -105,6 +106,118 @@ func part1(board []string, path []any, rowRange [][2]int, colRange [][2]int) int
 						next[1] = colRange[next[0]][1]
 					}
 				}
+				if board[next[1]][next[0]] == '#' {
+					break
+				}
+				pos = next
+			}
+		}
+	}
+	return 1000*(pos[1]+1) + 4*(pos[0]+1) + pos[2]
+}
+
+func nextOnCube(pos [3]int, rowRange [][2]int, colRange [][2]int, sideLen int) [3]int {
+	if pos[0] < 0 {
+		if pos[1] < 3*sideLen {
+			pos[1] = 3*sideLen - pos[1] - 1
+			pos[0] = sideLen
+			pos[2] = 0
+		} else {
+			pos[0] = pos[1] - 2*sideLen
+			pos[1] = 0
+			pos[2] = 1
+		}
+	} else if pos[1] < 0 {
+		if pos[0] < 2*sideLen {
+			pos[1] = pos[0] + 2*sideLen
+			pos[0] = 0
+			pos[2] = 0
+		} else {
+			pos[0] = pos[0] - 2*sideLen
+			pos[1] = 4*sideLen - 1
+			pos[2] = 3
+		}
+	} else if pos[0] >= 3*sideLen {
+		pos[0] = 2*sideLen - 1
+		pos[1] = 3*sideLen - pos[1] - 1
+		pos[2] = 2
+	} else if pos[1] >= 4*sideLen {
+		pos[1] = 0
+		pos[0] = pos[0] + 2*sideLen
+		pos[2] = 1
+	} else if pos[0] < rowRange[pos[1]][0] && pos[2] == 2 {
+		if pos[1] < sideLen {
+			pos[0] = 0
+			pos[1] = 3*sideLen - pos[1] - 1
+			pos[2] = 0
+		} else {
+			pos[0] = pos[1] - sideLen
+			pos[1] = 2 * sideLen
+			pos[2] = 1
+		}
+	} else if pos[0] > rowRange[pos[1]][1] && pos[2] == 0 {
+		if pos[1] < 2*sideLen {
+			pos[0] = pos[1] + sideLen
+			pos[1] = sideLen - 1
+			pos[2] = 3
+		} else if pos[1] < 3*sideLen {
+			pos[0] = 3*sideLen - 1
+			pos[1] = 3*sideLen - pos[1] - 1
+			pos[2] = 2
+		} else {
+			pos[0] = pos[1] - 2*sideLen
+			pos[1] = 3*sideLen - 1
+			pos[2] = 3
+		}
+	} else if pos[1] < colRange[pos[0]][0] && pos[2] == 3 {
+		pos[1] = pos[0] + sideLen
+		pos[0] = sideLen
+		pos[2] = 0
+	} else if pos[1] > colRange[pos[0]][1] && pos[2] == 1 {
+		if pos[0] < 2*sideLen {
+			pos[1] = pos[0] + 2*sideLen
+			pos[0] = sideLen - 1
+			pos[2] = 2
+		} else {
+			pos[1] = pos[0] - sideLen
+			pos[0] = 2*sideLen - 1
+			pos[2] = 2
+		}
+	}
+	return pos
+}
+
+func part2(board []string, path []any, rowRange [][2]int, colRange [][2]int) int {
+	sideLen := len(board[0]) / 3
+	pos := [3]int{0, 0, 0}
+	pos[0] = rowRange[0][0]
+	for _, step := range path {
+		if fmt.Sprintf("%T", step) == "string" {
+			if step == "R" {
+				pos[2]++
+				if pos[2] == 4 {
+					pos[2] = 0
+				}
+			} else {
+				pos[2]--
+				if pos[2] < 0 {
+					pos[2] = 3
+				}
+			}
+		} else {
+			for i := 0; i < step.(int); i++ {
+				next := pos
+				switch pos[2] {
+				case 0:
+					next[0]++
+				case 1:
+					next[1]++
+				case 2:
+					next[0]--
+				case 3:
+					next[1]--
+				}
+				next = nextOnCube(next, rowRange, colRange, sideLen)
 				if board[next[1]][next[0]] == '#' {
 					break
 				}
