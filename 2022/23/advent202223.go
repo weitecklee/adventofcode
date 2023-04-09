@@ -13,8 +13,8 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	elves, elfMap := parseInput(input)
-	fmt.Println(part1(elves, elfMap))
+	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 type Elf struct {
@@ -175,4 +175,37 @@ func part1(elves *[]*Elf, elfMap map[[2]int]bool) int {
 		}
 	}
 	return int((math.Abs(float64(yMax-yMin))+1)*(math.Abs(float64(xMax-xMin))+1)) - len(*elves)
+}
+
+func part2(elves *[]*Elf, elfMap map[[2]int]bool) int {
+	dir := 0
+	rounds := 0
+	for {
+		rounds++
+		noMoves := 0
+		proposedMap := map[[2]int]int{}
+		for _, elf := range *elves {
+			elf.Propose(dir, &elfMap)
+			if elf.allAdj == 0 {
+				noMoves++
+			}
+			proposedMap[elf.proposedPos]++
+		}
+		if noMoves == len(*elves) {
+			break
+		}
+		elfMap2 := map[[2]int]bool{}
+		for _, elf := range *elves {
+			if proposedMap[elf.proposedPos] == 1 {
+				elf.pos = elf.proposedPos
+			}
+			elfMap2[elf.pos] = true
+		}
+		elfMap = elfMap2
+		dir++
+		if dir == 4 {
+			dir = 0
+		}
+	}
+	return rounds
 }
