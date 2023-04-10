@@ -15,6 +15,7 @@ func main() {
 	}
 	positions := parseInput(strings.Split(string(data), "\n"))
 	fmt.Println(part1(positions))
+	fmt.Println(part2(positions))
 }
 
 func parseInput(input []string) [2]int {
@@ -63,4 +64,45 @@ func part1(positions [2]int) int {
 			return player1Score * rolls
 		}
 	}
+}
+
+func part2(positions [2]int) int {
+	universes := map[[4]int]int{} // universe key is {player1Position, player1Score, player2Position, player2Score}, value is number of universes with that state
+	initial := [4]int{positions[0], 0, positions[1], 0}
+	outcomes := [7][2]int{{3, 1}, {4, 3}, {5, 6}, {6, 7}, {7, 6}, {8, 3}, {9, 1}} // possible outcomes of 3 rolls and number of occurrences for each outcome
+	player1Wins := 0
+	player2Wins := 0
+	universes[initial] = 1
+	for len(universes) > 0 {
+		universes2 := map[[4]int]int{}
+		for universe, n := range universes {
+			for _, outcome := range outcomes {
+				player1Position := (universe[0] + outcome[0]) % 10
+				player1Score := universe[1] + player1Position + 1
+				if player1Score >= 21 {
+					player1Wins += n * outcome[1]
+				} else {
+					universes2[[4]int{player1Position, player1Score, universe[2], universe[3]}] += n * outcome[1]
+				}
+			}
+		}
+		universes = universes2
+		universes3 := map[[4]int]int{}
+		for universe, n := range universes {
+			for _, outcome := range outcomes {
+				player2Position := (universe[2] + outcome[0]) % 10
+				player2Score := universe[3] + player2Position + 1
+				if player2Score >= 21 {
+					player2Wins += n * outcome[1]
+				} else {
+					universes3[[4]int{universe[0], universe[1], player2Position, player2Score}] += n * outcome[1]
+				}
+			}
+		}
+		universes = universes3
+	}
+	if player1Wins > player2Wins {
+		return player1Wins
+	}
+	return player2Wins
 }
