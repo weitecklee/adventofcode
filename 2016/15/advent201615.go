@@ -34,13 +34,6 @@ func parseInput(input []string) [][]int {
 	return discs
 }
 
-func gcd(a int, b int) int {
-	if a == 0 {
-		return b
-	}
-	return gcd(a%b, b)
-}
-
 func part1(discs [][]int) int {
 	pressTime := 0
 	pass := false
