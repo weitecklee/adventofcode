@@ -15,6 +15,7 @@ func main() {
 	}
 	input := string(data)
 	fmt.Println(part1(input))
+	fmt.Println(part2(input))
 }
 
 func hashChannel(salt string, hashChan chan string) {
@@ -56,6 +57,58 @@ func part1(salt string) int {
 	triplets := []Triplet{}
 	quintuplets := map[string]map[int]bool{}
 	go hashChannel(salt, hashChan)
+	for i := 0; i < 100000; i++ {
+		hash := <-hashChan
+		triplet := findTriplet(hash)
+		if len(triplet) > 0 {
+			triplets = append(triplets, Triplet{
+				index: i,
+				char:  triplet,
+			})
+		}
+		quints := findQuintuplets(hash)
+		for _, quint := range quints {
+			if _, ok := quintuplets[quint]; !ok {
+				quintuplets[quint] = map[int]bool{}
+			}
+			quintuplets[quint][i] = true
+		}
+	}
+	keys := 0
+	i := 0
+	res := 0
+	for keys < 64 {
+		check := triplets[i]
+		for j := range quintuplets[check.char] {
+			if j > check.index && j <= check.index+1000 {
+				keys++
+				res = check.index
+				break
+			}
+		}
+		i++
+	}
+	return res
+}
+
+func hash2016Channel(salt string, hashChan chan string) {
+	i := 0
+	for {
+		s := salt + strconv.Itoa(i)
+		hash := md5.Sum([]byte(s))
+		for j := 0; j < 2016; j++ {
+			hash = md5.Sum([]byte(hex.EncodeToString(hash[:])))
+		}
+		hashChan <- hex.EncodeToString(hash[:])
+		i++
+	}
+}
+
+func part2(salt string) int {
+	hashChan := make(chan string, 100000)
+	triplets := []Triplet{}
+	quintuplets := map[string]map[int]bool{}
+	go hash2016Channel(salt, hashChan)
 	for i := 0; i < 100000; i++ {
 		hash := <-hashChan
 		triplet := findTriplet(hash)
