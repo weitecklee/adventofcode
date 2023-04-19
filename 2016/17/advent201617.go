@@ -13,7 +13,7 @@ func main() {
 		panic(err)
 	}
 	input := string(data)
-	fmt.Println(part1(input))
+	fmt.Println(solve(input))
 }
 
 type State struct {
@@ -40,7 +40,7 @@ func testDoor(r rune) bool {
 	return r == 'b' || r == 'c' || r == 'd' || r == 'e' || r == 'f'
 }
 
-func part1(passcode string) string {
+func solve(passcode string) (string, int) {
 	start := State{
 		pos:   [2]int{0, 0},
 		route: "",
@@ -65,6 +65,8 @@ func part1(passcode string) string {
 		},
 	}
 	exit := [2]int{3, 3}
+	shortest := ""
+	longest := 0
 	for i := 0; i < len(queue); i++ {
 		state := queue[i]
 		doors := doorsState(passcode, state.route)
@@ -81,10 +83,14 @@ func part1(passcode string) string {
 				route: state.route + directions[j].char,
 			}
 			if nextPos == exit {
-				return nextState.route
+				if shortest == "" {
+					shortest = nextState.route
+				}
+				longest = len(nextState.route)
+			} else {
+				queue = append(queue, nextState)
 			}
-			queue = append(queue, nextState)
 		}
 	}
-	return ""
+	return shortest, longest
 }
