@@ -40,7 +40,7 @@ func part1(nElves int) int {
 		5: 2
 		6: 3
 		7: 5
-		8: 8
+		8: 7
 		9: 9
 		10: 1
 	Pattern is to increment by 1 until lastElf is equal to half of nElves, then increment by 2.
