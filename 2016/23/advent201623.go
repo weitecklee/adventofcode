@@ -14,7 +14,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(input))
-	fmt.Println(part2())
+	fmt.Println(part2(input))
 }
 
 type Instruction struct {
@@ -83,13 +83,17 @@ func factorial(i int) int {
 	return 1
 }
 
-func part2() int {
+func part2(input []string) int {
 	/*
 		Analysis of the assembly code reveals that the first 19 lines calculate
 		the factorial of `a`, during which lines 25, 23, 21, 19 are toggled (in that order, 1-indexed).
-		After line 19 is toggled, the rest of the code is finally run, which is just adding 73*90 to `a`.
-		So the final result is a! + 73 * 90.
-		Most likely, lines 20 and 21 are different for other users.
+		After line 19 is toggled, the rest of the code is finally run, which is just adding 73*90
+		to the result of `a`.	So the final result is a! + 73 * 90.
+		Most likely, only lines 20 and 21 are different for other users.
 	*/
-	return factorial(12) + 73*90
+	parts := strings.Split(input[19], " ")
+	a, _ := strconv.Atoi(parts[1])
+	parts = strings.Split(input[20], " ")
+	b, _ := strconv.Atoi(parts[1])
+	return factorial(12) + a*b
 }
