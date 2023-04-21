@@ -13,17 +13,13 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-
 	fmt.Println(part1(input))
+	fmt.Println(part2())
 }
 
 type Instruction struct {
 	typ  string
 	args []string
-}
-
-func (i *Instruction) execute() {
-
 }
 
 func part1(input []string) int {
@@ -78,4 +74,22 @@ func part1(input []string) int {
 		i++
 	}
 	return register["a"]
+}
+
+func factorial(i int) int {
+	if i > 1 {
+		return i * factorial(i-1)
+	}
+	return 1
+}
+
+func part2() int {
+	/*
+		Analysis of the assembly code reveals that the first 19 lines calculate
+		the factorial of `a`, during which lines 25, 23, 21, 19 are toggled (in that order, 1-indexed).
+		After line 19 is toggled, the rest of the code is finally run, which is just adding 73*90 to `a`.
+		So the final result is a! + 73 * 90.
+		Most likely, lines 20 and 21 are different for other users.
+	*/
+	return factorial(12) + 73*90
 }
