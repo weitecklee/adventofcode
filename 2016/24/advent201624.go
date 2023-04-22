@@ -13,7 +13,7 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(input))
+	fmt.Println(solve(input))
 }
 
 type Location struct {
@@ -21,7 +21,7 @@ type Location struct {
 	distances map[string]int
 }
 
-func part1(input []string) int {
+func solve(input []string) (int, int) {
 	locations := map[string]Location{}
 	for j, line := range input {
 		for i, char := range line {
@@ -56,24 +56,29 @@ func part1(input []string) int {
 		}
 	}
 	minDist := math.MaxInt
+	minDist2 := math.MaxInt
 	visited := map[string]bool{}
 	visited["0"] = true
-	travelingSalesman(&minDist, &visited, 0, "0", &locations)
-	return minDist
+	travelingSalesman(&minDist, &minDist2, &visited, 0, "0", &locations)
+	return minDist, minDist2
 }
 
-func travelingSalesman(minDist *int, visited *map[string]bool, currDist int, route string, locations *map[string]Location) {
+func travelingSalesman(minDist *int, minDist2 *int, visited *map[string]bool, currDist int, route string, locations *map[string]Location) {
+	currLocation := (*locations)[string(route[len(route)-1])]
 	if len(route) == len(*locations) {
 		if currDist < *minDist {
 			*minDist = currDist
 		}
+		distanceToZero := currLocation.distances["0"]
+		if currDist+distanceToZero < *minDist2 {
+			*minDist2 = currDist + distanceToZero
+		}
 		return
 	}
-	currLocation := (*locations)[string(route[len(route)-1])]
 	for loc, dist := range currLocation.distances {
 		if !(*visited)[loc] {
 			(*visited)[loc] = true
-			travelingSalesman(minDist, visited, currDist+dist, route+loc, locations)
+			travelingSalesman(minDist, minDist2, visited, currDist+dist, route+loc, locations)
 			(*visited)[loc] = false
 		}
 	}
