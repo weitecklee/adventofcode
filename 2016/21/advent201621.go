@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -13,106 +14,142 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(input))
-	fmt.Println(part2(input))
+	instructions := parseInput(input)
+	fmt.Println(part1(instructions))
+	fmt.Println(part2(instructions))
 }
 
-func part1(steps []string) string {
-	password := "abcdefgh"
+type Instruction struct {
+	category string
+	dir      string
+	letters  []string
+	numbers  []int
+}
+
+func (instruc *Instruction) execute(password string) string {
+	var password2 strings.Builder
 	n := len(password)
-	for _, step := range steps {
-		parts := strings.Split(step, " ")
-		var password2 strings.Builder
-		switch parts[0] {
-		case "swap":
-			if parts[1] == "letter" {
-				for _, c := range password {
-					if string(c) == parts[2] {
-						password2.WriteString(parts[5])
-					} else if string(c) == parts[5] {
-						password2.WriteString(parts[2])
-					} else {
-						password2.WriteRune(c)
-					}
-				}
-			} else {
-				pos1, _ := strconv.Atoi(parts[2])
-				pos2, _ := strconv.Atoi(parts[5])
-				for i, c := range password {
-					if i == pos1 {
-						password2.WriteByte(password[pos2])
-					} else if i == pos2 {
-						password2.WriteByte(password[pos1])
-					} else {
-						password2.WriteRune(c)
-					}
+	switch instruc.category {
+	case "swap":
+		if instruc.dir == "letter" {
+			for _, c := range password {
+				if string(c) == instruc.letters[0] {
+					password2.WriteString(instruc.letters[1])
+				} else if string(c) == instruc.letters[1] {
+					password2.WriteString(instruc.letters[0])
+				} else {
+					password2.WriteRune(c)
 				}
 			}
-		case "rotate":
-			k := 0
-			if parts[1] == "based" {
-				letter := parts[6]
-				for i, c := range password {
-					if string(c) == letter {
-						k = i
-						break
-					}
-				}
-				if k >= 4 {
-					k++
-				}
-				k++
-				k %= n
-				k = n - k
-			} else {
-				k, _ = strconv.Atoi(parts[2])
-				if parts[1] == "right" {
-					k = n - k
-				}
-			}
-			for i := k; i < n; i++ {
-				password2.WriteByte(password[i])
-			}
-			for i := 0; i < k; i++ {
-				password2.WriteByte(password[i])
-			}
-		case "reverse":
-			pos1, _ := strconv.Atoi(parts[2])
-			pos2, _ := strconv.Atoi(parts[4])
-			for i := 0; i < pos1; i++ {
-				password2.WriteByte(password[i])
-			}
-			for i := pos2; i >= pos1; i-- {
-				password2.WriteByte(password[i])
-			}
-			for i := pos2 + 1; i < n; i++ {
-				password2.WriteByte(password[i])
-			}
-		case "move":
-			pos1, _ := strconv.Atoi(parts[2])
-			pos2, _ := strconv.Atoi(parts[5])
-			letter := password[pos1]
+		} else {
 			for i, c := range password {
-				if i == pos1 {
-					continue
-				}
-				if i == pos2 {
-					if pos1 > pos2 {
-						password2.WriteByte(letter)
-						password2.WriteRune(c)
-					} else {
-						password2.WriteRune(c)
-						password2.WriteByte(letter)
-					}
+				if i == instruc.numbers[0] {
+					password2.WriteByte(password[instruc.numbers[1]])
+				} else if i == instruc.numbers[1] {
+					password2.WriteByte(password[instruc.numbers[0]])
 				} else {
 					password2.WriteRune(c)
 				}
 			}
 		}
-		password = password2.String()
+	case "rotate":
+		k := 0
+		if instruc.dir == "based" {
+			letter := instruc.letters[0]
+			for i, c := range password {
+				if string(c) == letter {
+					k = i
+					break
+				}
+			}
+			if k >= 4 {
+				k++
+			}
+			k++
+			k %= n
+			k = n - k
+		} else {
+			k = instruc.numbers[0]
+			if instruc.dir == "right" {
+				k = n - k
+			}
+		}
+		for i := k; i < n; i++ {
+			password2.WriteByte(password[i])
+		}
+		for i := 0; i < k; i++ {
+			password2.WriteByte(password[i])
+		}
+	case "reverse":
+		for i := 0; i < instruc.numbers[0]; i++ {
+			password2.WriteByte(password[i])
+		}
+		for i := instruc.numbers[1]; i >= instruc.numbers[0]; i-- {
+			password2.WriteByte(password[i])
+		}
+		for i := instruc.numbers[1] + 1; i < n; i++ {
+			password2.WriteByte(password[i])
+		}
+	case "move":
+		letter := password[instruc.numbers[0]]
+		for i, c := range password {
+			if i == instruc.numbers[0] {
+				continue
+			}
+			if i == instruc.numbers[1] {
+				if instruc.numbers[0] > instruc.numbers[1] {
+					password2.WriteByte(letter)
+					password2.WriteRune(c)
+				} else {
+					password2.WriteRune(c)
+					password2.WriteByte(letter)
+				}
+			} else {
+				password2.WriteRune(c)
+			}
+		}
+	}
+	return password2.String()
+}
+
+func parseInput(input []string) *[]Instruction {
+	instructions := []Instruction{}
+	reLetter := regexp.MustCompile(`\b\w\b`)
+	reNumber := regexp.MustCompile(`\d`)
+	for _, line := range input {
+		tmp := Instruction{}
+		parts := strings.Split(line, " ")
+		tmp.category = parts[0]
+		tmp.dir = parts[1]
+		tmp.letters = reLetter.FindAllString(line, -1)
+		nums := reNumber.FindAllString(line, -1)
+		if nums != nil {
+			numbers := []int{}
+			for _, n := range nums {
+				num, _ := strconv.Atoi(n)
+				numbers = append(numbers, num)
+			}
+			tmp.numbers = numbers
+		}
+		instructions = append(instructions, tmp)
+	}
+	return &instructions
+}
+
+func scramble(password string, instructions *[]Instruction) string {
+	for _, step := range *instructions {
+		password = step.execute(password)
 	}
 	return password
 }
+
+func part1(instructions *[]Instruction) string {
+	password := "abcdefgh"
+	return scramble(password, instructions)
+}
+
+// Function to generate permutations of a string based on Heap's algorithm,
+// provided by ChatGPT.
 
 func generatePermutations(s []byte) [][]byte {
 	permutations := [][]byte{}
@@ -137,105 +174,12 @@ func heapPermute(size int, s []byte, permutations *[][]byte) {
 	}
 }
 
-func part2(steps []string) string {
+func part2(instructions *[]Instruction) string {
 	desired := "fbgdceah"
-	n := len(desired)
 	s := []byte("abcdefgh")
 	permutations := generatePermutations(s)
 	for _, p := range permutations {
-		password := string(p)
-		for _, step := range steps {
-			parts := strings.Split(step, " ")
-			var password2 strings.Builder
-			switch parts[0] {
-			case "swap":
-				if parts[1] == "letter" {
-					for _, c := range password {
-						if string(c) == parts[2] {
-							password2.WriteString(parts[5])
-						} else if string(c) == parts[5] {
-							password2.WriteString(parts[2])
-						} else {
-							password2.WriteRune(c)
-						}
-					}
-				} else {
-					pos1, _ := strconv.Atoi(parts[2])
-					pos2, _ := strconv.Atoi(parts[5])
-					for i, c := range password {
-						if i == pos1 {
-							password2.WriteByte(password[pos2])
-						} else if i == pos2 {
-							password2.WriteByte(password[pos1])
-						} else {
-							password2.WriteRune(c)
-						}
-					}
-				}
-			case "rotate":
-				k := 0
-				if parts[1] == "based" {
-					letter := parts[6]
-					for i, c := range password {
-						if string(c) == letter {
-							k = i
-							break
-						}
-					}
-					if k >= 4 {
-						k++
-					}
-					k++
-					k %= n
-					k = n - k
-				} else {
-					k, _ = strconv.Atoi(parts[2])
-					if parts[1] == "right" {
-						k = n - k
-					}
-				}
-				for i := k; i < n; i++ {
-					password2.WriteByte(password[i])
-				}
-				for i := 0; i < k; i++ {
-					password2.WriteByte(password[i])
-				}
-			case "reverse":
-				pos1, _ := strconv.Atoi(parts[2])
-				pos2, _ := strconv.Atoi(parts[4])
-				for i := 0; i < pos1; i++ {
-					password2.WriteByte(password[i])
-				}
-				for i := pos2; i >= pos1; i-- {
-					password2.WriteByte(password[i])
-				}
-				for i := pos2 + 1; i < n; i++ {
-					password2.WriteByte(password[i])
-				}
-			case "move":
-				pos1, _ := strconv.Atoi(parts[2])
-				pos2, _ := strconv.Atoi(parts[5])
-				letter := password[pos1]
-				for i, c := range password {
-					if i == pos1 {
-						continue
-					}
-					if i == pos2 {
-						if pos1 > pos2 {
-							password2.WriteByte(letter)
-							password2.WriteRune(c)
-						} else {
-							password2.WriteRune(c)
-							password2.WriteByte(letter)
-						}
-					} else {
-						password2.WriteRune(c)
-					}
-				}
-			}
-			password = password2.String()
-		}
-		if password == desired {
+		if scramble(string(p), instructions) == desired {
 			return string(p)
 		}
 	}
