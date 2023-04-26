@@ -12,7 +12,7 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(parseInput(input)))
+	fmt.Println(solve(parseInput(input)))
 }
 
 type Blizzard struct {
@@ -41,9 +41,9 @@ func (b *Blizzard) locationAtTime(t int, ht int, wd int) [2]int {
 	return pos
 }
 
-func parseInput(input []string) (map[int][]Blizzard, map[int][]Blizzard, int, int) {
-	horizontals := map[int][]Blizzard{}
-	verticals := map[int][]Blizzard{}
+func parseInput(input []string) (*map[int]*[]*Blizzard, *map[int]*[]*Blizzard, int, int) {
+	horizontals := map[int]*[]*Blizzard{}
+	verticals := map[int]*[]*Blizzard{}
 	for j, row := range input {
 		for i, c := range row {
 			if c == '.' || c == '#' {
@@ -52,27 +52,35 @@ func parseInput(input []string) (map[int][]Blizzard, map[int][]Blizzard, int, in
 			tmp := Blizzard{
 				pos0: [2]int{i, j},
 			}
+			if _, ok := horizontals[j]; !ok {
+				tmpArr := []*Blizzard{}
+				horizontals[j] = &tmpArr
+			}
+			if _, ok := verticals[i]; !ok {
+				tmpArr := []*Blizzard{}
+				verticals[i] = &tmpArr
+			}
 			switch c {
 			case '<':
 				tmp.dir = [2]int{-1, 0}
-				horizontals[j] = append(horizontals[j], tmp)
+				*horizontals[j] = append(*horizontals[j], &tmp)
 			case '>':
 				tmp.dir = [2]int{1, 0}
-				horizontals[j] = append(horizontals[j], tmp)
+				*horizontals[j] = append(*horizontals[j], &tmp)
 			case '^':
 				tmp.dir = [2]int{0, -1}
-				verticals[i] = append(verticals[i], tmp)
+				*verticals[i] = append(*verticals[i], &tmp)
 			case 'v':
 				tmp.dir = [2]int{0, 1}
-				verticals[i] = append(verticals[i], tmp)
+				*verticals[i] = append(*verticals[i], &tmp)
 			}
 		}
 	}
-	return horizontals, verticals, len(input) - 1, len(input[0]) - 1
+	return &horizontals, &verticals, len(input) - 1, len(input[0]) - 1
 }
 
-func part1(horizontals map[int][]Blizzard, verticals map[int][]Blizzard, ht int, wd int) int {
-	queue := [][3]int{{1, 0, 0}}
+func journey(startPos [2]int, endPos [2]int, startTime int, horizontals *map[int]*[]*Blizzard, verticals *map[int]*[]*Blizzard, ht int, wd int) int {
+	queue := [][3]int{{startPos[0], startPos[1], startTime}}
 	checks := [][2]int{
 		{-1, 0},
 		{1, 0},
@@ -94,25 +102,31 @@ func part1(horizontals map[int][]Blizzard, verticals map[int][]Blizzard, ht int,
 				continue
 			}
 			checked[toCheck] = true
-			if checkPos[0] < 1 || checkPos[0] >= wd || checkPos[1] < 0 {
+			if checkPos[0] < 1 || checkPos[0] >= wd || checkPos[1] < 0 || checkPos[1] > ht {
 				continue
 			}
-			if checkPos[1] == 0 && checkPos[0] != 1 {
+			if checkPos[0] == endPos[0] && checkPos[1] == endPos[1] {
+				return time
+			}
+			if checkPos[1] == 0 {
+				if checkPos[0] == 1 {
+					queue = append(queue, [3]int{checkPos[0], checkPos[1], time})
+				}
 				continue
 			}
 			if checkPos[1] == ht {
 				if checkPos[0] == wd-1 {
-					return time
+					queue = append(queue, [3]int{checkPos[0], checkPos[1], time})
 				}
 				continue
 			}
-			for _, blizzard := range horizontals[checkPos[1]] {
+			for _, blizzard := range *(*horizontals)[checkPos[1]] {
 				blizzardPos := blizzard.locationAtTime(time, ht, wd)
 				if blizzardPos[0] == checkPos[0] && blizzardPos[1] == checkPos[1] {
 					continue loop
 				}
 			}
-			for _, blizzard := range verticals[checkPos[0]] {
+			for _, blizzard := range *(*verticals)[checkPos[0]] {
 				blizzardPos := blizzard.locationAtTime(time, ht, wd)
 				if blizzardPos[0] == checkPos[0] && blizzardPos[1] == checkPos[1] {
 					continue loop
@@ -122,4 +136,11 @@ func part1(horizontals map[int][]Blizzard, verticals map[int][]Blizzard, ht int,
 		}
 	}
 	return -1
+}
+
+func solve(horizontals *map[int]*[]*Blizzard, verticals *map[int]*[]*Blizzard, ht int, wd int) (int, int) {
+	part1 := journey([2]int{1, 0}, [2]int{wd - 1, ht}, 0, horizontals, verticals, ht, wd)
+	backToStart := journey([2]int{wd - 1, ht}, [2]int{1, 0}, part1, horizontals, verticals, ht, wd)
+	part2 := journey([2]int{1, 0}, [2]int{wd - 1, ht}, backToStart, horizontals, verticals, ht, wd)
+	return part1, part2
 }
