@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -14,6 +15,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(parseInput(input)))
+	fmt.Println(part2(parseInput(input)))
 }
 
 type Instruction struct {
@@ -109,4 +111,34 @@ func part1(ip int, instructions []Instruction) int {
 		register[ip]++
 	}
 	return register[0]
+}
+
+/*
+Main loop of process takes a number N and loops through pairs of numbers (1 <= i, j <= N)
+and adds i to register 0 if i * j == N. Basically it is calculating the sum of divisors
+of N very very inefficiently, especially if N = 10551425 as in my case.
+*/
+
+func part2(ip int, instructions []Instruction) int {
+	register := [6]int{}
+	register[0] = 1
+	// run through program until it starts main loop, which is when it goes to line 1 (0-index)
+	for register[ip] != 1 {
+		if register[ip] > len(instructions)-1 {
+			break
+		}
+		execute(instructions[register[ip]], &register)
+		register[ip]++
+	}
+	// number N is in register[3] ** FOR MY INPUT, POSSIBLY DIFFERENT FOR OTHERS **
+	sum := 0
+	N := register[3]
+	k := int(math.Sqrt(float64(N)))
+	for i := 1; i <= k; i++ { // technically double counts if N is a perfect square
+		if N%i == 0 {
+			sum += i
+			sum += N / i
+		}
+	}
+	return sum
 }
