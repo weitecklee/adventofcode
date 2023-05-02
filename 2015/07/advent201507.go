@@ -74,8 +74,7 @@ func parseInput(input []string) []Instruction {
 	return instructions
 }
 
-func part1(instructions []Instruction) int {
-	wires := map[string]int{}
+func assembleCircuits(wires map[string]int, instructions []Instruction) int {
 	for len(instructions) > 0 {
 		instructions2 := []Instruction{}
 		for _, instruc := range instructions {
@@ -114,6 +113,11 @@ func part1(instructions []Instruction) int {
 	return wires["a"]
 }
 
+func part1(instructions []Instruction) int {
+	wires := map[string]int{}
+	return assembleCircuits(wires, instructions)
+}
+
 func part2(instructions []Instruction, a int) int {
 	wires := map[string]int{}
 	wires["b"] = a
@@ -123,40 +127,5 @@ func part2(instructions []Instruction, a int) int {
 			break
 		}
 	}
-	for len(instructions) > 0 {
-		instructions2 := []Instruction{}
-		for _, instruc := range instructions {
-			for side, wire := range instruc.in {
-				if n, ok := wires[wire]; ok {
-					if side == "left" {
-						instruc.left = n
-					} else {
-						instruc.right = n
-					}
-				}
-			}
-			if instruc.left >= 0 && instruc.right >= 0 {
-				switch instruc.op {
-				case "SET":
-					wires[instruc.out] = instruc.left
-				case "AND":
-					wires[instruc.out] = instruc.left & instruc.right
-				case "OR":
-					wires[instruc.out] = instruc.left | instruc.right
-				case "NOT":
-					wires[instruc.out] = instruc.left ^ instruc.right
-				case "LSHIFT":
-					wires[instruc.out] = instruc.left << instruc.right
-				case "RSHIFT":
-					wires[instruc.out] = instruc.left >> instruc.right
-				default:
-					panic(instruc.op)
-				}
-			} else {
-				instructions2 = append(instructions2, instruc)
-			}
-		}
-		instructions = instructions2
-	}
-	return wires["a"]
+	return assembleCircuits(wires, instructions)
 }
