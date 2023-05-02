@@ -14,7 +14,9 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	instructions := parseInput(input)
-	fmt.Println(part1(instructions))
+	a := part1(instructions)
+	fmt.Println(a)
+	fmt.Println(part2(instructions, a))
 }
 
 type Instruction struct {
@@ -74,6 +76,53 @@ func parseInput(input []string) []Instruction {
 
 func part1(instructions []Instruction) int {
 	wires := map[string]int{}
+	for len(instructions) > 0 {
+		instructions2 := []Instruction{}
+		for _, instruc := range instructions {
+			for side, wire := range instruc.in {
+				if n, ok := wires[wire]; ok {
+					if side == "left" {
+						instruc.left = n
+					} else {
+						instruc.right = n
+					}
+				}
+			}
+			if instruc.left >= 0 && instruc.right >= 0 {
+				switch instruc.op {
+				case "SET":
+					wires[instruc.out] = instruc.left
+				case "AND":
+					wires[instruc.out] = instruc.left & instruc.right
+				case "OR":
+					wires[instruc.out] = instruc.left | instruc.right
+				case "NOT":
+					wires[instruc.out] = instruc.left ^ instruc.right
+				case "LSHIFT":
+					wires[instruc.out] = instruc.left << instruc.right
+				case "RSHIFT":
+					wires[instruc.out] = instruc.left >> instruc.right
+				default:
+					panic(instruc.op)
+				}
+			} else {
+				instructions2 = append(instructions2, instruc)
+			}
+		}
+		instructions = instructions2
+	}
+	return wires["a"]
+}
+
+func part2(instructions []Instruction, a int) int {
+	wires := map[string]int{}
+	wires["b"] = a
+	for i, instruc := range instructions {
+		if instruc.out == "b" {
+			instructions = append(instructions[:i], instructions[i+1:]...)
+			break
+		}
+	}
 	for len(instructions) > 0 {
 		instructions2 := []Instruction{}
 		for _, instruc := range instructions {
