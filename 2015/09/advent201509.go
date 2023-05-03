@@ -15,7 +15,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	distances := parseInput(input)
-	fmt.Println(part1(distances))
+	fmt.Println(solve(distances))
 }
 
 func parseInput(input []string) *map[string]map[string]int {
@@ -35,30 +35,34 @@ func parseInput(input []string) *map[string]map[string]int {
 	return &distances
 }
 
-func travelingSalesman(shortest *int, visited *map[string]bool, distances *map[string]map[string]int, currentLocation string, currentDist int, nVisited int) {
+func travelingSalesman(shortest *int, longest *int, visited *map[string]bool, distances *map[string]map[string]int, currentLocation string, currentDist int, nVisited int) {
 	if nVisited == len(*distances) {
 		if currentDist < *shortest {
 			*shortest = currentDist
+		}
+		if currentDist > *longest {
+			*longest = currentDist
 		}
 		return
 	}
 	for nextLocation, dist := range (*distances)[currentLocation] {
 		if !(*visited)[nextLocation] {
 			(*visited)[nextLocation] = true
-			travelingSalesman(shortest, visited, distances, nextLocation, currentDist+dist, nVisited+1)
+			travelingSalesman(shortest, longest, visited, distances, nextLocation, currentDist+dist, nVisited+1)
 			(*visited)[nextLocation] = false
 		}
 	}
 
 }
 
-func part1(distances *map[string]map[string]int) int {
+func solve(distances *map[string]map[string]int) (int, int) {
 	shortest := math.MaxInt
+	longest := 0
 	visited := map[string]bool{}
 	for location := range *distances {
 		visited[location] = true
-		travelingSalesman(&shortest, &visited, distances, location, 0, 1)
+		travelingSalesman(&shortest, &longest, &visited, distances, location, 0, 1)
 		visited[location] = false
 	}
-	return shortest
+	return shortest, longest
 }
