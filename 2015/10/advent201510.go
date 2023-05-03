@@ -12,7 +12,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(part1(string(data)))
+	fmt.Println(solve(string(data)))
 }
 
 func lookAndSay(input string) string {
@@ -32,9 +32,13 @@ func lookAndSay(input string) string {
 	return res.String()
 }
 
-func part1(input string) int {
+func solve(input string) (int, int) {
 	for i := 0; i < 40; i++ {
 		input = lookAndSay(input)
 	}
-	return len(input)
+	part1 := len(input)
+	for i := 40; i < 50; i++ {
+		input = lookAndSay(input)
+	}
+	return part1, len(input)
 }
