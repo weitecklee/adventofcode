@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 func lookAndSay(input string) string {
 	var curr byte
 	i := 0
-	res := ""
+	var res strings.Builder
 	for i < len(input) {
 		curr = input[i]
 		n := 0
@@ -25,9 +26,10 @@ func lookAndSay(input string) string {
 			n++
 			i++
 		}
-		res += strconv.Itoa(n) + string(curr)
+		res.WriteString(strconv.Itoa(n))
+		res.WriteByte(curr)
 	}
-	return res
+	return res.String()
 }
 
 func part1(input string) int {
