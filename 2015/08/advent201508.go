@@ -13,6 +13,7 @@ func main() {
 	}
 	input := strings.Split(string(data), "\n")
 	fmt.Println(part1(input))
+	fmt.Println(part2(input))
 }
 
 func memoryLen(line string) int {
@@ -36,6 +37,26 @@ func part1(input []string) int {
 	count := 0
 	for _, line := range input {
 		count += len(line) - memoryLen(line)
+	}
+	return count
+}
+
+func encodeLen(line string) int {
+	count := 0
+	for _, c := range line {
+		if c == '\\' || c == '"' {
+			count += 2
+		} else {
+			count++
+		}
+	}
+	return count + 2
+}
+
+func part2(input []string) int {
+	count := 0
+	for _, line := range input {
+		count += encodeLen(line) - len(line)
 	}
 	return count
 }
