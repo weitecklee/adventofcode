@@ -15,6 +15,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	reindeer := parseInput(input)
 	fmt.Println(part1(reindeer))
+	fmt.Println(part2(reindeer))
 }
 
 type Reindeer struct {
@@ -54,6 +55,33 @@ func part1(reindeer map[string]Reindeer) int {
 		curr := deer.Distance(2503)
 		if curr > res {
 			res = curr
+		}
+	}
+	return res
+}
+
+func part2(reindeer map[string]Reindeer) int {
+	runningScore := map[string]int{}
+	for i := 1; i <= 2503; i++ {
+		res := 0
+		winners := []string{}
+		for name, deer := range reindeer {
+			curr := deer.Distance(i)
+			if curr > res {
+				res = curr
+				winners = []string{name}
+			} else if curr == res {
+				winners = append(winners, name)
+			}
+		}
+		for _, name := range winners {
+			runningScore[name]++
+		}
+	}
+	res := 0
+	for _, score := range runningScore {
+		if score > res {
+			res = score
 		}
 	}
 	return res
