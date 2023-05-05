@@ -15,6 +15,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	relationships := parseInput(input)
 	fmt.Println(part1(relationships))
+	fmt.Println(part2(relationships))
 }
 
 func parseInput(input []string) map[string]map[string]int {
@@ -73,4 +74,14 @@ func part1(relationships map[string]map[string]int) int {
 	}
 	recurSeating(&relationships, &seated, &circle, &maxHappiness, happiness, &n)
 	return maxHappiness
+}
+
+func part2(relationships map[string]map[string]int) int {
+	yourMap := map[string]int{}
+	for name := range relationships {
+		relationships[name]["you"] = 0
+		yourMap[name] = 0
+	}
+	relationships["you"] = yourMap
+	return part1(relationships)
 }
