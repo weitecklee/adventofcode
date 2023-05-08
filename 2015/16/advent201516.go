@@ -16,6 +16,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	auntSue, candidates := parseInput(input)
 	fmt.Println(part1(auntSue, candidates))
+	fmt.Println(part2(auntSue, candidates))
 }
 
 func parseInput(input []string) (map[string]int, []map[string]int) {
@@ -54,6 +55,28 @@ loop:
 	for i, candidate := range candidates {
 		for trait, n := range candidate {
 			if auntSue[trait] != n {
+				continue loop
+			}
+		}
+		return i + 1
+	}
+	return -1
+}
+
+func part2(auntSue map[string]int, candidates []map[string]int) int {
+loop:
+	for i, candidate := range candidates {
+		for trait, n := range candidate {
+			if trait == "cats" || trait == "trees" {
+				if auntSue[trait] >= n {
+					continue loop
+				}
+			} else if trait == "pomeranians" || trait == "goldfish" {
+				if auntSue[trait] <= n {
+					continue loop
+				}
+
+			} else if auntSue[trait] != n {
 				continue loop
 			}
 		}
