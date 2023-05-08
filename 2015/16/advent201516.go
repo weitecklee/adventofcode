@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -13,11 +14,12 @@ func main() {
 		panic(err)
 	}
 	input := strings.Split(string(data), "\n")
-	fmt.Println(part1(input))
+	auntSue, candidates := parseInput(input)
+	fmt.Println(part1(auntSue, candidates))
 }
 
-func part1(input []string) int {
-	re := regexp.MustCompile(`[a-z]+: \d+`)
+func parseInput(input []string) (map[string]int, []map[string]int) {
+	re := regexp.MustCompile(`([a-z]+): (\d+)`)
 	tickerTape := `children: 3
 	cats: 7
 	samoyeds: 2
@@ -28,16 +30,30 @@ func part1(input []string) int {
 	trees: 3
 	cars: 2
 	perfumes: 1`
-	matches := re.FindAllString(tickerTape, -1)
-	auntSue := map[string]bool{}
+	matches := re.FindAllStringSubmatch(tickerTape, -1)
+	auntSue := map[string]int{}
 	for _, match := range matches {
-		auntSue[match] = true
+		n, _ := strconv.Atoi(match[2])
+		auntSue[match[1]] = n
 	}
-loop:
-	for i, line := range input {
-		matches := re.FindAllString(line, -1)
+	candidates := []map[string]int{}
+	for _, line := range input {
+		matches := re.FindAllStringSubmatch(line, -1)
+		candidate := map[string]int{}
 		for _, match := range matches {
-			if !auntSue[match] {
+			n, _ := strconv.Atoi(match[2])
+			candidate[match[1]] = n
+		}
+		candidates = append(candidates, candidate)
+	}
+	return auntSue, candidates
+}
+
+func part1(auntSue map[string]int, candidates []map[string]int) int {
+loop:
+	for i, candidate := range candidates {
+		for trait, n := range candidate {
+			if auntSue[trait] != n {
 				continue loop
 			}
 		}
