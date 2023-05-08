@@ -34,50 +34,49 @@ func parseInput(input []string) [][]int {
 	return ingredients
 }
 
-func part1(ingredients [][]int) int {
-	maxTotal := 0
-	for i := 0; i <= 100; i++ {
-		for j := 0; i+j <= 100; j++ {
-			for k := 0; i+j+k <= 100; k++ {
-				l := 100 - i - j - k
-				total := 1
-				for m := 0; m < 4; m++ {
-					curr := ingredients[0][m]*i + ingredients[1][m]*j + ingredients[2][m]*k + ingredients[3][m]*l
-					if curr > 0 {
-						total *= curr
-					}
-				}
-				if total > maxTotal {
-					maxTotal = total
-				}
+func recur(ingredients *[][]int, maxTotal *int, n int, lenIngredients int, amounts *[]int, runningAmount int, part2 bool) {
+	if n == lenIngredients-1 {
+		(*amounts)[n] = 100 - runningAmount
+		if part2 {
+			calories := 0
+			for j := 0; j < lenIngredients; j++ {
+				calories += (*ingredients)[j][4] * (*amounts)[j]
+			}
+			if calories != 500 {
+				return
 			}
 		}
+		total := 1
+		for i := 0; i < 4; i++ {
+			curr := 0
+			for j := 0; j < lenIngredients; j++ {
+				curr += (*ingredients)[j][i] * (*amounts)[j]
+			}
+			if curr > 0 {
+				total *= curr
+			}
+		}
+		if total > *maxTotal {
+			*maxTotal = total
+		}
+		return
 	}
+	for i := 0; i+runningAmount <= 100; i++ {
+		(*amounts)[n] = i
+		recur(ingredients, maxTotal, n+1, lenIngredients, amounts, runningAmount+i, part2)
+	}
+}
+
+func part1(ingredients [][]int) int {
+	maxTotal := 0
+	amounts := make([]int, len(ingredients))
+	recur(&ingredients, &maxTotal, 0, len(ingredients), &amounts, 0, false)
 	return maxTotal
 }
 
 func part2(ingredients [][]int) int {
 	maxTotal := 0
-	for i := 0; i <= 100; i++ {
-		for j := 0; i+j <= 100; j++ {
-			for k := 0; i+j+k <= 100; k++ {
-				l := 100 - i - j - k
-				cal := ingredients[0][4]*i + ingredients[1][4]*j + ingredients[2][4]*k + ingredients[3][4]*l
-				if cal != 500 {
-					continue
-				}
-				total := 1
-				for m := 0; m < 4; m++ {
-					curr := ingredients[0][m]*i + ingredients[1][m]*j + ingredients[2][m]*k + ingredients[3][m]*l
-					if curr > 0 {
-						total *= curr
-					}
-				}
-				if total > maxTotal {
-					maxTotal = total
-				}
-			}
-		}
-	}
+	amounts := make([]int, len(ingredients))
+	recur(&ingredients, &maxTotal, 0, len(ingredients), &amounts, 0, true)
 	return maxTotal
 }
