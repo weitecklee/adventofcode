@@ -16,6 +16,7 @@ func main() {
 	input := strings.Split(string(data), "\n")
 	instructions := parseInput(input)
 	fmt.Println(part1(instructions))
+	fmt.Println(part2(instructions))
 }
 
 type Instruction struct {
@@ -71,6 +72,16 @@ func (I *Instruction) execute(register *map[string]int, i *int) {
 
 func part1(instructions []Instruction) int {
 	register := map[string]int{}
+	i := 0
+	for i < len(instructions) {
+		instructions[i].execute(&register, &i)
+	}
+	return register["b"]
+}
+
+func part2(instructions []Instruction) int {
+	register := map[string]int{}
+	register["a"] = 1
 	i := 0
 	for i < len(instructions) {
 		instructions[i].execute(&register, &i)
