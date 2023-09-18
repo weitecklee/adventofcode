@@ -1,31 +1,18 @@
-file1 = open('input.txt','r')
-text = file1.read()
+def findMarker(line: str, distincts: int) -> int:
+  i = 0
+  n = distincts
+  letters: dict[str, int] = {}
+  while i < n:
+    c = line[i]
+    if c in letters:
+      n = max(n, letters[c] + distincts + 1)
+    letters[c] = i
+    i += 1
+  return i
 
-letters = {}
+if __name__ == "__main__":
+  file1 = open('input.txt','r')
+  line = file1.read()
 
-for i in range(0, len(text)):
-    if i >= 4:
-        letters[text[i - 4]] -= 1
-        if letters[text[i - 4]] == 0:
-            letters.pop(text[i - 4])
-    if text[i] in letters:
-        letters[text[i]] += 1
-    else:
-        letters[text[i]] = 1
-    if len(letters) == 4:
-        print(i + 1)
-        break
-
-letters2 = {}
-for i in range(0, len(text)):
-    if i >= 14:
-        letters2[text[i - 14]] -= 1
-        if letters2[text[i - 14]] == 0:
-            letters2.pop(text[i - 14])
-    if text[i] in letters2:
-        letters2[text[i]] += 1
-    else:
-        letters2[text[i]] = 1
-    if len(letters2) == 14:
-        print(i + 1)
-        break
+  print(findMarker(line, 4))
+  print(findMarker(line, 14))
