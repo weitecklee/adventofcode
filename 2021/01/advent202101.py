@@ -1,17 +1,12 @@
-file1 = open('input.txt','r')
-lines = file1.readlines()
-lines = [int(line) for line in lines]
+def part1(numbers: list[int]) -> int:
+  return sum([1 for a, b in zip(numbers, numbers[1:]) if b > a])
 
-count = 0
-for i in range(1, len(lines)):
-  if lines[i] > lines[i - 1]:
-    count += 1
+def part2(numbers: list[int]) -> int:
+  return part1([sum(numbers[i-2:i+1]) for i in range(2, len(numbers))])
 
-print(count)
+if __name__ == "__main__":
+  with open('input.txt', 'r') as file:
+    numbers = [int(num) for num in file]
 
-count2 = 0
-for i in range(3, len(lines)):
-  if lines[i] > lines[i - 3]:
-    count2 += 1
-
-print(count2)
+  print(part1(numbers))
+  print(part2(numbers))

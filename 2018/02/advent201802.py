@@ -4,9 +4,9 @@ def part1(lines: list[str]) -> int:
   count2 = 0
   count3 = 0
   for line in lines:
-    charCount = Counter(line)
-    if 2 in charCount.values(): count2 += 1
-    if 3 in charCount.values(): count3 += 1
+    char_count = Counter(line)
+    if 2 in char_count.values(): count2 += 1
+    if 3 in char_count.values(): count3 += 1
   return count2 * count3
 
 def part2(lines: list[str]) -> str:
@@ -27,8 +27,8 @@ def part2(lines: list[str]) -> str:
   return ''
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [line.strip() for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [line.strip() for line in file]
 
   print(part1(lines))
   print(part2(lines))
