@@ -1,22 +1,25 @@
-def checker(lines: list[str], gradient: tuple[int, int]) -> int:
-  pos: list[int] = [0, 0]
-  count: int = 0
+from typing import List, Tuple
+from functools import reduce
+
+def checker(lines: List[str], gradient: Tuple[int, int]) -> int:
+  x, y = 0, 0
+  count = 0
   h, w = len(lines), len(lines[0])
-  while pos[1] < h:
-    if lines[pos[1]][pos[0]] == "#":
+  while y < h:
+    if lines[y][x] == "#":
       count += 1
-    pos[0] += gradient[0]
-    pos[1] += gradient[1]
-    pos[0] %= w
+    x = (x + gradient[0]) % w
+    y += gradient[1]
   return count
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [line.strip() for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [line.strip() for line in file]
 
-  print(checker(lines, (3, 1)))
+  part1 = checker(lines, (3, 1))
+  print(part1)
 
-  slopes: list[tuple[int, int]] = [
+  slopes: List[Tuple[int, int]] = [
     (1, 1),
     (3, 1),
     (5, 1),
@@ -24,7 +27,5 @@ if __name__ == "__main__":
     (1, 2),
   ]
 
-  part2 = 1
-  for slope in slopes:
-    part2 *= checker(lines, slope)
+  part2 = reduce(lambda x, y: x * y, [checker(lines, slope) for slope in slopes])
   print(part2)
