@@ -1,8 +1,10 @@
+from collections import defaultdict
+
 def part1(lines: list[str]) -> int:
   tmp = ''
   count = 0
   for line in lines:
-    if line == '':
+    if not line:
       yeses = set(list(tmp))
       count += len(yeses)
       tmp = ''
@@ -13,30 +15,23 @@ def part1(lines: list[str]) -> int:
 
 def part2(lines: list[str]) -> int:
   count = 0
-  yeses: dict[str, int] = {}
+  yeses = defaultdict(int)
   members = 0
   for line in lines:
-    if line == '':
-      for n in yeses.values():
-        if n == members:
-          count += 1
-      yeses: dict[str, int] = {}
+    if not line:
+      count += sum(1 for n in yeses.values() if n == members)
+      yeses = defaultdict(int)
       members = 0
     else:
       members += 1
       for c in line:
-        if c in yeses:
-          yeses[c] += 1
-        else:
-          yeses[c] = 1
-  for n in yeses.values():
-    if n == members:
-      count += 1
+        yeses[c] += 1
+  count += sum(1 for n in yeses.values() if n == members)
   return count
 
-
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [line.strip() for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [line.strip() for line in file]
+
   print(part1(lines))
   print(part2(lines))
