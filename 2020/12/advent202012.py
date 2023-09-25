@@ -5,17 +5,17 @@ def part1(steps: list[Tuple[str, int]]) -> int:
   pos: list[int] = [0, 0]
   direc: list[int] = [1, 0]
   for step in steps:
-    tmpDirec: list[int] = [0, 0]
+    tmp_direc: list[int] = [0, 0]
     if step[0] == 'N':
-      tmpDirec[1] = 1
+      tmp_direc[1] = 1
     elif step[0] == 'E':
-      tmpDirec[0] = 1
+      tmp_direc[0] = 1
     elif step[0] == 'W':
-      tmpDirec[0] = -1
+      tmp_direc[0] = -1
     elif step[0] == 'S':
-      tmpDirec[1] = -1
+      tmp_direc[1] = -1
     elif step[0] == 'F':
-      tmpDirec = direc
+      tmp_direc = direc
     elif step[0] == 'L':
       if step[1] == 90:
         direc[0], direc[1] = -direc[1], direc[0]
@@ -36,8 +36,8 @@ def part1(steps: list[Tuple[str, int]]) -> int:
         raise Exception('Unexpected step: ', step)
     else:
       raise Exception('Unexpected step: ', step)
-    pos[0] += tmpDirec[0] * step[1]
-    pos[1] += tmpDirec[1] * step[1]
+    pos[0] += tmp_direc[0] * step[1]
+    pos[1] += tmp_direc[1] * step[1]
   return abs(pos[0]) + abs(pos[1])
 
 def part2(steps: list[Tuple[str, int]]) -> int:
@@ -48,15 +48,15 @@ def part2(steps: list[Tuple[str, int]]) -> int:
       pos[0] += wayp[0] * step[1]
       pos[1] += wayp[1] * step[1]
     else:
-      tmpDirec: list[int] = [0, 0]
+      tmp_direc: list[int] = [0, 0]
       if step[0] == 'N':
-        tmpDirec[1] = 1
+        tmp_direc[1] = 1
       elif step[0] == 'E':
-        tmpDirec[0] = 1
+        tmp_direc[0] = 1
       elif step[0] == 'W':
-        tmpDirec[0] = -1
+        tmp_direc[0] = -1
       elif step[0] == 'S':
-        tmpDirec[1] = -1
+        tmp_direc[1] = -1
       elif step[0] == 'L':
         if step[1] == 90:
           wayp[0], wayp[1] = -wayp[1], wayp[0]
@@ -77,8 +77,8 @@ def part2(steps: list[Tuple[str, int]]) -> int:
           raise Exception('Unexpected step: ', step)
       else:
         raise Exception('Unexpected step: ', step)
-      wayp[0] += tmpDirec[0] * step[1]
-      wayp[1] += tmpDirec[1] * step[1]
+      wayp[0] += tmp_direc[0] * step[1]
+      wayp[1] += tmp_direc[1] * step[1]
   return abs(pos[0]) + abs(pos[1])
 
 def parse(lines: list[str]) -> list[Tuple[str, int]]:

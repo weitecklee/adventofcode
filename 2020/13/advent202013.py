@@ -5,16 +5,16 @@ def part1(lines: list[str]) -> int:
   ptn = r'\d+'
   timestamp = int(lines[0])
   matches = re.findall(ptn, lines[1])
-  minWait: int = 1000
+  min_wait: int = 1000
   res: int = 0
   if matches is None:
     raise Exception('Regex error', lines[1])
   for match in matches:
     bus = int(match)
     wait = bus - timestamp % bus
-    if wait < minWait:
+    if wait < min_wait:
       res = bus * wait
-      minWait = wait
+      min_wait = wait
   return res
 
 def part2(lines: list[str]) -> int:
