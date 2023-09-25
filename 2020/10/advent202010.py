@@ -12,16 +12,15 @@ def part1(lines: list[int]) -> int:
   return count1 * count3
 
 def part2(lines: list[int]) -> int:
-  ways: defaultdict[int, int] = defaultdict(lambda: 0)
+  ways = [0] * (lines[-1] + 1)
   ways[lines[-1]] = 1
-  for i in range(len(lines) - 2, -1, -1):
-    j = lines[i]
-    ways[j] = ways[j + 1] + ways[j + 2] + ways[j + 3]
+  for i in reversed(lines[:-1]):
+    ways[i] = ways[i + 1] + ways[i + 2] + ways[i + 3]
   return ways[0]
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [int(line.strip()) for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [int(line.strip()) for line in file]
   lines.append(0)
   lines.sort()
   lines.append(lines[-1] + 3)

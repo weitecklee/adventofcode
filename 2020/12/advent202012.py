@@ -92,8 +92,8 @@ def parse(lines: list[str]) -> list[Tuple[str, int]]:
   return steps
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [line.strip() for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [line.strip() for line in file]
   steps = parse(lines)
   print(part1(steps))
   print(part2(steps))

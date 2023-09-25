@@ -64,8 +64,8 @@ def parse(grid: list[str]) -> dict[Tuple[int, int], bool]:
   return seats
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  grid = [line.strip() for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    grid = [line.strip() for line in file]
   seats = parse(grid)
   seats2 = dict.copy(seats)
   c = len(grid) - 1

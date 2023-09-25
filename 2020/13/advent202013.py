@@ -36,7 +36,7 @@ def part2(lines: list[str]) -> int:
   return timestamp
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [line.strip() for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [line.strip() for line in file]
   print(part1(lines))
   print(part2(lines))

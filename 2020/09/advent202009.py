@@ -27,8 +27,8 @@ def part2(lines: list[int], target: int) -> int:
   return -1
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
-  lines = [int(line.strip()) for line in file1.readlines()]
+  with open('input.txt','r') as file:
+    lines = [int(line.strip()) for line in file]
   target = part1(lines)
   print(target)
   print(part2(lines, target))
