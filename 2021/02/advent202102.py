@@ -1,32 +1,32 @@
-file1 = open('input.txt','r')
-lines = file1.readlines()
+from typing import List
 
-horizontal = 0
-depth = 0
+def part1(lines: List[str]) -> int:
+  pos, depth = 0, 0
+  for line in lines:
+    action, val = line.split(' ')
+    if action == 'forward':
+      pos += int(val)
+    elif action == 'down':
+      depth += int(val)
+    else:
+      depth -= int(val)
+  return pos * depth
 
-for line in lines:
-  direction, dist = line.strip().split(' ')
-  if direction == 'forward':
-    horizontal += int(dist)
-  elif direction == 'down':
-    depth += int(dist)
-  elif direction == 'up':
-    depth -= int(dist)
+def part2(lines: List[str]) -> int:
+  pos, depth, aim = 0, 0, 0
+  for line in lines:
+    action, val = line.split(' ')
+    if action == 'forward':
+      pos += int(val)
+      depth += aim * int(val)
+    elif action == 'down':
+      aim += int(val)
+    else:
+      aim -= int(val)
+  return pos * depth
 
-print(horizontal * depth)
-
-horizontal = 0
-depth = 0
-aim = 0
-
-for line in lines:
-  direction, dist = line.strip().split(' ')
-  if direction == 'forward':
-    horizontal += int(dist)
-    depth += int(dist) * aim
-  elif direction == 'down':
-    aim += int(dist)
-  elif direction == 'up':
-    aim -= int(dist)
-
-print(horizontal * depth)
+if __name__ == "__main__":
+  with open('input.txt','r') as file:
+    lines = [line.strip() for line in file]
+  print(part1(lines))
+  print(part2(lines))
