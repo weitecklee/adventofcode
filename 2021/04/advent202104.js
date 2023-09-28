@@ -53,6 +53,7 @@ for (const draw of draws) {
           for (const [n, space] of winningBoard.spaces) {
             sum += n;
           }
+          console.log(draw);
           console.log(sum * draw);
           return;
         }
