@@ -96,7 +96,7 @@ func printIslands(pointMap *map[[2]int]bool) {
 	for i := 0; i <= ht; i++ {
 		row := []string{}
 		for j := 0; j <= wd; j++ {
-			row = append(row, ".")
+			row = append(row, " ")
 		}
 		message = append(message, row)
 	}
