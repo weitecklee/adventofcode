@@ -8,7 +8,7 @@ const input = fs.readFileSync('input.txt', 'utf-8', (err, data) => {
   }
 }).split('\n');
 
-const screen = new Array(6).fill(null).map((a) => new Array(50).fill('.'));
+const screen = new Array(6).fill(null).map((a) => new Array(50).fill(' '));
 
 const re = /\d+/g;
 
