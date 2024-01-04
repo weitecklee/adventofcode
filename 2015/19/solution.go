@@ -64,7 +64,7 @@ func part1(replacements *map[string][]string, molecule string) int {
 	uses the longest replacement available. This is not a general solution.
 	Indeed, it doesn't work for my input.
 
-	Finally, used the solution provided by u/askalski, comment copied in solution.txt for posterity.
+	Finally, used the solution provided by u/askalski, comment copied in solution.md for posterity.
 	https://www.reddit.com/r/adventofcode/comments/3xflz8/day_19_solutions/cy4etju/
 */
 

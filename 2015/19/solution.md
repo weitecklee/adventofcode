@@ -1,3 +1,8 @@
+> [!NOTE]
+> Original text from https://www.reddit.com/r/adventofcode/comments/3xflz8/day_19_solutions/cy4etju/
+
+---
+
 No leaderboard for me today, because I decided to sleep on Part 2, before solving it by hand.  Since there's really no code to speak of, I'll talk about the solution.
 
 ## First insight
