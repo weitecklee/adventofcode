@@ -1,15 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-let input = fs.readFileSync(path.resolve(__dirname, 'input.txt'), 'utf-8', (err, data) => {
+const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
   if (err) {
     console.log(err)
   } else {
     return data;
   }
-});
-
-input = input.split('\n');
+}).split('\n');
 
 const bits = new Array(input[0].length).fill(0);
 

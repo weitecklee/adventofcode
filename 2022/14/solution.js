@@ -1,14 +1,14 @@
 const fs = require('fs');
+const path = require('path');
 
-let input = fs.readFileSync('input.txt', 'utf-8', (err, data) => {
+const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
   if (err) {
     console.log(err)
   } else {
     return data;
   }
-});
+}).split('\n');
 
-input = input.split('\n');
 let maxy = 0;
 let minx = Infinity;
 let maxx = 0;

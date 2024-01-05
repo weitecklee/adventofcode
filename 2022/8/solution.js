@@ -1,15 +1,13 @@
 const fs = require('fs');
+const path = require('path');
 
-let input = fs.readFileSync('input.txt', 'utf-8', (err, data) => {
+const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
   if (err) {
     console.log(err)
   } else {
     return data;
   }
-});
-
-input = input.split('\n');
-input = input.map((a) => a.split('').map(Number));
+}).split('\n').map((a) => a.split('').map(Number));
 
 const tracker = [];
 for (const line of input) {
