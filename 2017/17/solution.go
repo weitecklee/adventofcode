@@ -4,11 +4,16 @@ import (
 	"container/ring"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 )
 
 func main() {
-	data, err := os.ReadFile("input.txt")
+	_, filename, _, _ := runtime.Caller(0)
+	dirname := filepath.Dir(filename)
+	inputFilePath := filepath.Join(dirname, "input.txt")
+	data, err := os.ReadFile(inputFilePath)
 	if err != nil {
 		panic(err)
 	}
