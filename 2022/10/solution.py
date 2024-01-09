@@ -6,7 +6,7 @@ register = 1
 cycle = 0
 cycles = [20, 60, 100, 140, 180, 220]
 strength = 0
-screen = [['.'] * 40 for _ in range(6)]
+screen = [[' '] * 40 for _ in range(6)]
 
 def tick():
   global cycle, strength, screen

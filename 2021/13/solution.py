@@ -7,7 +7,7 @@ paper = set()
 folds = []
 
 for line in lines:
-  nums = list(map(int, re.findall('\d+', line)))
+  nums = list(map(int, re.findall(r'\d+', line)))
   if len(nums) == 2:
     paper.add(tuple(nums))
   elif len(nums) == 1:
@@ -53,7 +53,7 @@ for fold in folds[1:]:
 xMax = max([x for (x, y) in paper])
 yMax = max([y for (x, y) in paper])
 
-code = [['.'] * (xMax + 1) for i in range((yMax + 1))]
+code = [[' '] * (xMax + 1) for i in range((yMax + 1))]
 
 for (x, y) in paper:
   code[y][x] = '#'

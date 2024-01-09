@@ -30,7 +30,7 @@ console.log(sum);
 
 const screen = new Array(6);
 for (let i = 0; i < 6; i++) {
-  screen[i] = '.'.repeat(40).split('');
+  screen[i] = ' '.repeat(40).split('');
 }
 
 for (let i = 0; i < 240; i++) {
