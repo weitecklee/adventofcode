@@ -1,3 +1,4 @@
+import os
 from typing import List, Tuple
 from functools import reduce
 
@@ -13,7 +14,7 @@ def checker(lines: List[str], gradient: Tuple[int, int]) -> int:
   return count
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
 
   part1 = checker(lines, (3, 1))

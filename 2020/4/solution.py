@@ -1,4 +1,5 @@
 import re
+import os
 
 REQUIRED_FIELDS = {'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
 VALID_ECL = ('amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth')
@@ -44,7 +45,7 @@ class Passport:
     return True
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
 
   pattern = r'(\w{3}:\S+)'

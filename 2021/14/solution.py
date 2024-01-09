@@ -1,6 +1,7 @@
 import re
+import os
 
-file1 = open('input.txt','r')
+file1 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r')
 lines = file1.readlines()
 
 instructions = {}

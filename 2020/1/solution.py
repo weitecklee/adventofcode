@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 def part1(numbers: List[int], target: int) -> int:
@@ -24,7 +25,7 @@ def part2(numbers: List[int], target: int) -> int:
   return -1
 
 if __name__ == "__main__":
-  with open('input.txt', 'r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     numbers = [int(num) for num in file]
   numbers.sort()
   target = 2020

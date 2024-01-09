@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List
 
 def playGame(numbers: List[int], turns: int) -> int:
@@ -15,7 +16,7 @@ def playGame(numbers: List[int], turns: int) -> int:
   return nextNumber
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     line = file.readline()
   numbers = [int(n) for n in line.split(',')]
   print(playGame(numbers, 2020))

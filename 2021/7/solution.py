@@ -1,3 +1,4 @@
+import os
 from typing import Callable, List, Tuple
 
 def solve(crabs: List[int], calculate: Callable[[List[int], int], int]) -> int:
@@ -22,7 +23,7 @@ def calculate_fuel2(crabs: List[int], target: int) -> int:
   return sum(abs(crab - target) * (abs(crab - target) + 1) // 2 for crab in crabs)
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     puzzle_input = [int(n) for n in file.readline().split(',')]
   print(solve(puzzle_input, calculate_fuel1))
   print(solve(puzzle_input, calculate_fuel2))

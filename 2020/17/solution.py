@@ -1,7 +1,6 @@
-import re
+import os
 from collections import defaultdict
 from typing import DefaultDict, List, Set, Tuple
-from functools import reduce
 
 def parse(lines: List[str]) -> Set[Tuple[int, int, int, int]]:
   cubes: Set[Tuple[int, int, int, int]] = set()
@@ -50,7 +49,7 @@ def part2(cubes: Set[Tuple[int, int, int, int]], cycles: int) -> int:
 
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
   cubes = parse(lines)
   print(part1(cubes, 6))

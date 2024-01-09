@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 def simulate(puzzle_input: List[int], days: int) -> int:
@@ -14,7 +15,7 @@ def simulate(puzzle_input: List[int], days: int) -> int:
   return sum(fish)
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     puzzle_input = [int(n) for n in file.readline().split(',')]
   print(simulate(puzzle_input, 80))
   print(simulate(puzzle_input, 256))

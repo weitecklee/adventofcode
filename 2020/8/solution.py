@@ -1,3 +1,4 @@
+import os
 from typing import List, Set, Tuple
 
 class Instruction:
@@ -51,7 +52,7 @@ def part2(instructions: List[Instruction], linesToSkip: List[int]) -> int:
   return -1
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
   instructions = parse(lines)
   part1, linesToSkip, _ = runProgram(instructions, -1)

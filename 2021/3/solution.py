@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 def find_common_bit(lines: List[str], place: int) -> int:
@@ -31,7 +32,7 @@ def part2(lines: List[str]) -> int:
   return int(''.join(oxygen.pop()), 2) * int(''.join(co2.pop()), 2)
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [(line.strip()) for line in file]
   print(part1(lines))
   print(part2(lines))

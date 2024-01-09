@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import os
 
 class Seat:
   def __init__(self, seat: str) -> None:
@@ -21,7 +22,7 @@ def part2(seatIDs: List[int]) -> int:
   return -1
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
 
   seats: List[Seat] = [Seat(line) for line in lines]

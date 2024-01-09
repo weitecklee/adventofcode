@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from typing import Tuple
 
@@ -64,7 +65,7 @@ def parse(grid: list[str]) -> dict[Tuple[int, int], bool]:
   return seats
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     grid = [line.strip() for line in file]
   seats = parse(grid)
   seats2 = dict.copy(seats)

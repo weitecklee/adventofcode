@@ -1,4 +1,5 @@
 import re
+import os
 
 class Match:
   def __init__(self, lo: int, hi: int, char: str, password: str):
@@ -15,7 +16,7 @@ class Match:
     return (self.password[self.lo - 1] == self.char) != (self.password[self.hi - 1] == self.char)
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
 
   pattern = r'(\d+)-(\d+) (\w): (\w+)'

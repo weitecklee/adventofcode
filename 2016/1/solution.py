@@ -1,3 +1,4 @@
+import os
 from typing import List, Set, Tuple
 
 def parse(puzzle_input: str) -> List[Tuple[str, int]]:
@@ -36,7 +37,7 @@ def part2(instructions: List[Tuple[str, int]]) -> int:
   return -1
 
 if __name__ == '__main__':
-  with open('input.txt', 'r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     puzzle_input = file.readline().strip()
   instructions = parse(puzzle_input)
   print(part1(instructions))

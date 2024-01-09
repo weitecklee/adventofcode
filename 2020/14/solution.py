@@ -1,4 +1,5 @@
 import re
+import os
 from typing import List
 
 def part1(lines: List[str]) -> int:
@@ -61,7 +62,7 @@ def generate_possible_addresses(masked_address) -> List[int] :
   return [int(''.join(address), 2) for address in possible_addresses]
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
   print(part1(lines))
   print(part2(lines))

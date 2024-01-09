@@ -1,3 +1,5 @@
+import os
+
 def part1(lines: list[int]) -> int:
   numbers: set[int] = set()
   numbers.update(lines[:25])
@@ -27,7 +29,7 @@ def part2(lines: list[int], target: int) -> int:
   return -1
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [int(line.strip()) for line in file]
   target = part1(lines)
   print(target)

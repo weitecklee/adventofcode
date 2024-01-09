@@ -1,4 +1,5 @@
 import re
+import os
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Set, Tuple
 
@@ -42,7 +43,7 @@ def part2(bags: DefaultDict[str, Dict[str, int]], target: str) -> int:
   return recur(bags, target) - 1
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
   bags1, bags2 = parse(lines)
   target = 'shiny gold bag'

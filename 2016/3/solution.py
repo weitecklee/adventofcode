@@ -1,5 +1,6 @@
 import re
-from typing import List, Set, Tuple
+import os
+from typing import List, Tuple
 
 def parse(puzzle_input: List[str]) -> List[Tuple[int, int, int]]:
   parsed_input: List[Tuple[int, int, int]] = []
@@ -27,7 +28,7 @@ def part2(lines: List[Tuple[int, int, int]]) -> int:
   return count
 
 if __name__ == '__main__':
-  with open('input.txt', 'r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     puzzle_input = [line.strip() for line in file]
   parsed_input = parse(puzzle_input)
   print(part1(parsed_input))

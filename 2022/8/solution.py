@@ -1,4 +1,6 @@
-file1 = open('input.txt','r')
+import os
+
+file1 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r')
 lines = list(map(str.strip, file1.readlines()))
 
 grid = [[0]*len(lines) for i in range(len(lines))]

@@ -1,3 +1,5 @@
+import os
+
 def findMarker(line: str, distincts: int) -> int:
   i = 0
   n = distincts
@@ -11,7 +13,7 @@ def findMarker(line: str, distincts: int) -> int:
   return i
 
 if __name__ == "__main__":
-  file1 = open('input.txt','r')
+  file1 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r')
   line = file1.read()
 
   print(findMarker(line, 4))

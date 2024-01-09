@@ -1,4 +1,5 @@
 import re
+import os
 from collections import defaultdict
 from typing import DefaultDict, List, Tuple
 
@@ -47,7 +48,7 @@ def part2(grid: DefaultDict[Tuple[int, int], int], lines: List[Line]) -> int:
   return len([a for a in grid if grid[a] >= 2])
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     puzzle_input = [(line.strip()) for line in file]
   lines = parse(puzzle_input)
   grid, diagonal_lines = part1(lines)

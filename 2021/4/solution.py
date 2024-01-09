@@ -1,4 +1,5 @@
-from typing import Dict, List, Set, Tuple
+import os
+from typing import Dict, List, Tuple
 
 class Board:
   def __init__(self, grid: List[List[int]]) -> None:
@@ -55,7 +56,7 @@ def part2(numbers: List[int], boards: List[Board]) -> int:
   return -1
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [(line.strip()) for line in file]
   numbers, boards = parse(lines)
   print(part1(numbers, boards))

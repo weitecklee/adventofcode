@@ -1,4 +1,5 @@
 import re
+import os
 from typing import List, Set, Tuple
 from functools import reduce
 
@@ -81,7 +82,7 @@ def part2(fields: List[Field], my_ticket: List[int], valid_tickets: List[List[in
   return reduce(lambda x, y: x * y, [my_ticket[pos] for pos in departure_positions])
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
   fields, my_ticket, nearby_tickets = parse(lines)
   total, valid_tickets = part1(fields, nearby_tickets)

@@ -1,4 +1,5 @@
 import re
+import os
 from typing import Tuple
 
 def part1(steps: list[Tuple[str, int]]) -> int:
@@ -92,7 +93,7 @@ def parse(lines: list[str]) -> list[Tuple[str, int]]:
   return steps
 
 if __name__ == "__main__":
-  with open('input.txt','r') as file:
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
     lines = [line.strip() for line in file]
   steps = parse(lines)
   print(part1(steps))
