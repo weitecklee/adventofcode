@@ -1,25 +1,22 @@
 import os
-file1 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r')
-lines = file1.readlines()
-count = 0
-maxC = 0
-arr = []
+from typing import List
 
-for line in lines:
-    if line == '\n':
-        arr.append(count)
-        if count > maxC:
-            maxC = count
-        count = 0
+def parse(puzzle_input: List[str]) -> List[int]:
+  elves: List[int] = []
+  curr = 0
+  for line in puzzle_input:
+    if line:
+      curr += int(line)
     else:
-        count += int(line)
+      elves.append(curr)
+      curr = 0
+  elves.append(curr)
+  return elves
 
-print('Maximum: ' + str(maxC))
-
-arr.sort(reverse = True)
-
-sum = 0
-for i in range(0, 3):
-    sum += arr[i]
-
-print(sum)
+if __name__ == '__main__':
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
+    puzzle_input = [line.strip() for line in file]
+  elves = parse(puzzle_input)
+  elves.sort()
+  print(elves[-1])
+  print(sum(elves[-3:]))
