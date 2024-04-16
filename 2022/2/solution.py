@@ -1,55 +1,75 @@
 import os
-file1 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r')
-lines = file1.readlines()
-score = 0
+from typing import List, Dict
 
-for line in lines:
-    plays = line.strip().split(' ')
-    if plays[1] == 'X':
-        score += 1
-        if plays[0] == 'C':
-            score += 6
-        elif plays[0] == 'A':
-            score += 3
-    elif plays[1] == 'Y':
-        score += 2
-        if plays[0] == 'A':
-            score += 6
-        elif plays[0] == 'B':
-            score += 3
-    elif plays[1] == 'Z':
-        score += 3
-        if plays[0] == 'B':
-            score += 6
-        elif plays[0] == 'C':
-            score += 3
+WIN = 6
+DRAW = 3
+LOSS = 0
+ROCK = 1
+PAPER = 2
+SCISSORS = 3
+HANDS: Dict[str, int] = {
+  'A': ROCK,
+  'B': PAPER,
+  'C': SCISSORS,
+  'X': ROCK,
+  'Y': PAPER,
+  'Z': SCISSORS
+}
+RESULTS: Dict[str, int] = {
+  'X': LOSS,
+  'Y': DRAW,
+  'Z': WIN
+}
 
-print(score)
+def parse(puzzle_input: List[str]) -> List[List[str]]:
+  rounds: List[List[str]] = []
+  for line in puzzle_input:
+    rounds.append(line.split(' '))
+  return rounds
 
-score2 = 0
+def determine_result(hand1: str, hand2: str) -> int:
+  rps1 = HANDS[hand1]
+  rps2 = HANDS[hand2]
+  if rps1 == rps2:
+    return DRAW
+  if (rps1 == ROCK and rps2 == PAPER) or (rps1 == PAPER and rps2 == SCISSORS) or (rps1 == SCISSORS and rps2 == ROCK):
+    return WIN
+  return LOSS
 
-for line in lines:
-    plays = line.strip().split(' ')
-    if plays[1] == 'X':
-        if plays[0] == 'A':
-            score2 += 3
-        elif plays[0] == 'B':
-            score2 += 1
-        elif plays[0] == 'C':
-            score2 += 2
-    elif plays[1] == 'Y':
-        if plays[0] == 'A':
-            score2 += 4
-        elif plays[0] == 'B':
-            score2 += 5
-        elif plays[0] == 'C':
-            score2 += 6
-    elif plays[1] == 'Z':
-        if plays[0] == 'A':
-            score2 += 8
-        elif plays[0] == 'B':
-            score2 += 9
-        elif plays[0] == 'C':
-            score2 += 7
+def part1(rounds: List[List[str]]) -> int:
+  score = 0
+  for round in rounds:
+    hand1, hand2 = round
+    score += HANDS[hand2] + determine_result(hand1, hand2)
+  return score
 
-print(score2)
+def part2(rounds: List[List[str]]) -> int:
+  score = 0
+  for round in rounds:
+    rps1 = HANDS[round[0]]
+    res = RESULTS[round[1]]
+    score += res
+    if res == LOSS:
+      if rps1 == ROCK:
+        score += SCISSORS
+      elif rps1 == SCISSORS:
+        score += PAPER
+      else:
+        score += ROCK
+    elif res == DRAW:
+      score += rps1
+    else:
+      if rps1 == ROCK:
+        score += PAPER
+      elif rps1 == SCISSORS:
+        score += ROCK
+      else:
+        score += SCISSORS
+  return score
+
+if __name__ == '__main__':
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
+    puzzle_input = [line.strip() for line in file]
+  rounds = parse(puzzle_input)
+  print(part1(rounds))
+  print(part2(rounds))
