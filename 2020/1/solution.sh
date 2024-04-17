@@ -47,7 +47,6 @@ main() {
 
   if [ -f "$filename" ]; then
     local sorted=($(sort -n < "$filename"))
-    unset IFS
     echo "$(part1 "${sorted[@]}")"
     echo "$(part2 "${sorted[@]}")"
   else
