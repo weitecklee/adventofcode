@@ -1,48 +1,32 @@
 import os
-file1 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r')
-lines = file1.readlines()
-sum = 0
-prio = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-set1 = set()
-set2 = set()
+from typing import Dict, List, Set
 
-for line in lines:
-    set1.clear()
-    set2.clear()
-    l = int(len(line) / 2)
-    for i in range(0, l):
-        set1.add(line[i])
-        set2.add(line[i + l])
-    same = set1.intersection(set2)
-    for x in same:
-        sum += prio.index(x) + 1
+ALPHABET = '_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+PRIORITIES: Dict[str, int] = {c: i for i, c in enumerate(ALPHABET)}
 
-print(sum)
+def calculate_priorities(*args):
+  return sum([PRIORITIES[c] for c in set.intersection(*args)])
 
-set1.clear()
-set2.clear()
-set3 = set()
-sum2 = 0
-n = 0
+def part1(puzzle_input: List[str]) -> int:
+  res = 0
+  for line in puzzle_input:
+    n = len(line)
+    comp1: Set[str] = set(line[:n//2])
+    comp2: Set[str] = set(line[n//2:])
+    res += calculate_priorities(comp1, comp2)
+  return res
 
-for line in lines:
-    if n == 0:
-        for c in line.strip():
-            set1.add(c)
-        n += 1
-    elif n == 1:
-        for c in line.strip():
-            set2.add(c)
-        n += 1
-    elif n == 2:
-        for c in line.strip():
-            set3.add(c)
-        same = set1.intersection(set2, set3)
-        for x in same:
-            sum2 += prio.index(x) + 1
-        set1.clear()
-        set2.clear()
-        set3.clear()
-        n = 0
+def part2(puzzle_input: List[str]) -> int:
+  res = 0
+  for i in range(0, len(puzzle_input), 3):
+    ruck1: Set[str] = set(puzzle_input[i])
+    ruck2: Set[str] = set(puzzle_input[i + 1])
+    ruck3: Set[str] = set(puzzle_input[i + 2])
+    res += calculate_priorities(ruck1, ruck2, ruck3)
+  return res
 
-print(sum2)
+if __name__ == '__main__':
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input.txt'),'r') as file:
+    puzzle_input = file.read().strip().split('\n')
+  print(part1(puzzle_input))
+  print(part2(puzzle_input))
