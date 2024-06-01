@@ -14,24 +14,19 @@ function convertString(str) {
   return [chem, Number(n)];
 }
 
-class DefaultDict {
-  constructor() {
-    this.map = new Map();
-  }
-
-  has(key) {
-    return this.map.has(key);
+class DefaultDict extends Map {
+  constructor(defaultValueFunc, entries) {
+    super(entries);
+    this.defaultValueFunc = defaultValueFunc;
   }
 
   get(key) {
-    if (!this.map.has(key)) {
-      this.map.set(key, 0);
+    if (!this.has(key)) {
+      const defaultValue = this.defaultValueFunc(key);
+      this.set(key, defaultValue);
+      return defaultValue;
     }
-    return this.map.get(key);
-  }
-
-  set(key, value) {
-    this.map.set(key, value);
+    return super.get(key);
   }
 }
 
@@ -78,7 +73,7 @@ function calculateOreReq(chemical, quantity, recipes, surplus) {
 }
 
 function part1(recipes) {
-  const surplus = new DefaultDict();
+  const surplus = new DefaultDict(() => 0);
   return calculateOreReq('FUEL', 1, recipes, surplus);
 }
 
@@ -88,7 +83,7 @@ function part2(recipes, oreAvailable) {
 
   while (lo < hi) {
     const mid = Math.floor((lo + hi + 1) / 2);
-    const surplus = new DefaultDict();
+    const surplus = new DefaultDict(() => 0);
     const ore = calculateOreReq('FUEL', mid, recipes, surplus);
     if (ore > oreAvailable) {
       hi = mid - 1;
