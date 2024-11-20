@@ -5,6 +5,16 @@ const input = fs
   .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
   .split("\n\n");
 
+const monster = [
+  "                  # ",
+  "#    ##    ##    ###",
+  " #  #  #  #  #  #   ",
+];
+const monsterRoughness = monster.reduce(
+  (a, b) => a + b.split("").reduce((c, d) => c + (d === "#"), 0),
+  0
+);
+
 class Tile {
   constructor(data) {
     const tileLines = data.split("\n");
@@ -60,6 +70,30 @@ class Tile {
     for (const line of this.imageData) {
       console.log(line);
     }
+  }
+
+  findMonster(monster) {
+    let monsters = 0;
+    for (let i = 0; i < this.imageData.length - monster.length; i++) {
+      for (let j = 0; j < this.imageData[i].length - monster[0].length; j++) {
+        let found = true;
+        for (let k = 0; k < monster.length; k++) {
+          for (let l = 0; l < monster[k].length; l++) {
+            if (monster[k][l] === "#" && this.imageData[i + k][j + l] !== "#") {
+              found = false;
+              break;
+            }
+          }
+          if (!found) {
+            break;
+          }
+        }
+        if (found) {
+          monsters++;
+        }
+      }
+    }
+    return monsters;
   }
 }
 
@@ -131,11 +165,12 @@ let row = 0;
 const tilesPerEdge = Math.sqrt(tiles.size);
 
 function printImage() {
+  // for debugging
   for (const row of image) {
     for (let i = 0; i < row[0].imageData.length; i++) {
       let line = "";
       for (const tile of row) {
-        line += tile.imageData[i] + "|";
+        line += tile.imageData[i] + " ";
       }
       console.log(line);
     }
@@ -210,5 +245,41 @@ while (true) {
   }
 }
 
-console.log("printImage");
-printImage();
+// printImage();
+
+const actualImage = [];
+for (const row of image) {
+  for (let i = 1; i < row[0].imageData.length - 1; i++) {
+    let line = "";
+    for (const tile of row) {
+      line += tile.imageData[i].slice(1, -1);
+    }
+    actualImage.push(line);
+  }
+}
+
+// console.log(actualImage);
+
+const actualImageTile = new Tile(["Tile 0:", ...actualImage].join("\n"));
+
+let rotations = 0;
+while (actualImageTile.findMonster(monster) === 0) {
+  actualImageTile.rotate();
+  rotations++;
+  if (rotations === 4) {
+    actualImageTile.reverse();
+  } else if (rotations === 8) {
+    break;
+  }
+}
+
+const numMonsters = actualImageTile.findMonster(monster);
+if (numMonsters === 0) {
+  throw new Error("No monsters found");
+}
+const part2 =
+  actualImageTile.imageData
+    .map((line) => line.split("").reduce((a, b) => a + (b === "#"), 0))
+    .reduce((a, b) => a + b) -
+  numMonsters * monsterRoughness;
+console.log(part2);
