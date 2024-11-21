@@ -15,7 +15,7 @@ func main() {
 	getInput(year, day)
 }
 
-func getInput(year string, day string) {
+func getInput(year, day string) {
 
 	sessionCookie := os.Getenv("AOC_SESSION_COOKIE")
 	if sessionCookie == "" {
@@ -35,19 +35,19 @@ func getInput(year string, day string) {
 
 	req.Header.Set("Cookie", fmt.Sprintf("session=%s", sessionCookie))
 
-	resp, err := client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Error making request: %v\n", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Request failed with status: %s\n", resp.Status)
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("Request failed with status: %s\n", res.Status)
 		return
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Error reading response body: %v\n", err)
 		return
