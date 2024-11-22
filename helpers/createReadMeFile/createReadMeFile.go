@@ -23,7 +23,37 @@ const (
 
 func main() {
 	solutionURLs := getSolutionURLs()
+	for _, solutionURL := range solutionURLs {
+		fmt.Printf("%s %s %s\n", solutionURL.Year, solutionURL.Day, solutionURL.URL)
+	}
 	createReadMeFile(solutionURLs)
+	createReadMeFile2015()
+}
+
+func createReadMeFile2015() {
+
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current directory: %v\n", err)
+		return
+	}
+
+	for day := 1; day < 26; day++ {
+		dirPath := filepath.Join(wd, "2015", fmt.Sprintf("%d", day))
+		err := os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create directories: %v", err)
+		}
+		filePath := filepath.Join(dirPath, "README.md")
+		puzzleURL := fmt.Sprintf("https://adventofcode.com/2015/day/%d", day)
+		body := fmt.Sprintf("### Advent of Code 2015 Day %d\n\n[Puzzle Page](%s)\n\n[Solutions Megathread]()\n", day, puzzleURL)
+		err = os.WriteFile(filePath, []byte(body), 0644)
+		if err != nil {
+			fmt.Printf("Error writing to file: %v\n", err)
+			return
+		}
+
+	}
 }
 
 func createReadMeFile(solutionURLs []SolutionURL) {
@@ -79,17 +109,6 @@ func getSolutionURLs() []SolutionURL {
 		UserAgent: userAgent,
 	}
 
-	searchTerm := "flair:solution"
-	resp, err := client.Get(searchURL + "?q=" + url.QueryEscape(searchTerm) + "&sort=new&restrict_sr=on&limit=1000")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		log.Fatalf("Failed to fetch results: %v", resp.Status)
-	}
-
 	var result struct {
 		Data struct {
 			Children []struct {
@@ -101,21 +120,35 @@ func getSolutionURLs() []SolutionURL {
 		} `json:"data"`
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		log.Fatal(err)
-	}
+	solutionURLs := []SolutionURL{}
 
-	solutionURLs := make([]SolutionURL, len(result.Data.Children))
+	for year := 2016; year < 2024; year++ {
 
-	for i, post := range result.Data.Children {
-		reg := regexp.MustCompile(`\d+`)
-		nums := reg.FindAllString(post.Data.Title, -1)
-		solutionURLs[i] = SolutionURL{
-			Title: post.Data.Title,
-			URL:   post.Data.URL,
-			Year:  nums[0],
-			Day:   strings.TrimLeft(nums[1], "0"),
+		searchTerm := fmt.Sprintf("flair:solution title:%d", year)
+		resp, err := client.Get(searchURL + "?q=" + url.QueryEscape(searchTerm) + "&sort=new&restrict_sr=on&limit=1000")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			log.Fatalf("Failed to fetch results: %v", resp.Status)
+		}
+
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, post := range result.Data.Children {
+			reg := regexp.MustCompile(`\d+`)
+			nums := reg.FindAllString(post.Data.Title, -1)
+			solutionURLs = append(solutionURLs, SolutionURL{
+				Title: post.Data.Title,
+				URL:   post.Data.URL,
+				Year:  nums[0],
+				Day:   strings.TrimLeft(nums[1], "0"),
+			})
 		}
 	}
 
