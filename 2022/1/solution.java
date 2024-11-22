@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -8,9 +9,11 @@ import java.util.PriorityQueue;
 class Solver {
   private static List<Integer> parseInput() {
     String fileName = "input.txt";
+    Path currentDirectory = Paths.get("").toAbsolutePath();
+    Path filePath = Paths.get(currentDirectory.toString(), fileName);
     List<Integer> elves = new ArrayList<>();
 
-    try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
       String line;
       int elf = 0;
       while ((line = br.readLine()) != null) {
