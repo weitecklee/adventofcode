@@ -2,4 +2,4 @@
 *.class
 input.txt
 /getPuzzleInput
-/createLinksFiles
+/createReadMeFile

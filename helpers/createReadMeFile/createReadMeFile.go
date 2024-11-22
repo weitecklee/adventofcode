@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -19,11 +22,38 @@ const (
 )
 
 func main() {
-	getSolutionURLs()
-
+	solutionURLs := getSolutionURLs()
+	createReadMeFile(solutionURLs)
 }
 
-func getSolutionURLs() {
+func createReadMeFile(solutionURLs []SolutionURL) {
+
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current directory: %v\n", err)
+		return
+	}
+
+	for _, solutionURL := range solutionURLs {
+		year, day, URL := solutionURL.Year, solutionURL.Day, solutionURL.URL
+		dirPath := filepath.Join(wd, year, day)
+		err := os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create directories: %v", err)
+		}
+		filePath := filepath.Join(dirPath, "README.md")
+		puzzleURL := fmt.Sprintf("https://adventofcode.com/%s/day/%s", year, day)
+		body := fmt.Sprintf("### Advent of Code %s Day %s\n\n[Puzzle Page](%s)\n\n[Solutions Megathread](%s)\n", year, day, puzzleURL, URL)
+		err = os.WriteFile(filePath, []byte(body), 0644)
+		if err != nil {
+			fmt.Printf("Error writing to file: %v\n", err)
+			return
+		}
+
+	}
+}
+
+func getSolutionURLs() []SolutionURL {
 
 	log.SetFlags(log.Llongfile)
 
@@ -76,10 +106,27 @@ func getSolutionURLs() {
 		log.Fatal(err)
 	}
 
-	for _, post := range result.Data.Children {
-		fmt.Printf("Title: %s\n", post.Data.Title)
-		fmt.Printf("URL: %s\n", post.Data.URL)
+	solutionURLs := make([]SolutionURL, len(result.Data.Children))
+
+	for i, post := range result.Data.Children {
+		reg := regexp.MustCompile(`\d+`)
+		nums := reg.FindAllString(post.Data.Title, -1)
+		solutionURLs[i] = SolutionURL{
+			Title: post.Data.Title,
+			URL:   post.Data.URL,
+			Year:  nums[0],
+			Day:   strings.TrimLeft(nums[1], "0"),
+		}
 	}
+
+	return solutionURLs
+}
+
+type SolutionURL struct {
+	Title string
+	Year  string
+	Day   string
+	URL   string
 }
 
 // userAgentTransport adds a custom User-Agent header to all HTTP requests
