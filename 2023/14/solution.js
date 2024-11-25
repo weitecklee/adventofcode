@@ -122,15 +122,19 @@ console.log(platform.calculateLoad());
 // }
 
 const platform2 = new Platform(input);
-const output = [];
-for (let i = 1; i < 150; i++) {
+const outputHistory = new Map();
+const loadHistory = new Map();
+for (let i = 1; i < 1000; i++) {
   platform2.cycle();
-  output.push(platform2.calculateLoad());
-  // console.log(i, platform2.calculateLoad());
+  const load = platform2.calculateLoad();
+  const platformString = platform2.platform.join("");
+  if (outputHistory.has(platformString)) {
+    const initialOffset = outputHistory.get(platformString);
+    const cycleLength = i - initialOffset;
+    const index = ((1000000000 - initialOffset) % cycleLength) + initialOffset;
+    console.log(loadHistory.get(index));
+    break;
+  }
+  outputHistory.set(platformString, i);
+  loadHistory.set(i, load);
 }
-
-// Manual inspection of output shows pattern stabilizes after 105 cycles with period of 13 cycles
-const initialOffset = 105;
-const period = 13;
-const index = ((1000000000 - initialOffset) % period) + initialOffset;
-console.log(output[index - 1]); // -1 because initialOffset used 1-based index
