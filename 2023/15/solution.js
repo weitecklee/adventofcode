@@ -22,26 +22,20 @@ class Boxes {
   constructor() {
     this.boxes = new Map();
     for (let i = 0; i < 256; i++) {
-      this.boxes.set(i, []);
+      // use Map instead of Array for better insertion/deletion performance,
+      // iteration happens in insertion order which satisfies requirements
+      this.boxes.set(i, new Map());
     }
   }
 
   remove(label, boxNumber) {
     const box = this.boxes.get(boxNumber);
-    const index = box.findIndex((a) => a.label === label);
-    if (index > -1) {
-      box.splice(index, 1);
-    }
+    box.delete(label);
   }
 
   add(label, boxNumber, focalLength) {
     const box = this.boxes.get(boxNumber);
-    const index = box.findIndex((a) => a.label === label);
-    if (index > -1) {
-      box[index].focalLength = Number(focalLength);
-    } else {
-      box.push({ label, focalLength: Number(focalLength) });
-    }
+    box.set(label, { focalLength: Number(focalLength) });
   }
 
   focusingPower() {
@@ -55,7 +49,10 @@ class Boxes {
     return Array.from(this.boxes.values()).reduce(
       (a, box, i) =>
         a +
-        box.reduce((b, lens, j) => b + (i + 1) * (j + 1) * lens.focalLength, 0),
+        Array.from(box.values()).reduce(
+          (b, lens, j) => b + (i + 1) * (j + 1) * lens.focalLength,
+          0
+        ),
       0
     );
   }
