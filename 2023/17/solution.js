@@ -33,7 +33,7 @@ function findMinPath(queue, visited, minSteps, maxSteps, input) {
     for (let i = 0; i < turnDirections.length; i++) {
       if (steps < minSteps && i != dirIndex) continue; // must stay in the same direction for at least minSteps
       if (i === 3 - dirIndex) continue; // no u-turns)
-      if (i === dirIndex && steps === maxSteps) continue; // must turn after 3 steps
+      if (i === dirIndex && steps === maxSteps) continue; // must turn after maxSteps
       const [dx, dy] = turnDirections[i];
       const [newX, newY] = [x + dx, y + dy];
       if (
