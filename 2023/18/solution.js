@@ -12,123 +12,61 @@ class Instruction {
     this.dir = a;
     this.dist = Number(b);
     this.color = c.slice(1, -1);
+    this.dir2 = ["R", "D", "L", "U"][Number(this.color[this.color.length - 1])];
+    this.dist2 = parseInt(this.color.slice(1, 6), 16);
   }
 }
 
-const pos = [0, 0];
 const instructions = input.map((line) => new Instruction(line));
-let minX = 0;
-let minY = 0;
-let maxX = 0;
-let maxY = 0;
-for (const instruction of instructions) {
-  switch (instruction.dir) {
-    case "U":
-      pos[1] -= instruction.dist;
-      break;
-    case "D":
-      pos[1] += instruction.dist;
-      break;
-    case "R":
-      pos[0] += instruction.dist;
-      break;
-    case "L":
-      pos[0] -= instruction.dist;
-      break;
-  }
-  minX = Math.min(minX, pos[0]);
-  minY = Math.min(minY, pos[1]);
-  maxX = Math.max(maxX, pos[0]);
-  maxY = Math.max(maxY, pos[1]);
-}
 
-const width = maxX - minX + 1;
-const height = maxY - minY + 1;
-const grid = Array(height)
-  .fill(0)
-  .map(() => Array(width).fill("."));
+function calculateSolution(instructions) {
+  // instructions: []{str dir, int dist}
+  // Combination of Shoelace formula and Pick's theorem
+  // Shoelace formula calculates area of polygon given vertices
+  // Pick's theorem calculates area of polygon given boundary points and interior points
+  // We have vertices (and boundary points) from input, and ultimately want to find sum of interior points and boundary points
+  // Shoelace formula
+  // https://en.wikipedia.org/wiki/Shoelace_formula
+  // Pick's theorem
+  // https://en.wikipedia.org/wiki/Pick%27s_theorem
 
-[pos[0], pos[1]] = [0 - minX, 0 - minY];
+  let x0 = 0;
+  let y0 = 0;
+  let x1, y1;
+  let area = 0;
+  let boundaryPoints = 0;
 
-for (const instruction of instructions) {
-  switch (instruction.dir) {
-    case "U":
-      for (let i = 0; i < instruction.dist; i++) {
-        pos[1]--;
-        grid[pos[1]][pos[0]] = "#";
-      }
-      break;
-    case "D":
-      for (let i = 0; i < instruction.dist; i++) {
-        pos[1]++;
-        grid[pos[1]][pos[0]] = "#";
-      }
-      break;
-    case "R":
-      for (let i = 0; i < instruction.dist; i++) {
-        pos[0]++;
-        grid[pos[1]][pos[0]] = "#";
-      }
-      break;
-    case "L":
-      for (let i = 0; i < instruction.dist; i++) {
-        pos[0]--;
-        grid[pos[1]][pos[0]] = "#";
-      }
-      break;
-  }
-}
-
-let groundCount = 0;
-
-function fillIn(x, y) {
-  let count = 0;
-  const queue = [[x, y]];
-  while (queue.length) {
-    const [x, y] = queue.pop();
-    if (x < 0 || x >= width || y < 0 || y >= height) {
-      continue;
+  for (const { dir, dist } of instructions) {
+    [x1, y1] = [x0, y0];
+    switch (dir) {
+      case "U":
+        y1 = y0 - dist;
+        break;
+      case "D":
+        y1 = y0 + dist;
+        break;
+      case "L":
+        x1 = x0 - dist;
+        break;
+      case "R":
+        x1 = x0 + dist;
+        break;
     }
-    if (grid[y][x] === "#") {
-      continue;
-    }
-    if (grid[y][x] === "-") {
-      continue;
-    }
-    if (grid[y][x] === ".") {
-      count++;
-    }
-    grid[y][x] = "-";
-    queue.push([x - 1, y]);
-    queue.push([x + 1, y]);
-    queue.push([x, y - 1]);
-    queue.push([x, y + 1]);
+    boundaryPoints += dist;
+    area += x0 * y1 - x1 * y0;
+    x0 = x1;
+    y0 = y1;
   }
-  return count;
+
+  area = Math.abs(area) / 2; // from Shoelace formula
+
+  const interiorPoints = area - boundaryPoints / 2 + 1; // Pick's theorem rearranged
+  return interiorPoints + boundaryPoints;
 }
 
-for (let i = 0; i < height; i++) {
-  if (grid[i][0] === ".") {
-    groundCount += fillIn(0, i);
-  }
-}
-
-for (let i = 0; i < height; i++) {
-  if (grid[i][width - 1] === ".") {
-    groundCount += fillIn(width - 1, i);
-  }
-}
-
-for (let i = 0; i < width; i++) {
-  if (grid[0][i] === ".") {
-    groundCount += fillIn(i, 0);
-  }
-}
-
-for (let i = 0; i < width; i++) {
-  if (grid[height - 1][i] === ".") {
-    groundCount += fillIn(i, height - 1);
-  }
-}
-
-console.log(height * width - groundCount);
+const part1 = calculateSolution(instructions);
+console.log(part1);
+const part2 = calculateSolution(
+  instructions.map((i) => ({ dir: i.dir2, dist: i.dist2 }))
+);
+console.log(part2);
