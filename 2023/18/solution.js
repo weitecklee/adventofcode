@@ -22,18 +22,18 @@ const instructions = input.map((line) => new Instruction(line));
 function calculateSolution(instructions) {
   // instructions: []{str dir, int dist}
   // Combination of Shoelace formula and Pick's theorem
-  // Shoelace formula calculates area of polygon given vertices
-  // Pick's theorem calculates area of polygon given boundary points and interior points
+  // Shoelace formula calculates area of polygon given vertex coordinates
+  // Pick's theorem calculates area of polygon given number of boundary points and number of interior points
   // We have vertices (and boundary points) from input, and ultimately want to find sum of interior points and boundary points
   // Shoelace formula
   // https://en.wikipedia.org/wiki/Shoelace_formula
   // Pick's theorem
   // https://en.wikipedia.org/wiki/Pick%27s_theorem
 
-  let x0 = 0;
+  let x0 = 0; // vertex coordinates (start from origin)
   let y0 = 0;
   let x1, y1;
-  let area = 0;
+  let sum = 0;
   let boundaryPoints = 0;
 
   for (const { dir, dist } of instructions) {
@@ -52,15 +52,15 @@ function calculateSolution(instructions) {
         x1 = x0 + dist;
         break;
     }
-    boundaryPoints += dist;
-    area += x0 * y1 - x1 * y0;
+    boundaryPoints += dist; // number of boundary points is sum of distances
+    sum += x0 * y1 - x1 * y0;
     x0 = x1;
     y0 = y1;
   }
 
-  area = Math.abs(area) / 2; // from Shoelace formula
-
+  const area = Math.abs(sum) / 2; // from Shoelace formula
   const interiorPoints = area - boundaryPoints / 2 + 1; // Pick's theorem rearranged
+
   return interiorPoints + boundaryPoints;
 }
 
