@@ -26,103 +26,77 @@ const directions = [
   [0, -1], // up
 ];
 
-const queue = [];
-// figure out valid directions from S
+// figure out what pipe S is
+const validDirections = [];
 for (let i = 0; i < directions.length; i++) {
   const [dx, dy] = directions[i];
   let x = start[0] + dx;
   let y = start[1] + dy;
   if (x < 0 || x >= input[0].length || y < 0 || y >= input.length) continue;
-  let turn = i;
   if (i === 0) {
-    // going down
     switch (input[y][x]) {
-      case "L": // turn right
-        turn = 1;
-        break;
-      case "J": // turn left
-        turn = 2;
-        break;
-      case "|": // continue down
+      case "L":
+      case "J":
+      case "|":
+        validDirections.push(i);
         break;
       default:
         continue;
     }
   } else if (i === 1) {
-    // going right
     switch (input[y][x]) {
-      case "J": // turn up
-        turn = 3;
-        break;
-      case "7": // turn down
-        turn = 0;
-        break;
-      case "-": // continue right
+      case "J":
+      case "7":
+      case "-":
+        validDirections.push(i);
         break;
       default:
         continue;
     }
   } else if (i === 2) {
-    // going left
     switch (input[y][x]) {
-      case "L": // turn up
-        turn = 3;
-        break;
-      case "F": // turn down
-        turn = 0;
-        break;
-      case "-": // continue left
+      case "L":
+      case "F":
+      case "-":
+        validDirections.push(i);
         break;
       default:
         continue;
     }
   } else {
-    // going up
     switch (input[y][x]) {
-      case "F": // turn right
-        turn = 1;
-        break;
-      case "7": // turn left
-        turn = 2;
-        break;
-      case "|": // continue up
+      case "F":
+      case "7":
+      case "|":
+        validDirections.push(i);
         break;
       default:
         continue;
     }
   }
-  queue.push([x, y, turn]);
 }
 
-// figure out what pipe S is
-const dirFromStart = [queue.pop()[2], queue.pop()[2]];
-dirFromStart.sort((a, b) => a - b);
-if (dirFromStart[0] === 0) {
-  if (dirFromStart[1] === 1) {
-    // down and right
+validDirections.sort((a, b) => a - b);
+if (validDirections[0] === 0) {
+  if (validDirections[1] === 1) {
     input[start[1]][start[0]] = "F";
-  } else if (dirFromStart[1] === 2) {
-    // down and left
+  } else if (validDirections[1] === 2) {
     input[start[1]][start[0]] = "7";
   } else {
-    // down and up
     input[start[1]][start[0]] = "|";
   }
-} else if (dirFromStart[0] === 1) {
-  if (dirFromStart[1] === 2) {
-    // right and left
+} else if (validDirections[0] === 1) {
+  if (validDirections[1] === 2) {
     input[start[1]][start[0]] = "-";
   } else {
-    // right and up
     input[start[1]][start[0]] = "L";
   }
 } else {
-  // left and up
   input[start[1]][start[0]] = "J";
 }
 
 let [x, y] = start;
-let dir = dirFromStart[0];
+let dir = validDirections[0];
 const pipePath = [[...start, input[start[1]][start[0]]]];
 while (true) {
   const [dx, dy] = directions[dir];
