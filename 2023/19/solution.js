@@ -17,19 +17,26 @@ class Workflow {
       if (ruleMatch) {
         const category = ruleMatch[1];
         const num = Number(ruleMatch[3]);
+        const sign = ruleMatch[2];
         const test =
-          ruleMatch[2] === ">"
-            ? (partRating) => partRating[category] > num
-            : (partRating) => partRating[category] < num;
+          sign === ">"
+            ? (part) => part[category] > num
+            : (part) => part[category] < num;
         return {
+          category,
+          num,
           rule,
+          sign,
           test,
           next: ruleMatch[4],
         };
       } else {
         return {
+          category: "?",
+          num: 0,
+          sign: "=",
           rule,
-          test: (partRating) => true,
+          test: (part) => true,
           next: rule,
         };
       }
@@ -72,3 +79,63 @@ for (const rating of ratings) {
   }
 }
 console.log(part1);
+
+function reverseRule(rule) {
+  const newRule = { ...rule };
+  newRule.sign = rule.sign === ">" ? "<" : ">";
+  newRule.rule = rule.rule.replace(rule.sign, newRule.sign);
+  newRule.num = rule.num + (rule.sign === ">" ? 1 : -1);
+  newRule.test =
+    rule.sign === ">"
+      ? (part) => part[rule.category] < newRule.num
+      : (part) => part[rule.category] > newRule.num;
+  return newRule;
+}
+
+const queue = [{ rules: [], currentWorkflow: workflowMap.get("in") }];
+const combinations = [];
+while (queue.length) {
+  const { rules, currentWorkflow } = queue.pop();
+  for (let i = 0; i < currentWorkflow.rules.length; i++) {
+    const currentRules = rules.slice();
+    for (let j = 0; j < i; j++) {
+      currentRules.push(reverseRule(currentWorkflow.rules[j]));
+    }
+    currentRules.push(currentWorkflow.rules[i]);
+    if (currentWorkflow.rules[i].next === "A") {
+      combinations.push(currentRules);
+    } else if (currentWorkflow.rules[i].next !== "R") {
+      queue.push({
+        rules: currentRules,
+        currentWorkflow: workflowMap.get(currentWorkflow.rules[i].next),
+      });
+    }
+  }
+}
+
+let part2 = 0;
+for (const combo of combinations) {
+  const approved = { x: [1, 4000], m: [1, 4000], a: [1, 4000], s: [1, 4000] };
+  for (const rule of combo) {
+    if (rule.sign === "=") continue;
+    if (rule.sign === ">") {
+      approved[rule.category][0] = Math.max(
+        approved[rule.category][0],
+        rule.num + 1
+      );
+    } else {
+      approved[rule.category][1] = Math.min(
+        approved[rule.category][1],
+        rule.num - 1
+      );
+    }
+  }
+  if (!Object.values(approved).every(([min, max]) => min <= max)) continue;
+
+  part2 += Object.values(approved).reduce(
+    (acc, [min, max]) => acc * (max - min + 1),
+    1
+  );
+}
+
+console.log(part2);
