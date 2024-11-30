@@ -96,12 +96,16 @@ const queue = [{ rules: [], currentWorkflow: workflowMap.get("in") }];
 const combinations = [];
 while (queue.length) {
   const { rules, currentWorkflow } = queue.pop();
+  // for each rule, reverse all rules before it and add current rule
   for (let i = 0; i < currentWorkflow.rules.length; i++) {
     const currentRules = rules.slice();
     for (let j = 0; j < i; j++) {
       currentRules.push(reverseRule(currentWorkflow.rules[j]));
     }
     currentRules.push(currentWorkflow.rules[i]);
+    // if next is "A", add to combinations
+    // if next is "R", do nothing (discard)
+    // otherwise, add to queue
     if (currentWorkflow.rules[i].next === "A") {
       combinations.push(currentRules);
     } else if (currentWorkflow.rules[i].next !== "R") {
