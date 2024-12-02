@@ -28,6 +28,9 @@ func main() {
 	solutionURL := getSolutionURL(year, day)
 	createReadMeFile(solutionURL)
 	getInput(year, day)
+	if err := copyTemplates(year, day); err != nil {
+		log.Fatalf("Failed to copy templates: %v", err)
+	}
 }
 
 func getInput(year, day string) {
@@ -190,4 +193,57 @@ type userAgentTransport struct {
 func (u *userAgentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Set("User-Agent", u.UserAgent)
 	return u.Transport.RoundTrip(req)
+}
+
+func copyTemplates(year, day string) error {
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current directory: %v\n", err)
+		return err
+	}
+	srcFolder := filepath.Join(wd, "templates")
+	dstFolder := filepath.Join(wd, year, day)
+
+	return filepath.Walk(srcFolder, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(srcFolder, path)
+		if err != nil {
+			return err
+		}
+		destPath := filepath.Join(dstFolder, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destPath, info.Mode())
+		} else {
+			return copyFile(path, destPath)
+		}
+	})
+}
+
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, sourceFile)
+	if err != nil {
+		return err
+	}
+
+	sourceInfo, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	return os.Chmod(dst, sourceInfo.Mode())
 }
