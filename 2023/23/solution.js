@@ -147,7 +147,7 @@ queue2.push([
 
 let part2 = 0;
 
-// BFS through graph to find longest path
+// DFS through graph to find longest path
 while (queue2.length) {
   const [node, distance, visited] = queue2.pop();
   if (node.addr === `${end[0]},${end[1]}`) {
