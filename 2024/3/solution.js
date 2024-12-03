@@ -5,7 +5,7 @@ const input = fs
   .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
   .split("\n");
 
-const regex = /mul\((\d+),(\d+)\)|do(n\'t)?\(\)/g;
+const regex = /mul\((\d{1,3}),(\d{1,3})\)|do(n\'t)?\(\)/g;
 
 let part1 = 0;
 let part2 = 0;
