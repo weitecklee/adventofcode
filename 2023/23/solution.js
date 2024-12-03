@@ -52,6 +52,15 @@ while (queue.length) {
 // console.timeEnd("part1");
 console.log(part1);
 
+/*
+  Part 1 uses simply BFS to find longest path (while obeying slopes).
+  Without slopes, grid becomes far too open to use above method (takes forever).
+  So first we go through grid and find intersections (nodes) and construct a graph,
+  keeping track of distances between neighbor nodes.
+  Then we use BFS to find longest path between start and end nodes.
+  (My input had 36 nodes)
+*/
+
 // console.time("part2");
 function Node(x, y) {
   this.addr = `${x},${y}`;
@@ -67,6 +76,7 @@ const nodes = new Map([
 const visited = new Set([`${start[0]},${start[1]}`]);
 const queue2 = [[start[0], start[1]]];
 
+// Find nodes
 while (queue2.length) {
   const [x, y, distance, origNode] = queue2.pop();
   const next = [];
@@ -90,7 +100,10 @@ visited.clear();
 
 queue2.push([start[0], start[1], nodes.get(`${start[0]},${start[1]}`)]);
 
+// Construct graph
+// From each node, BFS to find neighbors and distances
 while (queue2.length) {
+  // queue2 is queue of nodes
   const [x, y, origNode] = queue2.shift();
   const queue3 = [];
   for (const [dx, dy] of directions) {
@@ -101,6 +114,9 @@ while (queue2.length) {
     if (input[y2][x2] === "#") continue;
     queue3.push([x2, y2, 1]);
   }
+  // queue3 is BFS from node to neighbors
+  // When neighbor is found, add distance data to node/neighbor
+  // Then add neighbor to queue2
   while (queue3.length) {
     const [x2, y2, distance] = queue3.shift();
     for (const [dx, dy] of directions) {
@@ -131,6 +147,7 @@ queue2.push([
 
 let part2 = 0;
 
+// BFS through graph to find longest path
 while (queue2.length) {
   const [node, distance, visited] = queue2.pop();
   if (node.addr === `${end[0]},${end[1]}`) {
