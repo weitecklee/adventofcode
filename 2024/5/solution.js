@@ -25,28 +25,13 @@ for (const [n1, n2] of rules) {
   if (!ruleMap.has(n1)) {
     ruleMap.set(n1, new Rule(n1));
   }
-  const rule = ruleMap.get(n1);
-  rule.addRule(n2);
+  ruleMap.get(n1).addRule(n2);
 }
 
 function sortingFunction(a, b) {
-  if (ruleMap.has(a)) {
-    const rule = ruleMap.get(a);
-    if (rule.afterNum.has(b)) {
-      return -1;
-    } else {
-      return 0;
-    }
-  } else if (ruleMap.has(b)) {
-    const rule = ruleMap.get(b);
-    if (rule.afterNum.has(a)) {
-      return 1;
-    } else {
-      return 0;
-    }
-  } else {
-    return 0;
-  }
+  if (ruleMap.has(a) && ruleMap.get(a).afterNum.has(b)) return -1;
+  if (ruleMap.has(b) && ruleMap.get(b).afterNum.has(a)) return 1;
+  return 0;
 }
 
 let part1 = 0;
