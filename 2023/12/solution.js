@@ -13,7 +13,8 @@ const memoKey = (pattern, groupings) => pattern + "|" + groupings.join(",");
 /*
   Phew. This took a while. countArrangements took a fair bit of debugging
   to eventually get down (and it still looks pretty ugly). Even after
-  I got it working, it looked like it was gonna take days to solve part 2. Thankfully, with memoization  it only takes half a second.
+  I got it working, it looked like it was gonna take days to solve part 2.
+  Thankfully, with memoization  it only takes half a second.
 */
 
 function countArrangements(pattern, groupings) {
@@ -38,11 +39,10 @@ function countArrangements(pattern, groupings) {
     ) {
       i++;
     }
+    // check if there are any #'s in front, break if so
+    if (pattern.slice(0, i).includes("#")) break;
     // check if there's a # immediately before or after the group
-    if (
-      (i > 0 && pattern[i - 1] === "#") ||
-      (i + groupings[0] < pattern.length && pattern[i + groupings[0]] === "#")
-    )
+    if (i + groupings[0] < pattern.length && pattern[i + groupings[0]] === "#")
       continue;
     // check if out of bounds
     if (i + groupings[0] > pattern.length) break;
@@ -56,8 +56,6 @@ function countArrangements(pattern, groupings) {
       // if no groupings left, check if there are any #'s left unaccounted for
       continue;
     }
-    // check if there are any #'s in front, break if so
-    if (pattern.slice(0, i).includes("#")) break;
     count += validArrangements;
   }
 
