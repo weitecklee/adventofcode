@@ -41,7 +41,6 @@ for (const [target, nums] of input) {
   }
   if (queue.some((a) => a === target)) {
     part2 += target;
-    continue;
   }
 }
 
