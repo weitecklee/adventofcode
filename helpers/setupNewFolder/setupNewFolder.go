@@ -25,20 +25,27 @@ func main() {
 	var year, day string
 	fmt.Println("Enter year and day (e.g., \"2020 20\"):")
 	fmt.Scanln(&year, &day)
-	solutionURL := getSolutionURL(year, day)
-	createReadMeFile(solutionURL)
-	getInput(year, day)
+	solutionURL, err := getSolutionURL(year, day)
+	if err != nil {
+		fmt.Printf("Error getting solution URL: %v\n", err)
+	}
+	if err := createReadMeFile(solutionURL, year, day); err != nil {
+		fmt.Printf("Error creating README file: %v\n", err)
+	}
+	if err := getInput(year, day); err != nil {
+		fmt.Printf("Error getting input: %v\n", err)
+	}
 	if err := copyTemplates(year, day); err != nil {
 		log.Fatalf("Failed to copy templates: %v", err)
 	}
 }
 
-func getInput(year, day string) {
+func getInput(year, day string) error {
 
 	sessionCookie := os.Getenv("AOC_SESSION_COOKIE")
 	if sessionCookie == "" {
-		fmt.Println("Error: AOC_SESSION_COOKIE environment variable not set")
-		return
+		// fmt.Println("Error: AOC_SESSION_COOKIE environment variable not set")
+		return fmt.Errorf("AOC_SESSION_COOKIE environment variable not set")
 	}
 
 	url := "https://adventofcode.com/" + year + "/day/" + day + "/input"
@@ -47,34 +54,34 @@ func getInput(year, day string) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Printf("Error creating request: %v\n", err)
-		return
+		// fmt.Printf("Error creating request: %v\n", err)
+		return err
 	}
 
 	req.Header.Set("Cookie", fmt.Sprintf("session=%s", sessionCookie))
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Error making request: %v\n", err)
-		return
+		// fmt.Printf("Error making request: %v\n", err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		fmt.Printf("Request failed with status: %s\n", res.Status)
-		return
+		// fmt.Printf("Request failed with status: %s\n", res.Status)
+		return fmt.Errorf("request failed with status: %s", res.Status)
 	}
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("Error reading response body: %v\n", err)
-		return
+		// fmt.Printf("Error reading response body: %v\n", err)
+		return err
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error getting current directory: %v\n", err)
-		return
+		// fmt.Printf("Error getting current directory: %v\n", err)
+		return err
 	}
 
 	dir := filepath.Join(wd, year, day)
@@ -82,24 +89,27 @@ func getInput(year, day string) {
 
 	err = os.WriteFile(filePath, body, 0644)
 	if err != nil {
-		fmt.Printf("Error writing to file: %v\n", err)
-		return
+		// fmt.Printf("Error writing to file: %v\n", err)
+		return err
 	}
 
 	fmt.Println("Input saved to input.txt")
+	return nil
 }
 
-func getSolutionURL(year, day string) SolutionURL {
+func getSolutionURL(year, day string) (SolutionURL, error) {
 
-	log.SetFlags(log.Llongfile)
+	// log.SetFlags(log.Llongfile)
 
 	clientID := os.Getenv("REDDIT_CLIENT_ID")
 	if clientID == "" {
-		log.Fatal("Error: REDDIT_CLIENT_ID environment variable not set")
+		// log.Fatal("Error: REDDIT_CLIENT_ID environment variable not set")
+		return SolutionURL{}, fmt.Errorf("REDDIT_CLIENT_ID environment variable not set")
 	}
 	clientSecret := os.Getenv("REDDIT_CLIENT_SECRET")
 	if clientSecret == "" {
-		log.Fatal("Error: REDDIT_CLIENT_SECRET environment variable not set")
+		// log.Fatal("Error: REDDIT_CLIENT_SECRET environment variable not set")
+		return SolutionURL{}, fmt.Errorf("REDDIT_CLIENT_SECRET environment variable not set")
 	}
 
 	config := &clientcredentials.Config{
@@ -129,17 +139,20 @@ func getSolutionURL(year, day string) SolutionURL {
 	searchTerm := fmt.Sprintf(`flair:solution title:"%s day %s`, year, day)
 	resp, err := client.Get(searchURL + "?q=" + url.QueryEscape(searchTerm) + "&sort=new&restrict_sr=on&limit=1000")
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		return SolutionURL{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Fatalf("Failed to fetch results: %v", resp.Status)
+		// log.Fatalf("Failed to fetch results: %v", resp.Status)
+		return SolutionURL{}, fmt.Errorf("failed to fetch results: %v", resp.Status)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		return SolutionURL{}, err
 	}
 
 	solutionURL := SolutionURL{
@@ -149,32 +162,36 @@ func getSolutionURL(year, day string) SolutionURL {
 		Day:   day,
 	}
 
-	return solutionURL
+	return solutionURL, nil
 }
 
-func createReadMeFile(solutionURL SolutionURL) {
+func createReadMeFile(solutionURL SolutionURL, year, day string) error {
 
 	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error getting current directory: %v\n", err)
-		return
+		// fmt.Printf("Error getting current directory: %v\n", err)
+		return err
 	}
-
-	year, day, URL := solutionURL.Year, solutionURL.Day, solutionURL.URL
+	var URL string
+	if solutionURL.Year != "" {
+		year, day, URL = solutionURL.Year, solutionURL.Day, solutionURL.URL
+	}
 	dirPath := filepath.Join(wd, year, day)
 	err = os.MkdirAll(dirPath, 0755)
 	if err != nil {
-		log.Fatalf("Failed to create directories: %v", err)
+		// log.Fatalf("Failed to create directories: %v", err)
+		return err
 	}
 	filePath := filepath.Join(dirPath, "README.md")
 	puzzleURL := fmt.Sprintf("https://adventofcode.com/%s/day/%s", year, day)
 	body := fmt.Sprintf("### Advent of Code %s Day %s\n\n[Puzzle Page](%s)\n\n[Solutions Megathread](%s)\n", year, day, puzzleURL, URL)
 	err = os.WriteFile(filePath, []byte(body), 0644)
 	if err != nil {
-		fmt.Printf("Error writing to file: %v\n", err)
-		return
+		// fmt.Printf("Error writing to file: %v\n", err)
+		return err
 	}
 
+	return nil
 }
 
 type SolutionURL struct {
