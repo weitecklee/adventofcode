@@ -97,8 +97,9 @@ let lows = 0;
 let highs = 0;
 for (let i = 0; i < 1000; i++) {
   const queue = moduleMap.get("button").sendPulse();
-  while (queue.length) {
-    const [dst, pulse, src] = queue.shift();
+  let j = 0;
+  while (j < queue.length) {
+    const [dst, pulse, src] = queue[j];
     if (pulse) {
       highs++;
     } else {
@@ -110,7 +111,54 @@ for (let i = 0; i < 1000; i++) {
         .sendPulse(pulse, src)
         .forEach((p) => queue.push(p));
     }
+    j++;
   }
 }
 
 console.log(lows * highs);
+
+// Analysis of input shows graph is composed of 4 independent subgraphs,
+// branching from 'button' -> 'broadcaster', eventually leading to '&rm' -> 'rx'.
+// At end of each subgraph is a conjunction module that periodically sends
+// high pulse. Find this period for each subgraph and calculate LCM
+// to find when conjunction module pulses will line up to eventually send
+// low pulse to 'rx' module.
+
+// Find conjunction module that sends pulse to 'rx'
+const conjModuleToRX = moduleMap.get(
+  conjModules.find((mdl) => moduleMap.get(mdl).destinations.includes("rx"))
+);
+// Map to keep track of period for high pulses from each source
+const sources = new Map(
+  Array.from(conjModuleToRX.memory.keys()).map((k) => [k, 0])
+);
+
+let pushes = 1000;
+while (Array.from(sources.values()).some((v) => v === 0)) {
+  pushes++;
+  const queue = moduleMap.get("button").sendPulse();
+  let j = 0;
+  while (j < queue.length) {
+    const [dst, pulse, src] = queue[j];
+    if (sources.has(src) && pulse && sources.get(src) === 0) {
+      sources.set(src, pushes);
+    }
+    if (pulse) {
+      highs++;
+    } else {
+      lows++;
+    }
+    if (moduleMap.has(dst)) {
+      moduleMap
+        .get(dst)
+        .sendPulse(pulse, src)
+        .forEach((p) => queue.push(p));
+    }
+    j++;
+  }
+}
+
+const periods = Array.from(sources.values());
+const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+const lcm = (a, b) => (a * b) / gcd(a, b);
+console.log(periods.reduce(lcm));
