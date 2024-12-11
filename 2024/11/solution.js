@@ -37,24 +37,24 @@ class CustomMap extends Map {
   }
 }
 
+function blinkMap(map) {
+  const newMap = new CustomMap();
+  for (const [n, k] of map) {
+    newMap.add(blink(n), k);
+  }
+  return newMap;
+}
+
 let curr = new CustomMap(input);
 
 for (let i = 0; i < 25; i++) {
-  const temp = new CustomMap();
-  for (const [n, k] of curr) {
-    temp.add(blink(n), k);
-  }
-  curr = temp;
+  curr = blinkMap(curr);
 }
 
 console.log(curr.count);
 
 for (let i = 25; i < 75; i++) {
-  const temp = new CustomMap();
-  for (const [n, k] of curr) {
-    temp.add(blink(n), k);
-  }
-  curr = temp;
+  curr = blinkMap(curr);
 }
 
 console.log(curr.count);
