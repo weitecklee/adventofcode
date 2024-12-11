@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	userAgentAOC   = "github.com/weitecklee/adventofcode"
 	userAgent      = "script:Search r/adventofcode:1.0 (by /u/arkteck)"
 	accessTokenURL = "https://www.reddit.com/api/v1/access_token"
 	searchURL      = "https://oauth.reddit.com/r/adventofcode/search.json"
@@ -59,6 +60,7 @@ func getInput(year, day string) error {
 	}
 
 	req.Header.Set("Cookie", fmt.Sprintf("session=%s", sessionCookie))
+	req.Header.Set("User-Agent", userAgentAOC)
 
 	res, err := client.Do(req)
 	if err != nil {

@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 )
 
+const (
+	userAgentAOC = "github.com/weitecklee/adventofcode"
+)
+
 func main() {
 	var year, day string
 	fmt.Println("Enter year and day (e.g., \"2020 20\"):")
@@ -34,6 +38,7 @@ func getInput(year, day string) {
 	}
 
 	req.Header.Set("Cookie", fmt.Sprintf("session=%s", sessionCookie))
+	req.Header.Set("User-Agent", userAgentAOC)
 
 	res, err := client.Do(req)
 	if err != nil {
