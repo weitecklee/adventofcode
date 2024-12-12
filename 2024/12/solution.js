@@ -56,6 +56,11 @@ class Region {
         const f = this.set.has(`${r - 1},${c}`);
         const g = this.set.has(`${r},${c - 1}`);
         const h = this.set.has(`${r},${c}`);
+        /*
+          Corners counted (twice to account for pairs):
+          ■■  ■■  ◻◻  ◻◻
+          ■◻  ◻■  ◻■  ■◻
+        */
         if (h !== g && ((h === f && f === e) || h !== f)) {
           count += 2;
         }
