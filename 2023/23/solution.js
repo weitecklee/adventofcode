@@ -34,7 +34,7 @@ while (queue.length) {
     const [dx, dy] = directions[slopeIndex];
     const x2 = x + dx;
     const y2 = y + dy;
-    queue.push([x2, y2, new Set(visited)]);
+    queue.push([x2, y2, visited]);
     continue;
   }
   for (let i = 0; i < directions.length; i++) {
@@ -53,11 +53,11 @@ while (queue.length) {
 console.log(part1);
 
 /*
-  Part 1 uses simply BFS to find longest path (while obeying slopes).
+  Part 1 uses simple DFS to find longest path (while obeying slopes).
   Without slopes, grid becomes far too open to use above method (takes forever).
   So first we go through grid and find intersections (nodes) and construct a graph,
   keeping track of distances between neighbor nodes.
-  Then we use BFS to find longest path between start and end nodes.
+  Then we use DFS to find longest path between start and end nodes.
   (My input had 36 nodes)
 */
 
@@ -102,9 +102,11 @@ queue2.push([start[0], start[1], nodes.get(`${start[0]},${start[1]}`)]);
 
 // Construct graph
 // From each node, BFS to find neighbors and distances
-while (queue2.length) {
+let i = 0;
+while (i < queue2.length) {
   // queue2 is queue of nodes
-  const [x, y, origNode] = queue2.shift();
+  const [x, y, origNode] = queue2[i];
+  i++;
   const queue3 = [];
   for (const [dx, dy] of directions) {
     const x2 = x + dx;
@@ -117,8 +119,10 @@ while (queue2.length) {
   // queue3 is BFS from node to neighbors
   // When neighbor is found, add distance data to node/neighbor
   // Then add neighbor to queue2
-  while (queue3.length) {
-    const [x2, y2, distance] = queue3.shift();
+  let j = 0;
+  while (j < queue3.length) {
+    const [x2, y2, distance] = queue3[j];
+    j++;
     for (const [dx, dy] of directions) {
       const x3 = x2 + dx;
       const y3 = y2 + dy;
@@ -139,17 +143,19 @@ while (queue2.length) {
   }
 }
 
-queue2.push([
-  nodes.get(`${start[0]},${start[1]}`),
-  0,
-  new Set([`${start[0]},${start[1]}`]),
-]);
+const queue4 = [
+  [
+    nodes.get(`${start[0]},${start[1]}`),
+    0,
+    new Set([`${start[0]},${start[1]}`]),
+  ],
+];
 
 let part2 = 0;
 
 // DFS through graph to find longest path
-while (queue2.length) {
-  const [node, distance, visited] = queue2.pop();
+while (queue4.length) {
+  const [node, distance, visited] = queue4.pop();
   if (node.addr === `${end[0]},${end[1]}`) {
     part2 = Math.max(part2, distance);
     continue;
@@ -158,7 +164,7 @@ while (queue2.length) {
     if (visited.has(addr)) continue;
     const visited2 = new Set(visited);
     visited2.add(addr);
-    queue2.push([nodes.get(addr), distance + dist, visited2]);
+    queue4.push([nodes.get(addr), distance + dist, visited2]);
   }
 }
 
@@ -167,10 +173,7 @@ console.log(part2);
 
 /*
 
-part1: 9.111s
-part2: 33.332s
-
-Wow this is super sloppy, maybe I'll get around to cleaning it up later.
-Woof.
+part1: 1.6s
+part2: 9.6s
 
 */

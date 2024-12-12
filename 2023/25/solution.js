@@ -71,8 +71,10 @@ function findPath(nodeA, nodeB) {
   if (nodeA.neighbors.has(nodeB)) return [nodeA.name, nodeB.name];
   const queue = [[nodeA, [nodeA.name]]];
   const visited = new Set();
-  while (queue.length) {
-    const [currNode, path] = queue.shift();
+  let i = 0;
+  while (i < queue.length) {
+    const [currNode, path] = queue[i];
+    i++;
     if (currNode === nodeB) {
       return path;
     }
@@ -105,8 +107,11 @@ for (const [nameA, nameB] of candidates) {
 
 const group = new Set();
 const queue = [nodes[0]];
-while (queue.length) {
-  const currNode = queue.shift();
+
+let i = 0;
+while (i < queue.length) {
+  const currNode = queue[i];
+  i++;
   if (group.has(currNode)) continue;
   group.add(currNode);
   for (const neighbor of currNode.neighbors) {

@@ -82,8 +82,10 @@ function mapRegion(r, c) {
   const region = new Set();
   const regionCharacter = input[r][c];
   const queue = [[r, c]];
-  while (queue.length) {
-    const [r, c] = queue.shift();
+  let i = 0;
+  while (i < queue.length) {
+    const [r, c] = queue[i];
+    i++;
     region.add(`${r},${c}`);
     for (const [dr, dc] of directions) {
       const r2 = r + dr;

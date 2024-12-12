@@ -54,12 +54,13 @@ function part1(totalSteps) {
   const visited = new Set();
   const queue = [[start[0], start[1], 0]];
 
-  while (queue.length) {
-    const [x, y, steps] = queue.shift();
+  let i = 0;
+  while (i < queue.length) {
+    const [x, y, steps] = queue[i];
     const next = walk(x, y, steps, totalSteps, reachedPlots, visited);
     queue.push(...next);
+    i++;
   }
-  // console.log(reachedPlots);
   return reachedPlots.size;
 }
 
@@ -110,8 +111,9 @@ function part2(totalSteps) {
   const visited = new Set();
   const queue = [[start[0], start[1], 0]];
 
-  while (queue.length) {
-    const [x, y, stepsRemaining] = queue.shift();
+  let i = 0;
+  while (i < queue.length) {
+    const [x, y, stepsRemaining] = queue[i];
     const next = walkInfinite(
       x,
       y,
@@ -121,6 +123,7 @@ function part2(totalSteps) {
       visited
     );
     queue.push(...next);
+    i++;
   }
   return reachedPlots.size;
 }

@@ -27,8 +27,10 @@ for (const trailhead of trailheads) {
   let count = 0;
   const visited = new Set();
   const queue = [trailhead];
-  while (queue.length) {
-    const [r, c] = queue.shift();
+  let i = 0;
+  while (i < queue.length) {
+    const [r, c] = queue[i];
+    i++;
     if (visited.has(`${r},${c}`)) continue;
     visited.add(`${r},${c}`);
     if (input[r][c] === 9) {
@@ -56,8 +58,10 @@ let part2 = 0;
 for (const trailhead of trailheads) {
   let count = 0;
   const queue = [[...trailhead, new Set()]];
-  while (queue.length) {
-    const [r, c, visited] = queue.shift();
+  let i = 0;
+  while (i < queue.length) {
+    const [r, c, visited] = queue[i];
+    i++;
     if (visited.has(`${r},${c}`)) continue;
     visited.add(`${r},${c}`);
     if (input[r][c] === 9) {
