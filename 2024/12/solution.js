@@ -57,21 +57,7 @@ class Region {
         const g = this.set.has(`${r},${c - 1}`);
         const h = this.set.has(`${r},${c}`);
         if (h !== g && ((h === f && f === e) || h !== f)) {
-          count++;
-        }
-      }
-    }
-    for (let c = minC; c <= maxC + 1; c++) {
-      for (let r = minR; r <= maxR + 1; r++) {
-        // e | f
-        //-------
-        // g | h
-        const e = this.set.has(`${r - 1},${c - 1}`);
-        const f = this.set.has(`${r - 1},${c}`);
-        const g = this.set.has(`${r},${c - 1}`);
-        const h = this.set.has(`${r},${c}`);
-        if (h !== f && ((h === g && g === e) || h !== g)) {
-          count++;
+          count += 2;
         }
       }
     }
