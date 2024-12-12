@@ -16,6 +16,8 @@ const input = fs
   most critical connections that we want to cut.
   Seems to work well enough, 1000 is a big enough number that
   the same three connections are found each time.
+  For the record, my input had 1458 nodes, which makes
+  1458 * 1457 / 2 = 1062153 pairs.
 */
 
 class Node {
@@ -72,7 +74,7 @@ function findPath(nodeA, nodeB) {
   while (queue.length) {
     const [currNode, path] = queue.shift();
     if (currNode === nodeB) {
-      return [...path, nodeB.name];
+      return path;
     }
     if (visited.has(currNode)) continue;
     visited.add(currNode);
