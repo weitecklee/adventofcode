@@ -25,27 +25,13 @@ class Machine {
     this.prize2 = this.prize.map((a) => a + 10000000000000);
   }
 
-  get tokenCost() {
+  tokenCost(part2 = false) {
     const [pressesA, pressesB] = solve(
       [
         [this.buttonA[0], this.buttonB[0]],
         [this.buttonA[1], this.buttonB[1]],
       ],
-      this.prize
-    );
-    if (Number.isInteger(pressesA) && Number.isInteger(pressesB)) {
-      return pressesA * 3 + pressesB;
-    }
-    return 0;
-  }
-
-  get tokenCost2() {
-    const [pressesA, pressesB] = solve(
-      [
-        [this.buttonA[0], this.buttonB[0]],
-        [this.buttonA[1], this.buttonB[1]],
-      ],
-      this.prize2
+      part2 ? this.prize2 : this.prize
     );
     if (Number.isInteger(pressesA) && Number.isInteger(pressesB)) {
       return pressesA * 3 + pressesB;
@@ -55,5 +41,5 @@ class Machine {
 }
 
 const machines = input.map((a) => new Machine(a));
-console.log(machines.reduce((a, b) => a + b.tokenCost, 0));
-console.log(machines.reduce((a, b) => a + b.tokenCost2, 0));
+console.log(machines.reduce((a, b) => a + b.tokenCost(), 0));
+console.log(machines.reduce((a, b) => a + b.tokenCost(true), 0));
