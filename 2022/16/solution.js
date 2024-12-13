@@ -81,113 +81,74 @@ while (queue.length) {
     part1 = Math.max(part1, total);
     continue;
   }
+  let progress = false;
   for (const valveWithFlow of valvesWithFlow) {
     if (openValves.has(valveWithFlow)) continue;
     let newTimeRemaining =
       timeRemaining - valveDistances.get(currValve).get(valveWithFlow) - 1;
-    if (newTimeRemaining < 0) {
-      part1 = Math.max(part1, total);
+    if (newTimeRemaining <= 0) {
       continue;
     }
+    progress = true;
     let newTotal = total + newTimeRemaining * valveWithFlow.flow;
     let newOpenValves = new Set([...openValves, valveWithFlow]);
     queue.push([newTotal, newTimeRemaining, valveWithFlow, newOpenValves]);
   }
+  if (!progress) {
+    part1 = Math.max(part1, total);
+  }
 }
 
-const queue2 = [
-  [
-    0,
-    26,
-    valveMap.get("AA"),
-    26,
-    valveMap.get("AA"),
-    new Set(),
-    ["AA"],
-    ["AA"],
-  ],
-];
-let part2 = 0;
+console.log(part1);
+
+const queue2 = [[0, 26, valveMap.get("AA"), new Set()]];
+const paths = [];
 const pathSet = new Set();
 
-try {
-  while (queue2.length) {
-    const [
-      total,
-      timeRemainingMe,
-      currValveMe,
-      timeRemainingElephant,
-      currValveElephant,
-      openValves,
-      pathMe,
-      pathElephant,
-    ] = queue2.pop();
-    if (openValves.size === valvesWithFlow.length) {
-      part2 = Math.max(part2, total);
-      console.log(part2);
-      continue;
-    }
-    const pathKey1 = pathMe.join("-") + " " + pathElephant.join("-");
-    const pathKey2 = pathElephant.join("-") + " " + pathMe.join("-");
-    if (pathSet.has(pathKey1) || pathSet.has(pathKey2)) continue;
-    pathSet.add(pathKey1);
-    let progress = false;
-    for (const valveWithFlow of valvesWithFlow) {
-      if (openValves.has(valveWithFlow)) continue;
-      const newPathMe = [...pathMe, valveWithFlow.name];
-      let newOpenValves = new Set([...openValves, valveWithFlow]);
-      let newTimeRemainingMe =
-        timeRemainingMe -
-        valveDistances.get(currValveMe).get(valveWithFlow) -
-        1;
-      if (newTimeRemainingMe > 0) {
-        progress = true;
-        let newTotal = total + newTimeRemainingMe * valveWithFlow.flow;
-        queue2.push([
-          newTotal,
-          newTimeRemainingMe,
-          valveWithFlow,
-          timeRemainingElephant,
-          currValveElephant,
-          newOpenValves,
-          newPathMe,
-          pathElephant,
-        ]);
-      }
-      const newPathElephant = [...pathElephant, valveWithFlow.name];
-      let newTimeRemainingElephant =
-        timeRemainingElephant -
-        valveDistances.get(currValveElephant).get(valveWithFlow) -
-        1;
-      if (newTimeRemainingElephant > 0) {
-        progress = true;
-        let newTotal = total + newTimeRemainingElephant * valveWithFlow.flow;
-        queue2.push([
-          newTotal,
-          timeRemainingMe,
-          currValveMe,
-          newTimeRemainingElephant,
-          valveWithFlow,
-          newOpenValves,
-          pathMe,
-          newPathElephant,
-        ]);
-      }
-    }
-    if (!progress) {
-      part2 = Math.max(part2, total);
-      console.log(part2);
-    }
+function pathBitmask(openValves) {
+  let bitmask = [];
+  for (const valve of valvesWithFlow) {
+    bitmask.push(openValves.has(valve) ? "1" : "0");
   }
-} catch (e) {
-  console.log(e);
-} finally {
-  console.log(part1);
-  console.log(part2);
+  return parseInt(bitmask.join(""), 2);
 }
 
-// Working(?) solution with brute force.
-// Have to wrap it in a try block because it actually never finishes
-// on the full input (Set maximum size exceeded for pathSet).
-// After a minute or so it does give the correct answer but...
-// yeah we'll optimize it later.
+while (queue2.length) {
+  const [total, timeRemaining, currValve, openValves] = queue2.pop();
+  if (!pathSet.has(openValves)) {
+    pathSet.add(openValves);
+    paths.push([total, pathBitmask(openValves)]);
+  }
+  if (openValves.size === valvesWithFlow.length) {
+    continue;
+  }
+  for (const valveWithFlow of valvesWithFlow) {
+    if (openValves.has(valveWithFlow)) continue;
+    let newTimeRemaining =
+      timeRemaining - valveDistances.get(currValve).get(valveWithFlow) - 1;
+    if (newTimeRemaining <= 0) {
+      continue;
+    }
+    let newTotal = total + newTimeRemaining * valveWithFlow.flow;
+    let newOpenValves = new Set([...openValves, valveWithFlow]);
+    queue2.push([newTotal, newTimeRemaining, valveWithFlow, newOpenValves]);
+  }
+}
+
+let part2 = 0;
+for (let i = 0; i < paths.length; i++) {
+  for (let j = i + 1; j < paths.length; j++) {
+    const [total1, bitmask1] = paths[i];
+    const [total2, bitmask2] = paths[j];
+    if ((bitmask1 & bitmask2) === 0) {
+      part2 = Math.max(part2, total1 + total2);
+    }
+  }
+}
+
+console.log(part2);
+
+// New strategy: Map every possible path (including incomplete ones)
+// while keeping track of totals. Iterate through all possible pairs,
+// using bitmask comparison to make sure they don't share any valves.
+// If they don't, add totals together and keep track of the maximum.
