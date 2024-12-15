@@ -13,9 +13,8 @@ const puzzleMap2 = input[0]
   .replace(/@/g, "@.")
   .split("\n")
   .map((line) => line.split(""));
-const movements = input[1].split("\n").map((line) => line.split(""));
+const movements = input[1].replace(/\n/g, "");
 
-const boxes = new Map();
 const directions = new Map([
   [">", [0, 1]],
   ["<", [0, -1]],
@@ -28,75 +27,95 @@ class Robot {
     this.r = 0;
     this.c = 0;
   }
-  move(chr) {
-    const [dr, dc] = directions.get(chr);
+
+  locateSelf(map) {
+    for (let r = 0; r < map.length; r++) {
+      for (let c = 0; c < map[r].length; c++) {
+        if (map[r][c] === "@") {
+          robot.r = r;
+          robot.c = c;
+          return;
+        }
+      }
+    }
+  }
+
+  moves(movements, map, part2 = false) {
+    for (const dir of movements) {
+      if (part2) this.move2(dir, map);
+      else this.move(dir, map);
+    }
+  }
+
+  move(dir, map) {
+    const [dr, dc] = directions.get(dir);
     let [r, c] = [this.r + dr, this.c + dc];
-    while (puzzleMap[r][c] === "O") {
+    while (map[r][c] === "O") {
       r += dr;
       c += dc;
     }
-    if (puzzleMap[r][c] === "#") return;
+    if (map[r][c] === "#") return;
     r -= dr;
     c -= dc;
-    while (puzzleMap[r][c] === "O") {
-      puzzleMap[r][c] = ".";
-      puzzleMap[r + dr][c + dc] = "O";
+    while (map[r][c] === "O") {
+      map[r][c] = ".";
+      map[r + dr][c + dc] = "O";
       r -= dr;
       c -= dc;
     }
-    puzzleMap[r][c] = ".";
-    puzzleMap[r + dr][c + dc] = "@";
+    map[r][c] = ".";
+    map[r + dr][c + dc] = "@";
     this.r += dr;
     this.c += dc;
   }
 
-  move2(chr) {
-    const [dr, dc] = directions.get(chr);
+  move2(dir, map) {
+    const [dr, dc] = directions.get(dir);
     if (dc != 0) {
       let [r, c] = [this.r, this.c + dc];
-      while (puzzleMap2[r][c] === "[" || puzzleMap2[r][c] === "]") {
+      while (map[r][c] === "[" || map[r][c] === "]") {
         c += dc;
       }
-      if (puzzleMap2[r][c] === "#") return;
+      if (map[r][c] === "#") return;
       c -= dc;
-      while (puzzleMap2[r][c] === "[" || puzzleMap2[r][c] === "]") {
-        puzzleMap2[r][c - dc] = ".";
+      while (map[r][c] === "[" || map[r][c] === "]") {
+        map[r][c - dc] = ".";
         if (dc > 0) {
-          puzzleMap2[r][c] = "[";
-          puzzleMap2[r][c + dc] = "]";
+          map[r][c] = "[";
+          map[r][c + dc] = "]";
         } else {
-          puzzleMap2[r][c] = "]";
-          puzzleMap2[r][c + dc] = "[";
+          map[r][c] = "]";
+          map[r][c + dc] = "[";
         }
         c -= 2 * dc;
       }
-      puzzleMap2[r][c] = ".";
-      puzzleMap2[r][c + dc] = "@";
+      map[r][c] = ".";
+      map[r][c + dc] = "@";
       this.c += dc;
     } else {
       let [r, c] = [this.r + dr, this.c];
       const affectedCols = [new Set([c])];
       while (true) {
-        const newRange = new Set();
+        const newAffectedCols = new Set();
         for (const col of affectedCols[affectedCols.length - 1]) {
-          if (puzzleMap2[r][col] === "#") return;
-          if (puzzleMap2[r][col] === "[") {
-            newRange.add(col);
-            newRange.add(col + 1);
-          } else if (puzzleMap2[r][col] === "]") {
-            newRange.add(col);
-            newRange.add(col - 1);
+          if (map[r][col] === "#") return;
+          if (map[r][col] === "[") {
+            newAffectedCols.add(col);
+            newAffectedCols.add(col + 1);
+          } else if (map[r][col] === "]") {
+            newAffectedCols.add(col);
+            newAffectedCols.add(col - 1);
           }
         }
-        if (newRange.size === 0) break;
-        affectedCols.push(newRange);
+        if (newAffectedCols.size === 0) break;
+        affectedCols.push(newAffectedCols);
         r += dr;
       }
       for (let i = affectedCols.length - 1; i >= 0; i--) {
         r -= dr;
         for (const col of affectedCols[i]) {
-          puzzleMap2[r + dr][col] = puzzleMap2[r][col];
-          puzzleMap2[r][col] = ".";
+          map[r + dr][col] = map[r][col];
+          map[r][col] = ".";
         }
       }
       this.r += dr;
@@ -104,53 +123,22 @@ class Robot {
   }
 }
 
+function sumGPS(map) {
+  let sum = 0;
+  for (let r = 0; r < map.length; r++) {
+    for (let c = 0; c < map[r].length; c++) {
+      if (map[r][c] === "O" || map[r][c] === "[") sum += 100 * r + c;
+    }
+  }
+  return sum;
+}
+
 const robot = new Robot();
 
-for (let r = 0; r < puzzleMap.length; r++) {
-  for (let c = 0; c < puzzleMap[r].length; c++) {
-    if (puzzleMap[r][c] === "@") {
-      robot.r = r;
-      robot.c = c;
-    }
-  }
-}
+robot.locateSelf(puzzleMap);
+robot.moves(movements, puzzleMap);
+console.log(sumGPS(puzzleMap));
 
-for (const line of movements) {
-  for (const movement of line) {
-    robot.move(movement);
-  }
-}
-
-let part1 = 0;
-
-for (let r = 0; r < puzzleMap.length; r++) {
-  for (let c = 0; c < puzzleMap[r].length; c++) {
-    if (puzzleMap[r][c] === "O") part1 += 100 * r + c;
-  }
-}
-
-console.log(part1);
-
-for (let r = 0; r < puzzleMap2.length; r++) {
-  for (let c = 0; c < puzzleMap2[r].length; c++) {
-    if (puzzleMap2[r][c] === "@") {
-      robot.r = r;
-      robot.c = c;
-    }
-  }
-}
-
-for (const line of movements) {
-  for (const movement of line) {
-    robot.move2(movement);
-  }
-}
-
-let part2 = 0;
-
-for (let r = 0; r < puzzleMap2.length; r++) {
-  for (let c = 0; c < puzzleMap2[r].length; c++) {
-    if (puzzleMap2[r][c] === "[") part2 += 100 * r + c;
-  }
-}
-console.log(part2);
+robot.locateSelf(puzzleMap2);
+robot.moves(movements, puzzleMap2, true);
+console.log(sumGPS(puzzleMap2));
