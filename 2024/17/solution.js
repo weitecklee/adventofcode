@@ -11,13 +11,12 @@ const register = new Map([
   ["B", Number(input[1][1])],
   ["C", Number(input[2][1])],
 ]);
+const programString = input[4][1];
+const program = input[4][1].split(",").map(Number);
 
-let program = input[4][1].split(",").map(Number);
-
-let i = 0;
-const output = [];
-
-try {
+function runProgram(registerA, registerB = 0, registerC = 0) {
+  let i = 0;
+  const output = [];
   while (i >= 0 && i < program.length) {
     const instruction = program[i];
     const literalOperand = program[i + 1];
@@ -30,51 +29,65 @@ try {
         comboOperand = literalOperand;
         break;
       case 4:
-        comboOperand = register.get("A");
+        comboOperand = registerA;
         break;
       case 5:
-        comboOperand = register.get("B");
+        comboOperand = registerB;
         break;
       case 6:
-        comboOperand = register.get("C");
+        comboOperand = registerC;
         break;
     }
     switch (instruction) {
       case 0:
-        register.set("A", Math.trunc(register.get("A") / 2 ** comboOperand));
+        registerA = Math.trunc(registerA / 2 ** comboOperand);
         break;
       case 1:
-        register.set("B", register.get("B") ^ literalOperand);
+        registerB = registerB ^ literalOperand;
         break;
       case 2:
-        register.set("B", comboOperand % 8);
+        registerB = comboOperand & 7;
         break;
       case 3:
-        if (register.get("A") !== 0) {
+        if (registerA !== 0) {
           i = literalOperand;
           continue;
         }
         break;
       case 4:
-        register.set("B", register.get("B") ^ register.get("C"));
+        registerB = registerB ^ registerC;
         break;
       case 5:
-        output.push(comboOperand % 8);
+        output.push(comboOperand & 7);
         break;
       case 6:
-        register.set("B", Math.trunc(register.get("A") / 2 ** comboOperand));
+        registerB = Math.trunc(registerA / 2 ** comboOperand);
         break;
       case 7:
-        register.set("C", Math.trunc(register.get("A") / 2 ** comboOperand));
+        registerC = Math.trunc(registerA / 2 ** comboOperand);
         break;
       default:
         throw new Error("Unknown instruction: ", instruction);
     }
     i += 2;
   }
-} catch (e) {
-  console.error(e);
-  console.log(register);
-} finally {
-  console.log(output.join(","));
+  return output;
 }
+
+console.log(
+  runProgram(register.get("A"), register.get("B"), register.get("C")).join(",")
+);
+
+let j = 0;
+for (let i = program.length - 1; i >= 0; i--) {
+  j *= 8;
+  const currTarget = program.slice(i).join(",");
+  while (true) {
+    const curr = runProgram(j).join(",");
+    if (curr === currTarget) {
+      break;
+    }
+    j++;
+  }
+}
+console.log(j);
