@@ -91,3 +91,20 @@ for (let i = program.length - 1; i >= 0; i--) {
   }
 }
 console.log(j);
+
+/*
+  After a lot of trial and error and debugging and simulations, I figured out how
+  I could build up to the target pattern one part at a time.
+
+  If you run program(n) where n is register A and get output "a,b,c,...", then
+  program(8 * n) will be the first time the output will be "_,a,b,c,...", which
+  gives a good starting point to find the next n for the rest of your target pattern.
+
+  (In fact, it's so good, I never had to go more than 7 steps to find the next n,
+  which probably has to do with all the occurrences of 8 in this problem.)
+
+  The only issue I had is that very very large numbers and modulo in Javascript
+  do not work well and it was giving me negative numbers in my output. Luckily
+  the problem description of "keeping only its lowest 3 bits" gave me the idea
+  of using "& 7" instead, which worked perfectly.
+*/
