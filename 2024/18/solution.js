@@ -14,15 +14,9 @@ const directions = [
   [-1, 0],
 ];
 
-const memorySpace = new Set();
-
-for (let i = 0; i < 1024; i++) {
-  memorySpace.add(input[i]);
-}
-
-function findPath() {
+function findPath(n) {
   const queue = [[0, [0, 0]]];
-  const visited = new Set(memorySpace);
+  const visited = new Set(input.slice(0, n));
   let i = 0;
   while (i < queue.length) {
     const [steps, [x, y]] = queue[i];
@@ -45,11 +39,10 @@ function findPath() {
   return -1;
 }
 
-console.log(findPath());
+console.log(findPath(1024));
 
 for (let j = 1024; j < input.length; j++) {
-  memorySpace.add(input[j]);
-  if (findPath() === -1) {
+  if (findPath(j + 1) === -1) {
     console.log(input[j]);
     break;
   }
