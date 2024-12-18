@@ -25,7 +25,6 @@ class Blueprint {
 
   maximumGeodes(time) {
     let max = 0;
-    const tried = new Set();
     const queue = [
       {
         timeLeft: time,
@@ -158,3 +157,6 @@ class Blueprint {
 
 const blueprints = input.map((a) => new Blueprint(a));
 console.log(blueprints.reduce((a, b) => a + b.qualityLevel, 0));
+console.log(
+  blueprints.slice(0, 3).reduce((a, b) => a * b.maximumGeodes(32), 1)
+);
