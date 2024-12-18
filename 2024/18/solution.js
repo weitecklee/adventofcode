@@ -41,9 +41,16 @@ function findPath(n) {
 
 console.log(findPath(1024));
 
-for (let j = 1024; j < input.length; j++) {
-  if (findPath(j + 1) === -1) {
-    console.log(input[j]);
-    break;
+let lo = 1024;
+let hi = input.length - 1;
+
+while (lo < hi) {
+  const mid = Math.floor(lo + (hi - lo) / 2);
+  if (findPath(mid + 1) === -1) {
+    hi = mid;
+  } else {
+    lo = mid + 1;
   }
 }
+
+console.log(input[lo]);
