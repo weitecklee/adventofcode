@@ -35,29 +35,31 @@ class CircularList {
     this.list[this.list.length - 1].next = this.list[0];
   }
 
-  mix() {
-    for (const node of this.list) {
-      node.prev.next = node.next;
-      node.next.prev = node.prev;
-      const n = node.val % (this.list.length - 1);
-      if (n >= 0) {
-        let curr = node.next;
-        for (let i = 0; i < n; i++) {
-          curr = curr.next;
+  mix(k = 1) {
+    for (let i = 0; i < k; i++) {
+      for (const node of this.list) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+        const n = node.val % (this.list.length - 1);
+        if (n >= 0) {
+          let curr = node.next;
+          for (let j = 0; j < n; j++) {
+            curr = curr.next;
+          }
+          node.prev = curr.prev;
+          node.next = curr;
+          node.prev.next = node;
+          curr.prev = node;
+        } else {
+          let curr = node.prev;
+          for (let j = 0; j > n; j--) {
+            curr = curr.prev;
+          }
+          node.next = curr.next;
+          node.prev = curr;
+          node.next.prev = node;
+          curr.next = node;
         }
-        node.prev = curr.prev;
-        node.next = curr;
-        node.prev.next = node;
-        curr.prev = node;
-      } else {
-        let curr = node.prev;
-        for (let i = 0; i > n; i--) {
-          curr = curr.prev;
-        }
-        node.next = curr.next;
-        node.prev = curr;
-        node.next.prev = node;
-        curr.next = node;
       }
     }
   }
@@ -104,7 +106,6 @@ console.log(circularList.groveCoordinates.reduce((a, b) => a + b));
 const decryptionKey = 811589153;
 const circularList2 = new CircularList(input);
 circularList2.decrypt(decryptionKey);
-for (let i = 0; i < 10; i++) {
-  circularList2.mix();
-}
+circularList2.mix(10);
+
 console.log(circularList2.groveCoordinates.reduce((a, b) => a + b));
