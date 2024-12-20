@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const MinHeap = require("../../utils/MinHeap");
 
 const input = fs
   .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
@@ -69,3 +70,32 @@ for (const [coord, steps] of stepMap) {
 }
 
 console.log(part1);
+
+let part2 = 0;
+const cheatStarts = new Set();
+for (const [coord, steps] of stepMap) {
+  const [r, c] = coord.split(",").map(Number);
+  const queue = [[0, r, c]];
+  let i = 0;
+  const visited = new Set([`${r},${c}`]);
+  while (i < queue.length) {
+    const [cheatSteps, r2, c2] = queue[i];
+    i++;
+    if (input[r2][c2] !== "#") {
+      const stepsSaved = stepMap.get(`${r2},${c2}`) - steps - cheatSteps;
+      if (stepsSaved >= 100) {
+        part2++;
+      }
+    }
+    if (cheatSteps >= 20) continue;
+    for (const [dr, dc] of directions) {
+      const [r3, c3] = [r2 + dr, c2 + dc];
+      if (isEdge(r3, c3)) continue;
+      if (visited.has(`${r3},${c3}`)) continue;
+      visited.add(`${r3},${c3}`);
+      queue.push([cheatSteps + 1, r3, c3]);
+    }
+  }
+}
+
+console.log(part2);
