@@ -99,3 +99,11 @@ for (const [coord, steps] of stepMap) {
 }
 
 console.log(part2);
+
+/*
+  Problem statement was kinda confusing, had to look up what others were saying.
+  Basically, treat each spot on the track as a possible starting spot, then BFS
+  to max 20 steps away. Whenever you land on the track again, see if you saved
+  any time (compare how long it takes to get there without cheating and with
+  cheating).
+*/
