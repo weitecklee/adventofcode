@@ -53,52 +53,37 @@ while (r != endPos[0] || c != endPos[1]) {
   }
 }
 
-let part1 = 0;
-for (const [coord, steps] of stepMap) {
-  const [r, c] = coord.split(",").map(Number);
-  for (const [dr, dc] of directions) {
-    const [r2, c2] = [r + dr, c + dc];
-    if (isEdge(r2, c2)) continue;
-    if (input[r2][c2] === ".") continue;
-    const [r3, c3] = [r + 2 * dr, c + 2 * dc];
-    if (isEdge(r3, c3)) continue;
-    if (input[r3][c3] === "#") continue;
-    const steps2 = stepMap.get(`${r3},${c3}`);
-    if (steps2 >= steps + 102) part1++;
-    // 2 steps to walk through wall, then check if at least 100 saved
-  }
-}
-
-console.log(part1);
-
-let part2 = 0;
-const cheatStarts = new Set();
-for (const [coord, steps] of stepMap) {
-  const [r, c] = coord.split(",").map(Number);
-  const queue = [[0, r, c]];
-  let i = 0;
-  const visited = new Set([`${r},${c}`]);
-  while (i < queue.length) {
-    const [cheatSteps, r2, c2] = queue[i];
-    i++;
-    if (input[r2][c2] !== "#") {
-      const stepsSaved = stepMap.get(`${r2},${c2}`) - steps - cheatSteps;
-      if (stepsSaved >= 100) {
-        part2++;
+function cheat(cheatLimit, stepsSavedTolerance) {
+  let count = 0;
+  for (const [coord, steps] of stepMap) {
+    const [r, c] = coord.split(",").map(Number);
+    const queue = [[0, r, c]];
+    let i = 0;
+    const visited = new Set([`${r},${c}`]);
+    while (i < queue.length) {
+      const [cheatSteps, r2, c2] = queue[i];
+      i++;
+      if (input[r2][c2] !== "#") {
+        const stepsSaved = stepMap.get(`${r2},${c2}`) - steps - cheatSteps;
+        if (stepsSaved >= stepsSavedTolerance) {
+          count++;
+        }
+      }
+      if (cheatSteps >= cheatLimit) continue;
+      for (const [dr, dc] of directions) {
+        const [r3, c3] = [r2 + dr, c2 + dc];
+        if (isEdge(r3, c3)) continue;
+        if (visited.has(`${r3},${c3}`)) continue;
+        visited.add(`${r3},${c3}`);
+        queue.push([cheatSteps + 1, r3, c3]);
       }
     }
-    if (cheatSteps >= 20) continue;
-    for (const [dr, dc] of directions) {
-      const [r3, c3] = [r2 + dr, c2 + dc];
-      if (isEdge(r3, c3)) continue;
-      if (visited.has(`${r3},${c3}`)) continue;
-      visited.add(`${r3},${c3}`);
-      queue.push([cheatSteps + 1, r3, c3]);
-    }
   }
+  return count;
 }
 
-console.log(part2);
+console.log(cheat(2, 100));
+console.log(cheat(20, 100));
 
 /*
   Problem statement was kinda confusing, had to look up what others were saying.
