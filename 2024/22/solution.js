@@ -66,9 +66,9 @@ for (const n of input) {
   pricesColl.push(price2000(n));
 }
 
-const sequencesColl = [];
+const sequencesMap = new Map();
 for (const prices of pricesColl) {
-  const sequences = new Map();
+  const sequences = new Set();
   const diffs = [];
   for (let i = 1; i < prices.length; i++) {
     diffs.push(prices[i] - prices[i - 1]);
@@ -76,21 +76,10 @@ for (const prices of pricesColl) {
   for (let i = 3; i < diffs.length; i++) {
     const mapKey = diffs.slice(i - 3, i + 1).join(",");
     if (!sequences.has(mapKey)) {
-      sequences.set(mapKey, prices[i + 1]);
+      sequences.add(mapKey);
+      sequencesMap.set(mapKey, (sequencesMap.get(mapKey) || 0) + prices[i + 1]);
     }
   }
-  sequencesColl.push(sequences);
 }
 
-let part2 = 0;
-const seen = new Set();
-for (const sequences of sequencesColl) {
-  for (const [sequence, price] of sequences.entries()) {
-    if (seen.has(sequence)) continue;
-    seen.add(sequence);
-    const sum = sequencesColl.reduce((a, b) => a + (b.get(sequence) || 0), 0);
-    part2 = Math.max(part2, sum);
-  }
-}
-
-console.log(part2);
+console.log(Math.max(...Array.from(sequencesMap.values())));
