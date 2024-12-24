@@ -38,3 +38,29 @@ for (const [name, node] of nodeMap) {
 }
 
 console.log(trios.size);
+
+const nodes = Array.from(nodeMap.values());
+let part2Set = new Set();
+
+for (let i = 0; i < nodes.length; i++) {
+  const checked = new Set();
+  for (let j = i + 1; j < nodes.length; j++) {
+    if (!nodes[i].neighbors.has(nodes[j])) continue;
+    if (checked.has(nodes[j])) continue;
+    checked.add(nodes[j]);
+    const network = new Set([nodes[i], nodes[j]]);
+    for (let k = j + 1; k < nodes.length; k++) {
+      if (nodes[k].neighbors.isSupersetOf(network)) {
+        checked.add(nodes[k]);
+        network.add(nodes[k]);
+      }
+    }
+    if (network.size > part2Set.size) {
+      part2Set = network;
+    }
+  }
+}
+
+const part2 = Array.from(part2Set.keys()).map((a) => a.name);
+part2.sort();
+console.log(part2.join(","));
