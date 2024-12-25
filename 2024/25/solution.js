@@ -10,15 +10,12 @@ const locks = [];
 const keys = [];
 
 for (const block of input) {
-  const design = [];
-  for (let r = 0; r < block.length; r++) {
-    const line = [];
-    for (let c = 0; c < block[r].length; c++) {
-      if (block[r][c] === "#") line.push("1");
-      else line.push("0");
-    }
-    design.push(parseInt(line.join(""), 2));
-  }
+  const design = block.map((row) =>
+    parseInt(
+      row.replace(/[#.]/g, (c) => (c === "#" ? "1" : "0")),
+      2
+    )
+  );
   if (block[0][0] === "#") locks.push(design);
   else keys.push(design);
 }
