@@ -11,12 +11,13 @@ const keys = [];
 
 for (const block of input) {
   const design = [];
-  for (let c = 0; c < block[0].length; c++) {
-    let count = 0;
-    for (let r = 0; r < block.length; r++) {
-      if (block[r][c] === "#") count++;
+  for (let r = 0; r < block.length; r++) {
+    const line = [];
+    for (let c = 0; c < block[r].length; c++) {
+      if (block[r][c] === "#") line.push("1");
+      else line.push("0");
     }
-    design.push(count);
+    design.push(parseInt(line.join(""), 2));
   }
   if (block[0][0] === "#") locks.push(design);
   else keys.push(design);
@@ -25,15 +26,7 @@ for (const block of input) {
 let part1 = 0;
 for (const lock of locks) {
   for (const key of keys) {
-    let fit = true;
-    for (let i = 0; i < lock.length; i++) {
-      if (lock[i] + key[i] > 7) {
-        fit = false;
-        break;
-      }
-    }
-    if (fit) part1++;
+    if (lock.every((a, i) => (a & key[i]) === 0)) part1++;
   }
 }
-
 console.log(part1);
