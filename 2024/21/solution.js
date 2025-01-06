@@ -5,11 +5,25 @@ const input = fs
   .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
   .split("\n");
 
+function convertCodeToMoveCounts(code) {
+  let moveCounts = new Map();
+  code.split("").forEach((c, i) => {
+    if (i === 0) {
+      moveCounts.set(`A-${c}`, 1);
+    } else {
+      moveCounts.set(
+        `${code[i - 1]}-${c}`,
+        (moveCounts.get(`${code[i - 1]}-${c}`) || 0) + 1
+      );
+    }
+  });
+  return moveCounts;
+}
+
 class Pad {
   constructor() {
     this.pad;
     this.keyPositions;
-    this.currentKey;
     this.memo = new Map();
   }
 
@@ -20,16 +34,15 @@ class Pad {
         this.keyPositions.set(this.pad[r][c], [r, c]);
       }
     }
-    this.currentKey = "A";
   }
 
-  maneuverTo(target) {
-    const memoKey = `${this.currentKey}-${target}`;
-    if (this.memo.has(memoKey)) {
-      this.currentKey = target;
-      return this.memo.get(memoKey);
+  maneuver(movement) {
+    // returns string of button presses for movement (e.g., "A-<", "0-1", etc.)
+    if (this.memo.has(movement)) {
+      return this.memo.get(movement);
     }
-    const [r, c] = this.keyPositions.get(this.currentKey);
+    const [curr, target] = movement.split("-");
+    const [r, c] = this.keyPositions.get(curr);
     const [r2, c2] = this.keyPositions.get(target);
     let moves = [];
     for (let i = c; i > c2; i--) {
@@ -45,21 +58,24 @@ class Pad {
       moves.push(">");
     }
     const [rBlank, cBlank] = this.keyPositions.get("_");
-    this.currentKey = target;
     if ((r === rBlank && c2 === cBlank) || (r2 === rBlank && c === cBlank))
       moves = moves.reverse();
     moves.push("A");
     moves = moves.join("");
-    this.memo.set(memoKey, moves);
+    this.memo.set(movement, moves);
     return moves;
   }
 
-  type(code) {
-    const res = [];
-    for (const c of code) {
-      res.push(this.maneuverTo(c));
+  typeIn(moveCounts) {
+    const newMoveCounts = new Map();
+    for (const [movement, n] of moveCounts) {
+      const code = this.maneuver(movement);
+      const tmp = convertCodeToMoveCounts(code);
+      for (const [mvmt, a] of tmp) {
+        newMoveCounts.set(mvmt, (newMoveCounts.get(mvmt) || 0) + a * n);
+      }
     }
-    return res.join("");
+    return newMoveCounts;
   }
 }
 
@@ -90,38 +106,26 @@ class Keypad extends Pad {
 const numpad = new Numpad();
 const keypad = new Keypad();
 
-function minLength(arr) {
-  let min = arr[0].length;
-  arr.forEach((a) => {
-    min = Math.min(min, a.length);
-  });
-  return min;
-}
-
-function solve(code, n) {
-  let res = numpad.type(code);
-  for (let i = 0; i < n; i++) {
-    // console.log(n, res.length);
-    res = keypad.type(res);
+function solve(code, nRobots) {
+  let moveCounts = convertCodeToMoveCounts(code);
+  moveCounts = numpad.typeIn(moveCounts);
+  for (let i = 0; i < nRobots; i++) {
+    moveCounts = keypad.typeIn(moveCounts);
   }
-  return res;
-}
-
-function complexity(code) {
-  return type(code).length * Number(code.slice(0, 3));
+  return (
+    Array.from(moveCounts.values()).reduce((a, b) => a + b) *
+    Number(code.slice(0, 3))
+  );
 }
 
 let part1 = 0;
 for (const code of input) {
-  const res = solve(code, 2);
-  part1 += res.length * Number(code.slice(0, 3));
+  part1 += solve(code, 2);
 }
 console.log(part1);
 
-/*
-  879A 70
-  508A 72
-  463A 70
-  593A 74
-  189A 74
-*/
+let part2 = 0;
+for (const code of input) {
+  part2 += solve(code, 25);
+}
+console.log(part2);
