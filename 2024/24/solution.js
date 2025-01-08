@@ -78,14 +78,14 @@ console.log(calculateBinaryNumber("z"));
 
   z00 = x00 XOR y00
 
-  z01 = tcd XOR bwv
+  z01 = tcd XOR bwv      // tmp1 and tmp2 in code below
     tcd = x01 XOR y01
     bwv = x00 AND y00
 
-  z02 = frj XOR hqq
+  z02 = frj XOR hqq      // new tmp1 and tmp2 at end of each iteration
     frj = x02 XOR y02
-    hqq = sgv OR wqt
-      sgv = tcd AND bwv
+    hqq = sgv OR wqt     // otherWire in code below
+      sgv = tcd AND bwv  // use old tmp1 and tmp2 to find otherWire
       wqt = x01 AND y01
 
   z03 = ckv XOR bbh
@@ -109,6 +109,7 @@ console.log(calculateBinaryNumber("z"));
   Assuming we're lucky and the misplaced gates are in the middle,
   we can build up the structure manually and figure out which wires
   and gates are wrong and swap them with the correct ones.
+  Also lucky that each gate only has one wrong wire.
 
 */
 
@@ -144,6 +145,7 @@ function findOtherWire(xWirePrev, yWirePrev, tmp1, tmp2) {
 }
 
 function swapWires(wire1, wire2) {
+  // swap wire inputs and reinitialize each
   [wire1.input, wire2.input] = [wire2.input, wire1.input];
   wire1.initialize();
   wire2.initialize();
@@ -182,6 +184,7 @@ for (let i = 2; i < 45; i++) {
       swapWires(wire1, wireMap.get(otherWire));
     }
   } else {
+    // assume not the case that both wires are wrong
     if (wire1.name === otherWire) {
       wrongWires.push(wire2.name, xorWire);
       swapWires(wire2, wireMap.get(xorWire));
