@@ -19,7 +19,7 @@ function findMinRisk(input) {
   const cMax = input[0].length - 1;
 
   const queue = [[0, 0, 0]];
-  const visited = new Map();
+  const visited = new Map([["0,0", 0]]);
 
   while (queue.length) {
     const [risk, r, c] = MinHeap.pop(queue);
@@ -34,7 +34,7 @@ function findMinRisk(input) {
       if (visited.has(`${r2},${c2}`) && visited.get(`${r2},${c2}`) <= risk2)
         continue;
       visited.set(`${r2},${c2}`, risk2);
-      MinHeap.push(queue, [risk + input[r2][c2], r2, c2]);
+      MinHeap.push(queue, [risk2, r2, c2]);
     }
   }
 }
