@@ -5,6 +5,14 @@ const input = fs
   .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
   .split("\n\n");
 
+/*
+  Due to the first character in the algorithm being "#" and the last character
+  being ".", this means the infinite area beyond the image is constantly flashing
+  between unlit and lit. We keep track of this with enhanceCount. When
+  enhanceCount is odd, the infinite area is lit; when enhanceCount is even,
+  it is unlit.
+*/
+
 class Image {
   constructor(algo, image) {
     this.algo = algo;
@@ -60,6 +68,7 @@ class Image {
     }
     return this.image[r][c] === "#" ? "1" : "0";
   }
+
   get litPixels() {
     let count = 0;
     for (const row of this.image) {
