@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const MinHeap = require("../../utils/MinHeap");
 
 const input = fs.readFileSync(path.join(__dirname, "input.txt"), "utf-8");
 
@@ -16,6 +15,7 @@ let i = 0;
 function decodeMessage() {
   const packetVersion = parseInt(message.slice(i, (i += 3)), 2);
   part1 += packetVersion;
+
   const packetTypeID = parseInt(message.slice(i, (i += 3)), 2);
   if (packetTypeID === 4) {
     const value = [];
@@ -25,6 +25,7 @@ function decodeMessage() {
     value.push(message.slice(++i, (i += 4)));
     return parseInt(value.join(""), 2);
   }
+
   const subPackets = [];
   if (message[i++] === "0") {
     const totalLength = parseInt(message.slice(i, (i += 15)), 2);
@@ -38,6 +39,7 @@ function decodeMessage() {
       subPackets.push(decodeMessage());
     }
   }
+
   switch (packetTypeID) {
     case 0:
       return subPackets.reduce((a, b) => a + b, 0);
