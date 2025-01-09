@@ -20,29 +20,50 @@ function decodeMessage() {
   const packetTypeID = parseInt(message.slice(i, i + 3), 2);
   i += 3;
   if (packetTypeID === 4) {
+    const value = [];
     while (message[i] !== "0") {
+      value.push(message.slice(i + 1, i + 5));
       i += 5;
     }
+    value.push(message.slice(i + 1, i + 5));
     i += 5;
-  } else {
-    if (message[i] === "0") {
-      i += 1;
-      const totalLength = parseInt(message.slice(i, i + 15), 2);
-      i += 15;
-      let tmp = i;
-      while (i < tmp + totalLength) {
-        decodeMessage();
-      }
-    } else {
-      i += 1;
-      const numSubPackets = parseInt(message.slice(i, i + 11), 2);
-      i += 11;
-      for (let j = 0; j < numSubPackets; j++) {
-        decodeMessage();
-      }
+    return parseInt(value.join(""), 2);
+  }
+  const subPackets = [];
+  if (message[i] === "0") {
+    i += 1;
+    const totalLength = parseInt(message.slice(i, i + 15), 2);
+    i += 15;
+    let tmp = i;
+    while (i < tmp + totalLength) {
+      subPackets.push(decodeMessage());
     }
+  } else {
+    i += 1;
+    const numSubPackets = parseInt(message.slice(i, i + 11), 2);
+    i += 11;
+    for (let j = 0; j < numSubPackets; j++) {
+      subPackets.push(decodeMessage());
+    }
+  }
+  switch (packetTypeID) {
+    case 0:
+      return subPackets.reduce((a, b) => a + b, 0);
+    case 1:
+      return subPackets.reduce((a, b) => a * b, 1);
+    case 2:
+      return Math.min(...subPackets);
+    case 3:
+      return Math.max(...subPackets);
+    case 5:
+      return subPackets[0] > subPackets[1] ? 1 : 0;
+    case 6:
+      return subPackets[0] < subPackets[1] ? 1 : 0;
+    case 7:
+      return subPackets[0] === subPackets[1] ? 1 : 0;
   }
 }
 
-decodeMessage();
+const part2 = decodeMessage();
 console.log(part1);
+console.log(part2);
