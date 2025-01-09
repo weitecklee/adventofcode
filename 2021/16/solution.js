@@ -14,34 +14,26 @@ let part1 = 0;
 let i = 0;
 
 function decodeMessage() {
-  const packetVersion = parseInt(message.slice(i, i + 3), 2);
+  const packetVersion = parseInt(message.slice(i, (i += 3)), 2);
   part1 += packetVersion;
-  i += 3;
-  const packetTypeID = parseInt(message.slice(i, i + 3), 2);
-  i += 3;
+  const packetTypeID = parseInt(message.slice(i, (i += 3)), 2);
   if (packetTypeID === 4) {
     const value = [];
     while (message[i] !== "0") {
-      value.push(message.slice(i + 1, i + 5));
-      i += 5;
+      value.push(message.slice(++i, (i += 4)));
     }
-    value.push(message.slice(i + 1, i + 5));
-    i += 5;
+    value.push(message.slice(++i, (i += 4)));
     return parseInt(value.join(""), 2);
   }
   const subPackets = [];
-  if (message[i] === "0") {
-    i += 1;
-    const totalLength = parseInt(message.slice(i, i + 15), 2);
-    i += 15;
+  if (message[i++] === "0") {
+    const totalLength = parseInt(message.slice(i, (i += 15)), 2);
     let tmp = i;
     while (i < tmp + totalLength) {
       subPackets.push(decodeMessage());
     }
   } else {
-    i += 1;
-    const numSubPackets = parseInt(message.slice(i, i + 11), 2);
-    i += 11;
+    const numSubPackets = parseInt(message.slice(i, (i += 11)), 2);
     for (let j = 0; j < numSubPackets; j++) {
       subPackets.push(decodeMessage());
     }
