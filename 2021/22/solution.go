@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,8 +20,8 @@ func main() {
 		panic(err)
 	}
 	cuboids := parseInput(strings.Split(string(data), "\n"))
-	fmt.Println(part1(cuboids))
-	fmt.Println(part2(cuboids))
+	fmt.Println(solve(cuboids, -50, 50, -50, 50, -50, 50))
+	fmt.Println(solve(cuboids))
 }
 
 type Cuboid struct {
@@ -54,82 +55,61 @@ func parseInput(input []string) []Cuboid {
 	return cuboids
 }
 
-func part1(cuboids []Cuboid) int {
-	cubes := map[[3]int]bool{}
-	for _, cuboid := range cuboids {
-		xMin := -50
-		if cuboid.xRange[0] > xMin {
-			xMin = cuboid.xRange[0]
-		}
-		xMax := 50
-		if cuboid.xRange[1] < xMax {
-			xMax = cuboid.xRange[1]
-		}
-		yMin := -50
-		if cuboid.yRange[0] > yMin {
-			yMin = cuboid.yRange[0]
-		}
-		yMax := 50
-		if cuboid.yRange[1] < yMax {
-			yMax = cuboid.yRange[1]
-		}
-		zMin := -50
-		if cuboid.zRange[0] > zMin {
-			zMin = cuboid.zRange[0]
-		}
-		zMax := 50
-		if cuboid.zRange[1] < zMax {
-			zMax = cuboid.zRange[1]
-		}
-		for i := xMin; i <= xMax; i++ {
-			for j := yMin; j <= yMax; j++ {
-				for k := zMin; k <= zMax; k++ {
-					cubes[[3]int{i, j, k}] = cuboid.state
-				}
-			}
-		}
+func overlapCuboid(cuboid1, cuboid2 Cuboid) (bool, Cuboid) {
+	xMin := max(cuboid1.xRange[0], cuboid2.xRange[0])
+	xMax := min(cuboid1.xRange[1], cuboid2.xRange[1])
+	if xMin > xMax {
+		return false, Cuboid{}
 	}
-	count := 0
-	for _, on := range cubes {
-		if on {
-			count++
-		}
+	yMin := max(cuboid1.yRange[0], cuboid2.yRange[0])
+	yMax := min(cuboid1.yRange[1], cuboid2.yRange[1])
+	if yMin > yMax {
+		return false, Cuboid{}
 	}
-	return count
+	zMin := max(cuboid1.zRange[0], cuboid2.zRange[0])
+	zMax := min(cuboid1.zRange[1], cuboid2.zRange[1])
+	if zMin > zMax {
+		return false, Cuboid{}
+	}
+	return true, Cuboid{
+		state:  !cuboid2.state,
+		xRange: [2]int{xMin, xMax},
+		yRange: [2]int{yMin, yMax},
+		zRange: [2]int{zMin, zMax},
+	}
 }
 
-func part2(cuboids []Cuboid) int {
+func solve(cuboids []Cuboid, ranges ...int) int {
+	xRangeMin, xRangeMax := math.MinInt, math.MaxInt
+	yRangeMin, yRangeMax := math.MinInt, math.MaxInt
+	zRangeMin, zRangeMax := math.MinInt, math.MaxInt
+	if len(ranges) > 0 {
+		xRangeMin, xRangeMax = ranges[0], ranges[1]
+		yRangeMin, yRangeMax = ranges[2], ranges[3]
+		zRangeMin, zRangeMax = ranges[4], ranges[5]
+	}
+	spaceCuboid := Cuboid{
+		state:  false,
+		xRange: [2]int{xRangeMin, xRangeMax},
+		yRange: [2]int{yRangeMin, yRangeMax},
+		zRange: [2]int{zRangeMin, zRangeMax},
+	}
 	var overlaps []Cuboid
 	for _, cuboid1 := range cuboids {
 		var tmp []Cuboid
 		if cuboid1.state {
-			tmp = append(tmp, cuboid1)
+			if isOverlap, cbd := overlapCuboid(cuboid1, spaceCuboid); isOverlap {
+				tmp = append(tmp, cbd)
+			}
 		}
 		for _, cuboid2 := range overlaps {
-			xMin := max(cuboid1.xRange[0], cuboid2.xRange[0])
-			xMax := min(cuboid1.xRange[1], cuboid2.xRange[1])
-			if xMin > xMax {
-				continue
+			if isOverlap, cbd := overlapCuboid(cuboid1, cuboid2); isOverlap {
+				tmp = append(tmp, cbd)
 			}
-			yMin := max(cuboid1.yRange[0], cuboid2.yRange[0])
-			yMax := min(cuboid1.yRange[1], cuboid2.yRange[1])
-			if yMin > yMax {
-				continue
-			}
-			zMin := max(cuboid1.zRange[0], cuboid2.zRange[0])
-			zMax := min(cuboid1.zRange[1], cuboid2.zRange[1])
-			if zMin > zMax {
-				continue
-			}
-			tmp = append(tmp, Cuboid{
-				state:  !cuboid2.state,
-				xRange: [2]int{xMin, xMax},
-				yRange: [2]int{yMin, yMax},
-				zRange: [2]int{zMin, zMax},
-			})
 		}
 		overlaps = append(overlaps, tmp...)
 	}
+
 	res := 0
 	for _, cuboid := range overlaps {
 		size := (cuboid.xRange[1] - cuboid.xRange[0] + 1) * (cuboid.yRange[1] - cuboid.yRange[0] + 1) * (cuboid.zRange[1] - cuboid.zRange[0] + 1)
