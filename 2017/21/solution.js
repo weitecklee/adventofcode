@@ -128,6 +128,15 @@ function combine(patterns) {
 }
 
 function iterate(patterns, i) {
+  // when i % 3 === 0, pattern is divisible by 3 and not 2, no further action needed
+  // when i % 3 === 1, pattern is made up of 4x4's, break them up to 2x2's
+  // when i % 3 === 2, pattern is made up of 3x3's BUT pattern size is divisible by 2
+  //                   combine neighboring 3x3's into 6x6's, then break them up to 2x2's.
+  if (i % 3 === 1) {
+    patterns = breakup(patterns);
+  } else if (i % 3 === 2) {
+    patterns = combine(patterns);
+  }
   let tmp = [];
   for (let pattern of patterns) {
     let rot = 0;
@@ -144,20 +153,10 @@ function iterate(patterns, i) {
     let res = rules.get(pattern);
     tmp.push(res);
   }
-  // (following is after enhancement)
-  // when i % 3 === 0, pattern is divisible by 3 and not 2, no further action needed
-  // when i % 3 === 1, pattern is made up of 4x4's, break them up to 2x2's
-  // when i % 3 === 2, pattern is made up of 3x3's BUT pattern size is divisible by 2
-  //                   combine neighboring 3x3's into 6x6's, then break them up to 2x2's.
-  if (i % 3 === 1) {
-    tmp = breakup(tmp);
-  } else if (i % 3 === 2) {
-    tmp = combine(tmp);
-  }
   return tmp;
 }
 
-for (let i = 1; i <= 5; i++) {
+for (let i = 0; i < 5; i++) {
   patterns = iterate(patterns, i);
 }
 
@@ -165,7 +164,7 @@ console.log(
   patterns.reduce((a, b) => a + b.split("").filter((c) => c === "#").length, 0)
 );
 
-for (let i = 6; i <= 18; i++) {
+for (let i = 5; i < 18; i++) {
   patterns = iterate(patterns, i);
 }
 
