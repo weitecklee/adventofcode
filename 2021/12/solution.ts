@@ -33,70 +33,48 @@ for (const [name1, name2] of input) {
   cave2.addNeighbor(cave1);
 }
 
-let part1 = 0;
-
 interface QueueEntry {
-  current: Cave;
-  visited: Set<Cave>;
-}
-
-const queue: QueueEntry[] = [
-  { current: caveMap.get("start")!, visited: new Set([caveMap.get("start")!]) },
-];
-
-while (queue.length) {
-  const { current, visited } = queue.pop()!;
-  if (current.name === "end") {
-    part1++;
-    continue;
-  }
-  for (const neighbor of current.neighbors) {
-    if (neighbor.isSmall && visited.has(neighbor)) continue;
-    const visited2 = new Set(visited);
-    visited2.add(neighbor);
-    queue.push({ current: neighbor, visited: visited2 });
-  }
-}
-
-console.log(part1);
-
-let part2 = 0;
-
-interface QueueEntry2 {
   current: Cave;
   visited: Set<Cave>;
   revisitedSmall: boolean;
 }
 
-const queue2: QueueEntry2[] = [
-  {
-    current: caveMap.get("start")!,
-    visited: new Set([caveMap.get("start")!]),
-    revisitedSmall: false,
-  },
-];
+function solve(isPart2: boolean = false) {
+  let res = 0;
 
-while (queue2.length) {
-  const { current, visited, revisitedSmall } = queue2.pop()!;
-  if (current.name === "end") {
-    part2++;
-    continue;
-  }
-  for (const neighbor of current.neighbors) {
-    if (neighbor.name === "start") continue;
-    let revisitedSmall2 = revisitedSmall;
-    if (neighbor.isSmall && visited.has(neighbor)) {
-      if (!revisitedSmall) revisitedSmall2 = true;
-      else continue;
+  const queue: QueueEntry[] = [
+    {
+      current: caveMap.get("start")!,
+      visited: new Set([caveMap.get("start")!]),
+      revisitedSmall: false,
+    },
+  ];
+
+  while (queue.length) {
+    const { current, visited, revisitedSmall } = queue.pop()!;
+    if (current.name === "end") {
+      res++;
+      continue;
     }
-    const visited2 = new Set(visited);
-    visited2.add(neighbor);
-    queue2.push({
-      current: neighbor,
-      visited: visited2,
-      revisitedSmall: revisitedSmall2,
-    });
+    for (const neighbor of current.neighbors) {
+      if (neighbor.name === "start") continue;
+      let revisitedSmall2 = revisitedSmall;
+      if (neighbor.isSmall && visited.has(neighbor)) {
+        if (isPart2 && !revisitedSmall) revisitedSmall2 = true;
+        else continue;
+      }
+      const visited2 = new Set(visited);
+      visited2.add(neighbor);
+      queue.push({
+        current: neighbor,
+        visited: visited2,
+        revisitedSmall: revisitedSmall2,
+      });
+    }
   }
+
+  return res;
 }
 
-console.log(part2);
+console.log(solve());
+console.log(solve(true));
