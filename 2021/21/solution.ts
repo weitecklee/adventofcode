@@ -75,59 +75,58 @@ const possibilities: number[][] = [
   [1, 9],
 ];
 
-interface QueueEntry {
-  player1Score: number;
-  player1Space: number;
-  player2Score: number;
-  player2Space: number;
-  isPlayer1Turn: boolean;
-  universes: number;
-}
+// universeMapKey is [player1Score, player1Space, player2Score, player2Space] joined into string
+// value is number of universes with that state
 
-const queue: QueueEntry[] = [
-  {
-    player1Score: 0,
-    player1Space: player1StartingSpace,
-    player2Score: 0,
-    player2Space: player2StartingSpace,
-    isPlayer1Turn: true,
-    universes: 1,
-  },
-];
+let universeMap: Map<string, number> = new Map([
+  [[0, player1StartingSpace, 0, player2StartingSpace].join(","), 1],
+]);
 
 let player1Wins = 0;
 let player2Wins = 0;
-while (queue.length) {
-  const {
-    player1Score,
-    player1Space,
-    player2Score,
-    player2Space,
-    isPlayer1Turn,
-    universes,
-  } = queue.pop()!;
-  if (player1Score >= 21) {
-    player1Wins += universes;
-    continue;
+isPlayer1Turn = true;
+
+while (universeMap.size) {
+  const universeMap2: Map<string, number> = new Map();
+  for (const [universeKey, num] of universeMap) {
+    const parts = universeKey.split(",");
+    const player1Score = Number(parts[0]);
+    const player1Space = Number(parts[1]);
+    const player2Score = Number(parts[2]);
+    const player2Space = Number(parts[3]);
+
+    if (player1Score >= 21) {
+      player1Wins += num;
+      continue;
+    }
+    if (player2Score >= 21) {
+      player2Wins += num;
+      continue;
+    }
+
+    for (const [n, s] of possibilities) {
+      let player1SpaceNew = player1Space + (isPlayer1Turn ? s : 0);
+      if (player1SpaceNew > 10) player1SpaceNew -= 10;
+      let player2SpaceNew = player2Space + (isPlayer1Turn ? 0 : s);
+      if (player2SpaceNew > 10) player2SpaceNew -= 10;
+      const player1ScoreNew =
+        player1Score + (isPlayer1Turn ? player1SpaceNew : 0);
+      const player2ScoreNew =
+        player2Score + (isPlayer1Turn ? 0 : player2SpaceNew);
+      const universeKey2 = [
+        player1ScoreNew,
+        player1SpaceNew,
+        player2ScoreNew,
+        player2SpaceNew,
+      ].join(",");
+      universeMap2.set(
+        universeKey2,
+        (universeMap2.get(universeKey2) || 0) + n * num
+      );
+    }
   }
-  if (player2Score >= 21) {
-    player2Wins += universes;
-    continue;
-  }
-  for (const [n, s] of possibilities) {
-    let player1SpaceNew = player1Space + (isPlayer1Turn ? s : 0);
-    if (player1SpaceNew > 10) player1SpaceNew -= 10;
-    let player2SpaceNew = player2Space + (isPlayer1Turn ? 0 : s);
-    if (player2SpaceNew > 10) player2SpaceNew -= 10;
-    queue.push({
-      player1Score: player1Score + (isPlayer1Turn ? player1SpaceNew : 0),
-      player1Space: player1SpaceNew,
-      player2Score: player2Score + (isPlayer1Turn ? 0 : player2SpaceNew),
-      player2Space: player2SpaceNew,
-      isPlayer1Turn: !isPlayer1Turn,
-      universes: universes * n,
-    });
-  }
+  isPlayer1Turn = !isPlayer1Turn;
+  universeMap = universeMap2;
 }
 
 console.log(Math.max(player1Wins, player2Wins));
