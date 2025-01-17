@@ -40,7 +40,7 @@ const folds = input[1].split("\n").map((a) => {
   return [0, Number(partB)];
 });
 
-function foldTheDots(dots: Dot[], fold: number[]) {
+function foldTheDots(dots: Dot[], fold: number[]): Dot[] {
   const coordsSet: Set<string> = new Set();
   const dots2: Dot[] = [];
   for (const dot of dots) {

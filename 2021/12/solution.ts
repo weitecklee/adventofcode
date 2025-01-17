@@ -39,7 +39,7 @@ interface QueueEntry {
   revisitedSmall: boolean;
 }
 
-function solve(isPart2: boolean = false) {
+function solve(isPart2: boolean = false): number {
   let res = 0;
 
   const queue: QueueEntry[] = [
