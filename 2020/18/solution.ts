@@ -7,15 +7,14 @@ const input = fs
 
 const parenRegex = /\([^\()]+?\)/g;
 function evaluate1(eqn: string): number {
-  let matches = eqn.match(parenRegex);
-  while (matches) {
+  let matches;
+  while ((matches = eqn.match(parenRegex))) {
     for (const match of matches) {
       eqn = eqn.replace(
         match,
         evaluate1(match.slice(1, match.length - 1)).toString()
       );
     }
-    matches = eqn.match(parenRegex);
   }
   const parts = eqn.split(" ");
   let op = "add";
@@ -40,23 +39,20 @@ const addRegex = /\d+ \+ \d+/g;
 const numRegex = /\d+/g;
 
 function evaluate2(eqn: string): number {
-  let matches = eqn.match(parenRegex);
-  while (matches) {
+  let matches;
+  while ((matches = eqn.match(parenRegex))) {
     for (const match of matches) {
       eqn = eqn.replace(
         match,
         evaluate2(match.slice(1, match.length - 1)).toString()
       );
     }
-    matches = eqn.match(parenRegex);
   }
-  matches = eqn.match(addRegex);
-  while (matches) {
+  while ((matches = eqn.match(addRegex))) {
     for (const match of matches) {
       const [a, _, b] = match.split(" ");
       eqn = eqn.replace(match, (Number(a) + Number(b)).toString());
     }
-    matches = eqn.match(addRegex);
   }
   return eqn.match(numRegex)!.reduce((a, b) => a * Number(b), 1);
 }
