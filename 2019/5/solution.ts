@@ -20,21 +20,32 @@ class Intcode {
         .split("")
         .reverse()
         .map(Number);
+
+      let params: number[] = [];
+      switch (opcode) {
+        case 1:
+        case 2:
+        case 5:
+        case 6:
+          params = this.#getParams(program, parameterModes, 2, i).map(
+            (a) => program[a]
+          );
+          break;
+        case 7:
+        case 8:
+          params = this.#getParams(program, parameterModes, 3, i);
+          break;
+      }
+
       switch (opcode) {
         case 1:
           // add
-          const params1 = this.#getParams(program, parameterModes, 2, i).map(
-            (a) => program[a]
-          );
-          program[program[i + 3]] = params1.reduce((a, b) => a + b, 0);
+          program[program[i + 3]] = params.reduce((a, b) => a + b, 0);
           i += 3;
           break;
         case 2:
           // multiply
-          const params2 = this.#getParams(program, parameterModes, 2, i).map(
-            (a) => program[a]
-          );
-          program[program[i + 3]] = params2.reduce((a, b) => a * b, 1);
+          program[program[i + 3]] = params.reduce((a, b) => a * b, 1);
           i += 3;
           break;
         case 3:
@@ -47,11 +58,8 @@ class Intcode {
           break;
         case 5:
           // jump if true
-          const params5 = this.#getParams(program, parameterModes, 2, i).map(
-            (a) => program[a]
-          );
-          if (params5[0] !== 0) {
-            i = params5[1];
+          if (params[0] !== 0) {
+            i = params[1];
             continue;
           } else {
             i += 2;
@@ -59,11 +67,8 @@ class Intcode {
           break;
         case 6:
           // jump if false
-          const params6 = this.#getParams(program, parameterModes, 2, i).map(
-            (a) => program[a]
-          );
-          if (params6[0] === 0) {
-            i = params6[1];
+          if (params[0] === 0) {
+            i = params[1];
             continue;
           } else {
             i += 2;
@@ -71,21 +76,19 @@ class Intcode {
           break;
         case 7:
           // less than
-          const params7 = this.#getParams(program, parameterModes, 3, i);
-          if (program[params7[0]] < program[params7[1]]) {
-            program[params7[2]] = 1;
+          if (program[params[0]] < program[params[1]]) {
+            program[params[2]] = 1;
           } else {
-            program[params7[2]] = 0;
+            program[params[2]] = 0;
           }
           i += 3;
           break;
         case 8:
           // equal
-          const params8 = this.#getParams(program, parameterModes, 3, i);
-          if (program[params8[0]] === program[params8[1]]) {
-            program[params8[2]] = 1;
+          if (program[params[0]] === program[params[1]]) {
+            program[params[2]] = 1;
           } else {
-            program[params8[2]] = 0;
+            program[params[2]] = 0;
           }
           i += 3;
           break;
