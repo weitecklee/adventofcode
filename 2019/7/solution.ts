@@ -154,59 +154,19 @@ class AmplifierControllerSoftware {
   }
 }
 
+function permutations(arr: number[]): number[][] {
+  if (arr.length <= 1) return [arr];
+  const res: number[][] = [];
+  for (let i = 0; i < arr.length; i++) {
+    const others = arr.slice(0, i).concat(arr.slice(i + 1));
+    for (const n of permutations(others)) {
+      res.push([arr[i], ...n]);
+    }
+  }
+  return res;
+}
+
 const acs = new AmplifierControllerSoftware(puzzleInput);
 
-let part1 = 0;
-const used: Set<number> = new Set();
-for (let a = 0; a < 5; a++) {
-  used.add(a);
-  for (let b = 0; b < 5; b++) {
-    if (used.has(b)) continue;
-    used.add(b);
-    for (let c = 0; c < 5; c++) {
-      if (used.has(c)) continue;
-      used.add(c);
-      for (let d = 0; d < 5; d++) {
-        if (used.has(d)) continue;
-        used.add(d);
-        for (let e = 0; e < 5; e++) {
-          if (used.has(e)) continue;
-          const output = acs.run([a, b, c, d, e]);
-          if (output > part1) part1 = output;
-        }
-        used.delete(d);
-      }
-      used.delete(c);
-    }
-    used.delete(b);
-  }
-  used.delete(a);
-}
-console.log(part1);
-
-let part2 = 0;
-for (let a = 5; a < 10; a++) {
-  used.add(a);
-  for (let b = 5; b < 10; b++) {
-    if (used.has(b)) continue;
-    used.add(b);
-    for (let c = 5; c < 10; c++) {
-      if (used.has(c)) continue;
-      used.add(c);
-      for (let d = 5; d < 10; d++) {
-        if (used.has(d)) continue;
-        used.add(d);
-        for (let e = 5; e < 10; e++) {
-          if (used.has(e)) continue;
-          const output = acs.run([a, b, c, d, e]);
-          if (output > part2) part2 = output;
-        }
-        used.delete(d);
-      }
-      used.delete(c);
-    }
-    used.delete(b);
-  }
-  used.delete(a);
-}
-console.log(part2);
+console.log(Math.max(...permutations([0, 1, 2, 3, 4]).map((a) => acs.run(a))));
+console.log(Math.max(...permutations([5, 6, 7, 8, 9]).map((a) => acs.run(a))));
