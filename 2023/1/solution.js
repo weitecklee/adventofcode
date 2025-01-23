@@ -1,18 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 let part1 = 0;
 
 for (const line of input) {
-
   let i = 0;
   while (i < line.length) {
     const tmp = Number(line[i]);
@@ -32,7 +33,6 @@ for (const line of input) {
     }
     i--;
   }
-
 }
 
 console.log(part1);
@@ -40,18 +40,17 @@ console.log(part1);
 let part2 = 0;
 
 const digits = new Map();
-digits.set('one', 1);
-digits.set('two', 2);
-digits.set('three', 3);
-digits.set('four', 4);
-digits.set('five', 5);
-digits.set('six', 6);
-digits.set('seven', 7);
-digits.set('eight', 8);
-digits.set('nine', 9);
+digits.set("one", 1);
+digits.set("two", 2);
+digits.set("three", 3);
+digits.set("four", 4);
+digits.set("five", 5);
+digits.set("six", 6);
+digits.set("seven", 7);
+digits.set("eight", 8);
+digits.set("nine", 9);
 
 for (const line of input) {
-
   let i = 0;
   while (i < line.length) {
     const tmp = Number(line[i]);
@@ -103,7 +102,6 @@ for (const line of input) {
     }
     i--;
   }
-
 }
 
 console.log(part2);

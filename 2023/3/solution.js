@@ -1,20 +1,22 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const gearMap = new Map();
 const symbolSet = new Set();
 const symbolPattern = /[^0-9.]/g;
 const numberPattern = /\d+/g;
 const gearPattern = /\*/g;
-const coord = (a, b) => a + ',' + b;
+const coord = (a, b) => a + "," + b;
 
 function Gear() {
   this.ratio = 1;
@@ -40,15 +42,15 @@ for (let i = 0; i < input.length; i++) {
     let isPart = false;
     for (let j = -1; j < match[0].length + 1; j++) {
       for (let k = -1; k < 2; k++) {
-      const curr = coord(match.index + j, i + k);
-      if (symbolSet.has(curr)) {
-        isPart = true;
-      }
-      if (gearMap.has(curr)) {
-        const gear = gearMap.get(curr);
-        gear.parts++;
-        gear.ratio *= Number(match[0]);
-      }
+        const curr = coord(match.index + j, i + k);
+        if (symbolSet.has(curr)) {
+          isPart = true;
+        }
+        if (gearMap.has(curr)) {
+          const gear = gearMap.get(curr);
+          gear.parts++;
+          gear.ratio *= Number(match[0]);
+        }
       }
     }
     if (isPart) {
