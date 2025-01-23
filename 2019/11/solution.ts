@@ -147,28 +147,65 @@ function* intcodeGenerator(prog: number[], input: number[]): IntcodeGenerator {
   return -1;
 }
 
-const robotInput: number[] = [0];
-const robot = intcodeGenerator(puzzleInput, robotInput);
-const robotPos = [0, 0];
-const robotDir = [0, 1];
-const panels: Map<string, number> = new Map();
+function runProgram(startingPanelColor: number): Map<string, number> {
+  const robotInput: number[] = [startingPanelColor];
+  const robot = intcodeGenerator(puzzleInput, robotInput);
+  const robotPos = [0, 0]; // using RC coordinate system
+  const robotDir = [-1, 0];
+  const panels: Map<string, number> = new Map();
 
-while (true) {
-  const ret = robot.next();
-  if (ret.done) break;
-  const ret2 = robot.next();
-  if (ret2.done) break;
-  panels.set(robotPos.join(","), ret.value);
-  if (ret2.value === 1) {
-    // turn right
-    [robotDir[0], robotDir[1]] = [robotDir[1], -robotDir[0]];
-  } else {
-    // turn left
-    [robotDir[0], robotDir[1]] = [-robotDir[1], robotDir[0]];
+  while (true) {
+    const ret = robot.next();
+    if (ret.done) break;
+    const ret2 = robot.next();
+    if (ret2.done) break;
+    panels.set(robotPos.join(","), ret.value);
+    if (ret2.value === 1) {
+      // turn right
+      [robotDir[0], robotDir[1]] = [robotDir[1], -robotDir[0]];
+    } else {
+      // turn left
+      [robotDir[0], robotDir[1]] = [-robotDir[1], robotDir[0]];
+    }
+    robotPos[0] += robotDir[0];
+    robotPos[1] += robotDir[1];
+    robotInput.push(panels.get(robotPos.join(",")) ?? 0);
   }
-  robotPos[0] += robotDir[0];
-  robotPos[1] += robotDir[1];
-  robotInput.push(panels.get(robotPos.join(",")) ?? 0);
+
+  return panels;
 }
 
-console.log(panels.size);
+const part1Panels = runProgram(0);
+console.log(part1Panels.size);
+
+const part2Panels = runProgram(1);
+const coords = Array.from(part2Panels.keys()).map((a) =>
+  a.split(",").map(Number)
+);
+let rMin = Number.MAX_SAFE_INTEGER;
+let rMax = Number.MIN_SAFE_INTEGER;
+let cMin = rMin;
+let cMax = rMax;
+
+for (const [r, c] of coords) {
+  if (r < rMin) rMin = r;
+  if (r > rMax) rMax = r;
+  if (c < cMin) cMin = c;
+  if (c > cMax) cMax = c;
+}
+
+const rRange = rMax - rMin + 1;
+const cRange = cMax - cMin + 1;
+
+const part2Paint = Array(rRange)
+  .fill("")
+  .map(() => Array(cRange).fill(" "));
+
+for (const [coordString, paint] of part2Panels) {
+  let [r, c] = coordString.split(",").map(Number);
+  r -= rMin;
+  c -= cMin;
+  part2Paint[r][c] = paint === 1 ? "#" : " ";
+}
+
+part2Paint.forEach((r) => console.log(r.join("")));
