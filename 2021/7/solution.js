@@ -1,13 +1,16 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split(',').map(Number);
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split(",")
+  .map(Number);
 
 const steps = (align) => {
   let sum = 0;
@@ -15,11 +18,14 @@ const steps = (align) => {
     sum += Math.abs(num - align);
   }
   return sum;
-}
+};
 
 let left = Math.min(...input);
 let right = Math.max(...input);
-const candidates = [[left, steps(left)], [right, steps(right)]];
+const candidates = [
+  [left, steps(left)],
+  [right, steps(right)],
+];
 
 while (Math.abs(candidates[0][0] - candidates[1][0]) > 1) {
   const mid = Math.floor((candidates[0][0] + candidates[1][0]) / 2);
@@ -32,12 +38,15 @@ const steps2 = (align) => {
   let sum = 0;
   for (const num of input) {
     const d = Math.abs(num - align);
-    sum += d * (d + 1) / 2;
+    sum += (d * (d + 1)) / 2;
   }
   return sum;
-}
+};
 
-const candidates2 = [[left, steps2(left)], [right, steps2(right)]];
+const candidates2 = [
+  [left, steps2(left)],
+  [right, steps2(right)],
+];
 
 while (Math.abs(candidates2[0][0] - candidates2[1][0]) > 1) {
   const mid = Math.floor((candidates2[0][0] + candidates2[1][0]) / 2);

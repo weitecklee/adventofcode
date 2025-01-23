@@ -1,19 +1,21 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
-const draws = input[0].split(',').map(Number);
+const draws = input[0].split(",").map(Number);
 
 const boards = new Set();
 
-const Board = function() {
+const Board = function () {
   this.spaces = new Map();
   this.rows = new Array(5).fill(0);
   this.cols = new Array(5).fill(0);
@@ -67,5 +69,3 @@ for (const draw of draws) {
     partOneDone = true;
   }
 }
-
-

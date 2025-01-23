@@ -1,33 +1,35 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const bits = new Array(input[0].length).fill(0);
 
 for (const line of input) {
   for (let i = 0; i < line.length; i++) {
-    if (line[i] === '1') {
+    if (line[i] === "1") {
       bits[i]++;
     }
   }
 }
 
-let gamma = '';
-let epsilon = '';
+let gamma = "";
+let epsilon = "";
 for (const bit of bits) {
   if (bit > input.length / 2) {
-    gamma += '1';
-    epsilon += '0';
+    gamma += "1";
+    epsilon += "0";
   } else {
-    gamma += '0';
-    epsilon += '1';
+    gamma += "0";
+    epsilon += "1";
   }
 }
 gamma = Number.parseInt(gamma, 2);
@@ -41,7 +43,7 @@ while (candidates.length > 1) {
   const ones = [];
   const zeros = [];
   for (const line of candidates) {
-    if (line[place] === '1') {
+    if (line[place] === "1") {
       bit++;
       ones.push(line);
     } else {
@@ -65,7 +67,7 @@ while (candidates.length > 1) {
   const ones = [];
   const zeros = [];
   for (const line of candidates) {
-    if (line[place] === '1') {
+    if (line[place] === "1") {
       bit++;
       ones.push(line);
     } else {

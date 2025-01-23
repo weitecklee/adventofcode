@@ -1,13 +1,16 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n').map((a) => a.split('').map(Number));
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n")
+  .map((a) => a.split("").map(Number));
 
 const tracker = [];
 for (const line of input) {
@@ -23,7 +26,7 @@ for (let i = 0; i < input.length; i++) {
     }
   }
   max = -1;
-  for (let j = input[i].length - 1; j >=0 ; j--) {
+  for (let j = input[i].length - 1; j >= 0; j--) {
     if (input[i][j] > max) {
       tracker[i][j] = 1;
       max = input[i][j];
@@ -62,7 +65,12 @@ console.log(count);
 let max = 0;
 
 const viewer = (a, b) => {
-  if (a === 0 || b === 0 || a === input.length - 1 || b === input[0].length - 1) {
+  if (
+    a === 0 ||
+    b === 0 ||
+    a === input.length - 1 ||
+    b === input[0].length - 1
+  ) {
     return 0;
   }
   const ht = input[a][b];
@@ -97,7 +105,7 @@ const viewer = (a, b) => {
     }
   }
   return left * right * up * down;
-}
+};
 
 for (let i = 0; i < input.length; i++) {
   for (let j = 0; j < input[i].length; j++) {

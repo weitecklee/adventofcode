@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const monkeys = [];
 
@@ -18,7 +20,7 @@ function Monkey() {
   this.ifTrue = null;
   this.ifFalse = null;
   this.inspected = 0;
-};
+}
 
 let prime = 1;
 
@@ -34,23 +36,23 @@ for (const line of input) {
     const parse = line.match(/old (.) (.+)/);
     const oper = parse[1];
     const arg = parse[2];
-    if (arg === 'old') {
-      if (oper === '+') {
-        curr.operation = (a) => (a + a);
+    if (arg === "old") {
+      if (oper === "+") {
+        curr.operation = (a) => a + a;
       } else {
-        curr.operation = (a) => (a * a);
+        curr.operation = (a) => a * a;
       }
     } else {
-      if (oper === '+') {
-        curr.operation = (a) => (a + Number(arg));
+      if (oper === "+") {
+        curr.operation = (a) => a + Number(arg);
       } else {
-        curr.operation = (a) => (a * Number(arg));
+        curr.operation = (a) => a * Number(arg);
       }
     }
   } else if (/Test/.test(line)) {
     const divisor = Number(line.match(/\d+/)[0]);
     prime *= divisor;
-    curr.test = (a) => (a % divisor === 0);
+    curr.test = (a) => a % divisor === 0;
   } else if (/If true/.test(line)) {
     const ifTrue = Number(line.match(/\d+/)[0]);
     curr.ifTrue = ifTrue;
@@ -81,4 +83,3 @@ for (const monkey of monkeys) {
 }
 inspected.sort((a, b) => b - a);
 console.log(inspected[0] * inspected[1]);
-

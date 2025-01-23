@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 function Dir(parent) {
   this.parent = parent;
@@ -19,19 +21,22 @@ const main = new Dir(null);
 let curr = main;
 
 for (const line of input) {
-  if (line[0] === '$' && line !== '$ cd \/') { // line starting with $
+  if (line[0] === "$" && line !== "$ cd /") {
+    // line starting with $
     const path = /\$ cd (.*)/.exec(line); // line starting with $ cd, others ignored
     if (path) {
-      if (path[1] === '..') {
+      if (path[1] === "..") {
         curr = curr.parent;
       } else {
         curr = curr.subdirs.get(path[1]);
       }
     }
-  } else if (/\d/.test(line[0])) { // line starting with number
+  } else if (/\d/.test(line[0])) {
+    // line starting with number
     const size = /^\d+/.exec(line)[0];
     curr.size += Number(size);
-  } else { // line starting with dir
+  } else {
+    // line starting with dir
     const path = /dir (.*)/.exec(line);
     if (path) {
       const newDir = new Dir(curr);
@@ -50,7 +55,7 @@ const recur = (dir) => {
     sum += size;
   }
   return size;
-}
+};
 
 const total = recur(main);
 console.log(sum);
@@ -66,6 +71,6 @@ const recur2 = (dir) => {
     min = size;
   }
   return size;
-}
+};
 recur2(main);
 console.log(min);

@@ -1,29 +1,31 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 let count = 0;
 let outputs = 0;
 
 const master = [
-  'abcefg',
-  'cf',
-  'acdeg',
-  'acdfg',
-  'bcdf',
-  'abdfg',
-  'abdefg',
-  'acf',
-  'abcdefg',
-  'abcdfg',
-]
+  "abcefg",
+  "cf",
+  "acdeg",
+  "acdfg",
+  "bcdf",
+  "abdfg",
+  "abdefg",
+  "acf",
+  "abcdefg",
+  "abcdfg",
+];
 
 for (const line of input) {
   const s = line.match(/\w+/g);
@@ -31,7 +33,7 @@ for (const line of input) {
   const values = s.slice(10);
   const lengths = new Map();
   for (let i = 0; i < 10; i++) {
-    patterns[i] = patterns[i].split('').sort();
+    patterns[i] = patterns[i].split("").sort();
     if (!lengths.has(patterns[i].length)) {
       lengths.set(patterns[i].length, []);
     }
@@ -40,15 +42,15 @@ for (const line of input) {
   const decode = new Map();
   for (const s of lengths.get(3)[0]) {
     if (!lengths.get(2)[0].includes(s)) {
-      decode.set(s, 'a');
+      decode.set(s, "a");
       break;
     }
   }
   for (let i = 0; i < 2; i++) {
     for (const s2 of lengths.get(6)) {
       if (!s2.includes(lengths.get(2)[0][i])) {
-        decode.set(lengths.get(2)[0][i], 'c');
-        decode.set(lengths.get(2)[0][1 - i], 'f');
+        decode.set(lengths.get(2)[0][i], "c");
+        decode.set(lengths.get(2)[0][1 - i], "f");
         break;
       }
     }
@@ -59,14 +61,14 @@ for (const line of input) {
     }
     for (const s2 of lengths.get(6)) {
       if (!s2.includes(lengths.get(4)[0][i])) {
-        decode.set(lengths.get(4)[0][i], 'd');
+        decode.set(lengths.get(4)[0][i], "d");
         break;
       }
     }
   }
   for (const s of lengths.get(4)[0]) {
     if (!decode.has(s)) {
-      decode.set(s, 'b');
+      decode.set(s, "b");
       break;
     }
   }
@@ -80,13 +82,13 @@ for (const line of input) {
       }
     }
     if (n === 1) {
-      decode.set(odd, 'g');
+      decode.set(odd, "g");
       break;
     }
   }
   for (const s of lengths.get(7)[0]) {
     if (!decode.has(s)) {
-      decode.set(s, 'e');
+      decode.set(s, "e");
       break;
     }
   }
@@ -100,14 +102,19 @@ for (const line of input) {
     for (const c of master[i]) {
       pattern.push(encode.get(c));
     }
-    digits.set(pattern.sort().join(''), i);
+    digits.set(pattern.sort().join(""), i);
   }
-  let output = '';
+  let output = "";
   for (const value of values) {
-    if (value.length === 2 || value.length === 3 || value.length === 4 || value.length === 7) {
+    if (
+      value.length === 2 ||
+      value.length === 3 ||
+      value.length === 4 ||
+      value.length === 7
+    ) {
       count++;
     }
-    const str = value.split('').sort().join('');
+    const str = value.split("").sort().join("");
     output += digits.get(str);
   }
   outputs += Number(output);

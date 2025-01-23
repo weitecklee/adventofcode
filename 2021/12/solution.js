@@ -1,18 +1,20 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const connections = new Map();
 
 for (const line of input) {
-  const [a, b] = line.split('-');
+  const [a, b] = line.split("-");
   if (!connections.has(a)) {
     connections.set(a, []);
   }
@@ -23,12 +25,12 @@ for (const line of input) {
   connections.get(b).push(a);
 }
 
-const q = [['start', new Set(['start'])]];
+const q = [["start", new Set(["start"])]];
 let res = 0;
 
 for (const [cave, visited] of q) {
   for (const connection of connections.get(cave)) {
-    if (connection === 'end') {
+    if (connection === "end") {
       res++;
       continue;
     }
@@ -44,12 +46,12 @@ for (const [cave, visited] of q) {
 
 console.log(res);
 
-const q2 = [['start', new Set(['start']), '']];
+const q2 = [["start", new Set(["start"]), ""]];
 res = 0;
 
 for (const [cave, visited, twice] of q2) {
   for (const connection of connections.get(cave)) {
-    if (connection === 'end') {
+    if (connection === "end") {
       res++;
       continue;
     }
@@ -59,7 +61,7 @@ for (const [cave, visited, twice] of q2) {
         newVisited.add(connection);
       }
       q2.push([connection, newVisited, twice]);
-    } else if (twice === '' && connection !== 'start') {
+    } else if (twice === "" && connection !== "start") {
       const newVisited = new Set(visited);
       q2.push([connection, newVisited, connection]);
     }

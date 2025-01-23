@@ -1,13 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
+const input = fs.readFileSync(
+  path.join(__dirname, "input.txt"),
+  "utf-8",
+  (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
   }
-});
+);
 
 const chamber = new Set();
 
@@ -29,7 +33,7 @@ class Block {
     const space2 = [];
     for (const pos of this.space) {
       const pos2 = [pos[0], pos[1] - 1];
-      if (pos2[1] === 0 || chamber.has(pos2.join(','))) {
+      if (pos2[1] === 0 || chamber.has(pos2.join(","))) {
         return false;
       }
       space2.push(pos2);
@@ -42,21 +46,20 @@ class Block {
     const space2 = [];
     for (const pos of this.space) {
       const pos2 = [pos[0] - 1, pos[1]];
-      if (pos2[0] === 0 || chamber.has(pos2.join(','))) {
+      if (pos2[0] === 0 || chamber.has(pos2.join(","))) {
         return false;
       }
       space2.push(pos2);
     }
     this.space = space2;
     return true;
-
   }
 
   moveRight() {
     const space2 = [];
     for (const pos of this.space) {
       const pos2 = [pos[0] + 1, pos[1]];
-      if (pos2[0] === 8 || chamber.has(pos2.join(','))) {
+      if (pos2[0] === 8 || chamber.has(pos2.join(","))) {
         return false;
       }
       space2.push(pos2);
@@ -64,7 +67,6 @@ class Block {
     this.space = space2;
     return true;
   }
-
 }
 
 class HorizontalBlock extends Block {
@@ -133,16 +135,16 @@ const newBlock = (n, start) => {
   if (n % 5 === 4) {
     return new SquareBlock(start);
   }
-}
+};
 
 let height = 0;
 let i = 0;
 for (let n = 0; n < 2022; n++) {
   const currBlock = newBlock(n, height + 4);
   while (true) {
-    if (input[i] === '<') {
+    if (input[i] === "<") {
       currBlock.moveLeft();
-    } else if (input[i] === '>') {
+    } else if (input[i] === ">") {
       currBlock.moveRight();
     }
     i++;
@@ -151,7 +153,7 @@ for (let n = 0; n < 2022; n++) {
     }
     if (!currBlock.moveDown()) {
       for (const pos of currBlock.space) {
-        chamber.add(pos.join(','));
+        chamber.add(pos.join(","));
       }
       height = Math.max(height, currBlock.height);
       break;
@@ -177,13 +179,13 @@ const profile = (h) => {
   const prof = new Array(7).fill(0);
   for (let i = 0; i < 7; i++) {
     let y = h;
-    while (y > 0 && !chamber.has((i + 1) + ',' + y)) {
+    while (y > 0 && !chamber.has(i + 1 + "," + y)) {
       y--;
     }
     prof[i] = h - y;
   }
-  return prof.join('.');
-}
+  return prof.join(".");
+};
 
 chamber.clear();
 i = 0;
@@ -197,9 +199,9 @@ let n = 0;
 while (!cycleFound) {
   const currBlock = newBlock(n, height + 4);
   while (true) {
-    if (input[i] === '<') {
+    if (input[i] === "<") {
       currBlock.moveLeft();
-    } else if (input[i] === '>') {
+    } else if (input[i] === ">") {
       currBlock.moveRight();
     }
     i++;
@@ -208,13 +210,13 @@ while (!cycleFound) {
     }
     if (!currBlock.moveDown()) {
       for (const pos of currBlock.space) {
-        chamber.add(pos.join(','));
+        chamber.add(pos.join(","));
       }
       height = Math.max(height, currBlock.height);
       break;
     }
   }
-  const cycleID = (n %  5) + '|' + i + '|' + profile(height);
+  const cycleID = (n % 5) + "|" + i + "|" + profile(height);
   if (!cycleFound && !cycles.has(cycleID)) {
     cycles.set(cycleID, [n, height]);
   } else if (!cycleFound && cycles.has(cycleID)) {
@@ -236,9 +238,9 @@ const heightToAdd = cyclesRan * cycleH;
 for (let j = 0; j < leftOverN; j++) {
   const currBlock = newBlock(n + j, height + 4);
   while (true) {
-    if (input[i] === '<') {
+    if (input[i] === "<") {
       currBlock.moveLeft();
-    } else if (input[i] === '>') {
+    } else if (input[i] === ">") {
       currBlock.moveRight();
     }
     i++;
@@ -247,7 +249,7 @@ for (let j = 0; j < leftOverN; j++) {
     }
     if (!currBlock.moveDown()) {
       for (const pos of currBlock.space) {
-        chamber.add(pos.join(','));
+        chamber.add(pos.join(","));
       }
       height = Math.max(height, currBlock.height);
       break;
@@ -255,4 +257,4 @@ for (let j = 0; j < leftOverN; j++) {
   }
 }
 
-console.log(height + heightToAdd)
+console.log(height + heightToAdd);

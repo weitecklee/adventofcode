@@ -1,16 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const check = (a, b) => {
-  if (typeof a === 'number' && typeof b === 'number') {
+  if (typeof a === "number" && typeof b === "number") {
     if (a < b) {
       return true;
     }
@@ -19,10 +21,10 @@ const check = (a, b) => {
     }
     return;
   }
-  if (typeof a === 'number') {
+  if (typeof a === "number") {
     return check([a], b);
   }
-  if (typeof b === 'number') {
+  if (typeof b === "number") {
     return check(a, [b]);
   }
   for (let i = 0; i < a.length; i++) {
@@ -38,7 +40,7 @@ const check = (a, b) => {
     return true;
   }
   return;
-}
+};
 
 let ans = 0;
 const input2 = [];
@@ -61,11 +63,15 @@ input2.sort((a, b) => {
     return -1;
   }
   return 1;
-})
+});
 
 let decoder = 1;
 for (let i = 0; i < input2.length; i++) {
-  if (input2[i].length === 1 && input2[i][0].length === 1 && (input2[i][0][0] === 2 || input2[i][0][0] === 6)) {
+  if (
+    input2[i].length === 1 &&
+    input2[i][0].length === 1 &&
+    (input2[i][0][0] === 2 || input2[i][0][0] === 6)
+  ) {
     decoder *= i + 1;
   }
 }

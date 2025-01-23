@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 class Knot {
   constructor() {
@@ -31,12 +33,12 @@ class Tail extends Knot {
   constructor() {
     super();
     this.visited = new Set();
-    this.visited.add('0.0');
+    this.visited.add("0.0");
   }
   move(vec) {
     this.pos[0] += vec[0];
     this.pos[1] += vec[1];
-    this.visited.add(this.pos.join('.'));
+    this.visited.add(this.pos.join("."));
     if (this.tail) {
       const dif0 = this.pos[0] - this.tail.pos[0];
       const dif1 = this.pos[1] - this.tail.pos[1];
@@ -59,13 +61,13 @@ for (let i = 0; i < 9; i++) {
 }
 
 for (const line of input) {
-  const [dir, dist] = line.split(' ');
+  const [dir, dist] = line.split(" ");
   const vec = [0, 0];
-  if (dir === 'U') {
+  if (dir === "U") {
     vec[1] = 1;
-  } else if (dir === 'D') {
+  } else if (dir === "D") {
     vec[1] = -1;
-  } else if (dir === 'L') {
+  } else if (dir === "L") {
     vec[0] = -1;
   } else {
     vec[0] = 1;

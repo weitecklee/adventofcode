@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const y = 2000000;
 
@@ -44,7 +46,7 @@ ans += tmp[1] - tmp[0] + 1;
 console.log(ans);
 
 const max = 4000000;
-const pos = input.map((line) => line.match(/-?\d+/g).map(Number))
+const pos = input.map((line) => line.match(/-?\d+/g).map(Number));
 
 for (let j = 0; j <= max; j++) {
   const arr2 = [];
