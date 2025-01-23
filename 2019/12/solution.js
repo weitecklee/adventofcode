@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const posStringRegex = /<x=(.+), y=(.+), z=(.+)>/;
 
@@ -38,7 +40,10 @@ class Moon {
   }
 
   calculateEnergy() {
-    return this.pos.reduce((a, b) => a + Math.abs(b), 0) * this.vel.reduce((a, b) => a + Math.abs(b), 0);
+    return (
+      this.pos.reduce((a, b) => a + Math.abs(b), 0) *
+      this.vel.reduce((a, b) => a + Math.abs(b), 0)
+    );
   }
 }
 
@@ -65,7 +70,6 @@ function part1(input) {
   }
 
   return moons.reduce((a, b) => a + b.calculateEnergy(), 0);
-
 }
 
 function printStates(moons) {
@@ -75,7 +79,7 @@ function printStates(moons) {
     for (const moon of moons) {
       state.push(moon.pos[i], moon.vel[i]);
     }
-    res.push(state.join(','));
+    res.push(state.join(","));
   }
   return res;
 }
@@ -90,7 +94,7 @@ function gcd(a, b) {
 }
 
 function lcm(a, b) {
-  return a * b / gcd(a, b);
+  return (a * b) / gcd(a, b);
 }
 
 function part2(input) {

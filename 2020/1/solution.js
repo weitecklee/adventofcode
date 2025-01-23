@@ -1,13 +1,16 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n').map(Number);
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n")
+  .map(Number);
 
 input.sort((a, b) => a - b);
 
@@ -41,9 +44,9 @@ for (let i = 0; i < input.length - 2; i++) {
     }
   }
   if (input[i] + input[j] + input[k] === target) {
-    console.log(input[i] * input[j] * input[k])
+    console.log(input[i] * input[j] * input[k]);
     return;
   }
 }
 
-console.log("Could not find solution for part 2.")
+console.log("Could not find solution for part 2.");

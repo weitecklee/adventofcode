@@ -1,13 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
+const input = fs.readFileSync(
+  path.join(__dirname, "input.txt"),
+  "utf-8",
+  (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
   }
-});
+);
 
 const width = 25;
 const height = 6;
@@ -16,7 +20,7 @@ const image = [];
 for (let i = 0; i < input.length; i += width * height) {
   const layer = [];
   for (let j = 0; j < height; j++) {
-    layer.push(input.slice(i + width * j, i + (width) * (j + 1)));
+    layer.push(input.slice(i + width * j, i + width * (j + 1)));
   }
   image.push(layer);
 }
@@ -31,13 +35,13 @@ for (const layer of image) {
   for (const row of layer) {
     for (const pixel of row) {
       switch (pixel) {
-        case '0':
+        case "0":
           count0++;
           break;
-        case '1':
+        case "1":
           count1++;
           break;
-        case '2':
+        case "2":
           count2++;
       }
     }
@@ -55,17 +59,17 @@ for (let row = 0; row < height; row++) {
   const line = [];
   for (let col = 0; col < width; col++) {
     for (const layer of image) {
-      if (layer[row][col] === '1') {
-        line.push('@');
+      if (layer[row][col] === "1") {
+        line.push("@");
         break;
       }
-      if (layer[row][col] === '0') {
-        line.push(' ');
+      if (layer[row][col] === "0") {
+        line.push(" ");
         break;
       }
     }
   }
-  message.push(line.join(''));
+  message.push(line.join(""));
 }
 
 for (const line of message) {

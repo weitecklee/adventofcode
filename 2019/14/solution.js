@@ -1,16 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 function convertString(str) {
-  const [n, chem] = str.split(' ');
+  const [n, chem] = str.split(" ");
   return [chem, Number(n)];
 }
 
@@ -39,16 +41,16 @@ function parseInput(input) {
   const recipes = new Map();
 
   for (const line of input) {
-    const [inputs, output] = line.split(' => ');
+    const [inputs, output] = line.split(" => ");
     const [chemical, quantity] = convertString(output);
-    recipes.set(chemical, new Recipe(quantity, inputs.split(', ')))
+    recipes.set(chemical, new Recipe(quantity, inputs.split(", ")));
   }
 
   return recipes;
 }
 
 function calculateOreReq(chemical, quantity, recipes, surplus) {
-  if (chemical === 'ORE') {
+  if (chemical === "ORE") {
     return quantity;
   }
 
@@ -62,11 +64,19 @@ function calculateOreReq(chemical, quantity, recipes, surplus) {
 
   const recipe = recipes.get(chemical);
   const batches = Math.ceil(quantity / recipe.quantity);
-  surplus.set(chemical, surplus.get(chemical) + batches * recipe.quantity - quantity);
+  surplus.set(
+    chemical,
+    surplus.get(chemical) + batches * recipe.quantity - quantity
+  );
   let ore = 0;
 
   for (const [inputChemical, inputQuantity] of recipe.inputs) {
-    ore += calculateOreReq(inputChemical, inputQuantity * batches, recipes, surplus);
+    ore += calculateOreReq(
+      inputChemical,
+      inputQuantity * batches,
+      recipes,
+      surplus
+    );
   }
 
   return ore;
@@ -74,7 +84,7 @@ function calculateOreReq(chemical, quantity, recipes, surplus) {
 
 function part1(recipes) {
   const surplus = new DefaultDict(() => 0);
-  return calculateOreReq('FUEL', 1, recipes, surplus);
+  return calculateOreReq("FUEL", 1, recipes, surplus);
 }
 
 function part2(recipes, oreAvailable) {
@@ -84,7 +94,7 @@ function part2(recipes, oreAvailable) {
   while (lo < hi) {
     const mid = Math.floor((lo + hi + 1) / 2);
     const surplus = new DefaultDict(() => 0);
-    const ore = calculateOreReq('FUEL', mid, recipes, surplus);
+    const ore = calculateOreReq("FUEL", mid, recipes, surplus);
     if (ore > oreAvailable) {
       hi = mid - 1;
     } else {

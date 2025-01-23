@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const height = input.length;
 const width = input[0].length;
@@ -20,7 +22,7 @@ const gcd = (a, b) => {
     a = tmp;
   }
   return a;
-}
+};
 
 const isCoprime = (a, b) => gcd(a, b) === 1;
 
@@ -28,7 +30,7 @@ const calculateAngle = (a, b) => {
   const theta = Math.atan2(-b, a);
   const angle = Math.PI / 2 - theta;
   return angle >= 0 ? angle : angle + 2 * Math.PI;
-}
+};
 
 const angles = [];
 angles.push([1, 0, calculateAngle(1, 0)]);
@@ -54,13 +56,20 @@ let base = [];
 
 for (let row = 0; row < height; row++) {
   for (let col = 0; col < width; col++) {
-    if (input[row][col] != '#') {
+    if (input[row][col] != "#") {
       continue;
     }
     let count = 0;
     for (const [a, b, angle] of angles) {
-      for (let i = 1; (a * i + col) >= 0 && (b * i + row) >= 0 && (a * i + col) < width && (b * i + row) < height; i++) {
-        if (input[b * i + row][a * i + col] === '#') {
+      for (
+        let i = 1;
+        a * i + col >= 0 &&
+        b * i + row >= 0 &&
+        a * i + col < width &&
+        b * i + row < height;
+        i++
+      ) {
+        if (input[b * i + row][a * i + col] === "#") {
           count++;
           break;
         }
@@ -81,8 +90,15 @@ const asteroids = [];
 
 for (const [a, b, angle] of angles) {
   const currAngle = [];
-  for (let i = 1; (a * i + col) >= 0 && (b * i + row) >= 0 && (a * i + col) < width && (b * i + row) < height; i++) {
-    if (input[b * i + row][a * i + col] === '#') {
+  for (
+    let i = 1;
+    a * i + col >= 0 &&
+    b * i + row >= 0 &&
+    a * i + col < width &&
+    b * i + row < height;
+    i++
+  ) {
+    if (input[b * i + row][a * i + col] === "#") {
       currAngle.push([a * i + col, b * i + row]);
     }
   }

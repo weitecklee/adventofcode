@@ -1,20 +1,22 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 function convertRow(row) {
-  return parseInt(row.replaceAll('F', '0').replaceAll('B', '1'), 2);
+  return parseInt(row.replaceAll("F", "0").replaceAll("B", "1"), 2);
 }
 
 function convertCol(col) {
-  return parseInt(col.replaceAll('L', '0').replaceAll('R', '1'), 2);
+  return parseInt(col.replaceAll("L", "0").replaceAll("R", "1"), 2);
 }
 
 const seats = new Set();
@@ -29,11 +31,11 @@ for (const line of input) {
 console.log(part1);
 
 for (const seat of seats) {
-  if (seats.has(seat + 2) && !(seats.has(seat + 1))) {
+  if (seats.has(seat + 2) && !seats.has(seat + 1)) {
     console.log(seat + 1);
     break;
   }
-  if (seats.has(seat - 2) && !(seats.has(seat - 1))) {
+  if (seats.has(seat - 2) && !seats.has(seat - 1)) {
     console.log(seat - 1);
     break;
   }

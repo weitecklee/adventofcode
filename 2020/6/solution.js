@@ -1,17 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 class Group {
   constructor(answers) {
-    this.answers = answers.map((a) => a.split(''));
+    this.answers = answers.map((a) => a.split(""));
     this.part1 = 0;
     this.part2 = 0;
     this.calculatePart1();
@@ -47,7 +49,6 @@ let tempAnswers = [];
 let i = 0;
 
 while (i < input.length) {
-
   if (input[i].length) {
     tempAnswers.push(input[i]);
   } else {

@@ -1,15 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
-const targetColor = 'shiny gold';
+const targetColor = "shiny gold";
 const bags = new Map();
 
 class Bag {
@@ -34,11 +36,11 @@ class Bag {
       if (containedBagColor === targetColor || currentBag.containsTarget) {
         this.containsTarget = true;
       }
-      this.numberOfBagsInside += containedBagCount * (currentBag.numberOfBagsInside + 1);
+      this.numberOfBagsInside +=
+        containedBagCount * (currentBag.numberOfBagsInside + 1);
     }
     this.checked = true;
   }
-
 }
 
 const colorPattern = /^.*?(?= bag)/;
@@ -54,7 +56,6 @@ for (const line of input) {
   }
 
   bags.set(color, new Bag(color, tempBags));
-
 }
 
 let part1 = 0;

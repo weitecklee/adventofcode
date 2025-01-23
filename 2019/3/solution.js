@@ -1,15 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n').map((a) => a.split(','));
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n")
+  .map((a) => a.split(","));
 
-const pos2String = (pos) => pos[0] + ',' + pos[1];
+const pos2String = (pos) => pos[0] + "," + pos[1];
 
 class Wire {
   constructor(input) {
@@ -27,16 +30,16 @@ class Wire {
       const distance = Number(part.slice(1));
       const increment = [0, 0];
       switch (direction) {
-        case 'U':
+        case "U":
           increment[1] = -1;
           break;
-        case 'D':
+        case "D":
           increment[1] = 1;
           break;
-        case 'L':
+        case "L":
           increment[0] = -1;
           break;
-        case 'R':
+        case "R":
           increment[0] = 1;
       }
       for (let i = 0; i < distance; i++) {
@@ -62,7 +65,11 @@ let part1 = Infinity;
 let part2 = Infinity;
 
 for (const pos of intersections) {
-  const manhattanDistance = pos.split(',').map(Number).map(Math.abs).reduce((a, b) => a + b);
+  const manhattanDistance = pos
+    .split(",")
+    .map(Number)
+    .map(Math.abs)
+    .reduce((a, b) => a + b);
   const combinedSteps = wire1.steps.get(pos) + wire2.steps.get(pos);
   part1 = Math.min(part1, manhattanDistance);
   part2 = Math.min(part2, combinedSteps);

@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const orbitalObjectMap = new Map();
 
@@ -29,7 +31,7 @@ class OrbitalObject {
 }
 
 for (const line of input) {
-  const parts = line.split(')')
+  const parts = line.split(")");
   if (!orbitalObjectMap.has(parts[0])) {
     orbitalObjectMap.set(parts[0], new OrbitalObject(parts[0]));
   }
@@ -44,7 +46,7 @@ for (const line of input) {
 
 function part1() {
   let res = 0;
-  const queue =[ ...orbitalObjectMap.values()];
+  const queue = [...orbitalObjectMap.values()];
   while (queue.length) {
     const curr = queue.pop();
     res += curr.orbiters.length;
@@ -76,4 +78,4 @@ function part2(obj1, obj2) {
   }
 }
 
-console.log(part2('YOU', 'SAN'));
+console.log(part2("YOU", "SAN"));

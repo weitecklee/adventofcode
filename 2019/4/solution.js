@@ -1,13 +1,16 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('-').map(Number);
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("-")
+  .map(Number);
 
 const adjacentSameDigitsRegex = /(.)\1+/g;
 
@@ -25,7 +28,7 @@ class Password {
       this.part2 = false;
       return;
     }
-    const passwordArray = this.password.split('').map(Number);
+    const passwordArray = this.password.split("").map(Number);
     for (let i = 1; i < passwordArray.length; i++) {
       if (passwordArray[i] < passwordArray[i - 1]) {
         this.part1 = false;
@@ -57,4 +60,3 @@ for (let i = input[0]; i <= input[1]; i++) {
 
 console.log(part1);
 console.log(part2);
-
