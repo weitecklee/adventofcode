@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const re1 = /[aeiou]/g;
 const re2 = /(\w)\1/;
@@ -19,7 +21,12 @@ let count = 0;
 let count2 = 0;
 
 for (const line of input) {
-  if (re1.test(line) && line.match(re1).length >= 3 && re2.test(line) && !re3.test(line)) {
+  if (
+    re1.test(line) &&
+    line.match(re1).length >= 3 &&
+    re2.test(line) &&
+    !re3.test(line)
+  ) {
     count++;
   }
   if (re4.test(line) && re5.test(line)) {

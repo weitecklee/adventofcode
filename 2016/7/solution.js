@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 let count = 0;
 let count2 = 0;
@@ -20,7 +22,7 @@ for (const line of input) {
     count++;
   }
   const brackets = line.match(re3);
-  const outsideBrackets = line.replace(re3, '+');
+  const outsideBrackets = line.replace(re3, "+");
   let counted = false;
   for (const match of brackets) {
     for (let i = 0; i < match.length - 2; i++) {

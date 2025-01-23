@@ -1,18 +1,22 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
+const input = fs.readFileSync(
+  path.join(__dirname, "input.txt"),
+  "utf-8",
+  (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
   }
-});
+);
 
 const pos = [0, 0];
 const dir = [0, 1];
 
-const steps = input.split(', ')
+const steps = input.split(", ");
 
 class Instruction {
   constructor(s) {
@@ -37,7 +41,7 @@ for (const instruction of instructions) {
   pos[1] += instruction.dist * dir[1];
 }
 
-console.log(Math.abs(pos[0]) + Math.abs(pos[1]))
+console.log(Math.abs(pos[0]) + Math.abs(pos[1]));
 
 const seen = new Set();
 dir[0] = 0;
@@ -45,7 +49,7 @@ dir[1] = 1;
 pos[0] = 0;
 pos[1] = 0;
 
-const coordinate = (p) => (p[0] + ',' + p[1]);
+const coordinate = (p) => p[0] + "," + p[1];
 seen.add(coordinate(pos));
 
 for (const instruction of instructions) {

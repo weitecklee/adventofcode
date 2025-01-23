@@ -3,7 +3,7 @@
 
 ---
 
-No leaderboard for me today, because I decided to sleep on Part 2, before solving it by hand.  Since there's really no code to speak of, I'll talk about the solution.
+No leaderboard for me today, because I decided to sleep on Part 2, before solving it by hand. Since there's really no code to speak of, I'll talk about the solution.
 
 ## First insight
 
@@ -18,9 +18,9 @@ You can think of `Rn Y Ar` as the characters `( , )`:
 
     X => X(X) | X(X,X) | X(X,X,X)
 
-Whenever there are two adjacent "elements" in your "molecule", you apply the first production.  This reduces your molecule length by 1 each time.
+Whenever there are two adjacent "elements" in your "molecule", you apply the first production. This reduces your molecule length by 1 each time.
 
-And whenever you have `T(T)` `T(T,T)` or `T(T,T,T)` (T is a literal token such as "Mg", i.e. not a nonterminal like "TiTiCaCa"), you apply the second production.  This reduces your molecule length by 3, 5, or 7.
+And whenever you have `T(T)` `T(T,T)` or `T(T,T,T)` (T is a literal token such as "Mg", i.e. not a nonterminal like "TiTiCaCa"), you apply the second production. This reduces your molecule length by 3, 5, or 7.
 
 ## Third insight
 
@@ -30,14 +30,14 @@ Repeatedly applying `X => XX` until you arrive at a single token takes `count(to
     count("ABCDE") = 5
     5 - 1 = 4 steps
 
-Applying `X => X(X)` is similar to `X => XX`, except you get the `()` for free.  This can be expressed as `count(tokens) - count("(" or ")") - 1`.
+Applying `X => X(X)` is similar to `X => XX`, except you get the `()` for free. This can be expressed as `count(tokens) - count("(" or ")") - 1`.
 
     A(B(C(D(E)))) => A(B(C(X))) => A(B(X)) => A(X) => X
     count("A(B(C(D(E))))") = 13
     count("(((())))") = 8
     13 - 8 - 1 = 4 steps
 
-You can generalize to `X => X(X,X)` by noting that each `,` reduces the length by two (`,X`).  The new formula is `count(tokens) - count("(" or ")") - 2*count(",") - 1`.
+You can generalize to `X => X(X,X)` by noting that each `,` reduces the length by two (`,X`). The new formula is `count(tokens) - count("(" or ")") - 2*count(",") - 1`.
 
     A(B(C,D),E(F,G)) => A(B(C,D),X) => A(X,X) => X
     count("A(B(C,D),E(F,G))") = 16

@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 class Bot {
   constructor(giveLow, giveHigh) {
@@ -16,12 +18,12 @@ class Bot {
     this.lowOutput = null;
     this.highOutput = null;
     this.values = [];
-    if (giveLow[0] === 'bot') {
+    if (giveLow[0] === "bot") {
       this.lowBot = giveLow[1];
     } else {
       this.lowOutput = giveLow[1];
     }
-    if (giveHigh[0] === 'bot') {
+    if (giveHigh[0] === "bot") {
       this.highBot = giveHigh[1];
     } else {
       this.highOutput = giveHigh[1];
@@ -63,11 +65,10 @@ const valuesToGiveOut = [];
 
 for (const line of input) {
   const parts = line.match(re).map((a) => {
-    a = a.split(' ');
+    a = a.split(" ");
     a[1] = Number(a[1]);
     return a;
-    }
-  );
+  });
   if (parts.length === 3) {
     botMap.set(parts[0][1], new Bot(parts[1], parts[2]));
   } else {

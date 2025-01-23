@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 let count = 0;
 const realRooms = [];
@@ -16,7 +18,7 @@ for (const line of input) {
   const sections = line.match(/(.*?)-(\d+)\[(.*)\]/);
   const charmap = new Map();
   for (const c of sections[1]) {
-    if (c !== '-') {
+    if (c !== "-") {
       if (!charmap.has(c)) {
         charmap.set(c, 0);
       }
@@ -33,8 +35,8 @@ for (const line of input) {
     } else {
       return b[1] - a[1];
     }
-  })
-  let check = '';
+  });
+  let check = "";
   for (let i = 0; i < 5; i++) {
     check += arr[i][0];
   }
@@ -50,7 +52,7 @@ console.log(count);
 for (const [name, sectorID] of realRooms) {
   const codes = [];
   for (const c of name) {
-    if (c === '-') {
+    if (c === "-") {
       codes.push(32);
     } else {
       let code = c.charCodeAt(0) - 97;
@@ -59,7 +61,7 @@ for (const [name, sectorID] of realRooms) {
     }
   }
   // console.log(String.fromCharCode(...codes), sectorID);
-  if (String.fromCharCode(...codes) === 'northpole object storage') {
+  if (String.fromCharCode(...codes) === "northpole object storage") {
     console.log(sectorID);
     break;
   }

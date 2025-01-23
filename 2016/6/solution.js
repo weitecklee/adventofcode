@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf-8', (err, data) => {
-  if (err) {
-    console.log(err)
-  } else {
-    return data;
-  }
-}).split('\n');
+const input = fs
+  .readFileSync(path.join(__dirname, "input.txt"), "utf-8", (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return data;
+    }
+  })
+  .split("\n");
 
 const frequencyMaps = [];
 for (let i = 0; i < input[0].length; i++) {
@@ -23,8 +25,8 @@ for (const line of input) {
   }
 }
 
-let res = '';
-let res2 = '';
+let res = "";
+let res2 = "";
 
 for (const freqMap of frequencyMaps) {
   const freqArray = [];
