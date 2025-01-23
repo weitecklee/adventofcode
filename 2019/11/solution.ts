@@ -14,7 +14,7 @@ class Memory<K, V> extends Map<K, V> {
 
 type IntcodeGenerator = Generator<number, number, number>;
 
-function* intcodeGenerator(prog: number[], input: number[]): IntcodeGenerator {
+function* intcodeGenerator(prog: number[]): IntcodeGenerator {
   function getParams(
     program: Memory<number, number>,
     parameterModes: number[],
@@ -42,7 +42,6 @@ function* intcodeGenerator(prog: number[], input: number[]): IntcodeGenerator {
 
   const program = new Memory(prog.map((a, i) => [i, a]));
   let i = 0; // program index
-  let j = 0; // input index
   let relativeBase = 0;
   while (i >= 0) {
     const opcode = program.get(i) % 100;
@@ -86,7 +85,7 @@ function* intcodeGenerator(prog: number[], input: number[]): IntcodeGenerator {
         break;
       case 3:
         // save input
-        program.set(params[0], input[j++]);
+        program.set(params[0], yield 9999);
         i++;
         break;
       case 4:
@@ -148,14 +147,16 @@ function* intcodeGenerator(prog: number[], input: number[]): IntcodeGenerator {
 }
 
 function runProgram(startingPanelColor: number): Map<string, number> {
-  const robotInput: number[] = [startingPanelColor];
-  const robot = intcodeGenerator(puzzleInput, robotInput);
+  const robot = intcodeGenerator(puzzleInput);
   const robotPos = [0, 0]; // using RC coordinate system
   const robotDir = [-1, 0];
-  const panels: Map<string, number> = new Map();
+  const panels: Map<string, number> = new Map([
+    [robotPos.join(","), startingPanelColor],
+  ]);
 
   while (true) {
-    const ret = robot.next();
+    robot.next();
+    const ret = robot.next(panels.get(robotPos.join(",")) ?? 0);
     if (ret.done) break;
     const ret2 = robot.next();
     if (ret2.done) break;
@@ -169,9 +170,7 @@ function runProgram(startingPanelColor: number): Map<string, number> {
     }
     robotPos[0] += robotDir[0];
     robotPos[1] += robotDir[1];
-    robotInput.push(panels.get(robotPos.join(",")) ?? 0);
   }
-
   return panels;
 }
 
