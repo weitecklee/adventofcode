@@ -57,4 +57,12 @@ function draw() {
   else console.log("\x1b[26B\x1b[?25h");
 }
 
+function cleanup() {
+  console.log("\x1b[26B\x1b[?25h");
+  process.exit(0);
+}
+
 draw();
+
+process.on("SIGINT", cleanup);
+process.on("SIGTERM", cleanup);
