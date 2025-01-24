@@ -157,6 +157,13 @@ let xBall = 0;
 let xPaddle = 0;
 let score = 0;
 let xRet: IteratorResult<number, number>;
+const tileBlocks = new Map([
+  [0, " "],
+  [1, "█"],
+  [2, "▒"],
+  [3, "▔"],
+  [4, "O"],
+]);
 console.log("\x1b[?25l");
 
 function draw() {
@@ -174,7 +181,7 @@ function draw() {
       xPaddle = xRet.value;
     }
     if (xRet.value >= 0 && yRet.value >= 0)
-      arcadeScreen[yRet.value][xRet.value] = tileRet.value || " ";
+      arcadeScreen[yRet.value][xRet.value] = tileBlocks.get(tileRet.value);
   }
 
   if (xBall < xPaddle) move = -1;
@@ -185,7 +192,7 @@ function draw() {
   console.log(score);
   console.log("\x1b[26A\x1b[44D");
 
-  if (!xRet.done) setTimeout(draw, 100);
+  if (!xRet.done) setTimeout(draw, 1000 / 24);
   else console.log("\x1b[26B\x1b[?25h");
 }
 
