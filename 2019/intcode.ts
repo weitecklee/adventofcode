@@ -1,6 +1,20 @@
-class Memory<K, V> extends Map<K, V> {
-  get(key: K): V {
-    return (super.get(key) ?? 0) as V;
+// Old code runs fine with ts-node but repeatedly ran into errors
+// when compiling with tsc. Turns out it just really hates extending
+// builtin classes like Map. `Memory` implemented another way
+// to get around this.
+
+class Memory {
+  map: Map<number, number>;
+  constructor(entries: [number, number][]) {
+    this.map = new Map(entries);
+  }
+
+  set(k: number, v: number) {
+    this.map.set(k, v);
+  }
+
+  get(k: number): number {
+    return this.map.get(k) ?? 0;
   }
 }
 
@@ -8,7 +22,7 @@ type IntcodeGenerator = Generator<number, number, number>;
 
 function* intcodeGenerator(prog: number[]): IntcodeGenerator {
   function getParams(
-    program: Memory<number, number>,
+    program: Memory,
     parameterModes: number[],
     nParams: number,
     i: number,

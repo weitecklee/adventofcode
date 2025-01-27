@@ -61,11 +61,11 @@ const part2Paint = Array(rRange)
   .fill("")
   .map(() => Array(cRange).fill(" "));
 
-for (const [coordString, paint] of part2Panels) {
+part2Panels.forEach((paint, coordString) => {
   let [r, c] = coordString.split(",").map(Number);
   r -= rMin;
   c -= cMin;
   part2Paint[r][c] = paint === 1 ? "#" : " ";
-}
+});
 
 part2Paint.forEach((r) => console.log(r.join("")));
