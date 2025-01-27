@@ -18,7 +18,7 @@ class Memory {
   }
 }
 
-type IntcodeGenerator = Generator<number, number, number>;
+export type IntcodeGenerator = Generator<number, number, number>;
 
 function* intcodeGenerator(prog: number[]): IntcodeGenerator {
   function getParams(
