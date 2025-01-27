@@ -26,8 +26,10 @@ const directions = [
   [-1, 0],
 ];
 
+const areaMap: Map<string, number> = new Map([["0,0", 1]]);
+let oxygenLocation: number[] = [0, 0];
+
 let i = 0;
-let found = false;
 while (i < queue.length) {
   const [commands, pos] = queue[i];
   i++;
@@ -39,16 +41,33 @@ while (i < queue.length) {
     const remoteControl2 = cloneRC(commands);
     remoteControl2.next();
     const ret = remoteControl2.next(j);
+    areaMap.set(pos2.join(","), ret.value);
     if (ret.value === 0) {
       continue;
     }
-    if (ret.value === 1) {
-      queue.push([commands.concat(j), pos2]);
-    } else if (ret.value === 2) {
+    if (ret.value === 2) {
       console.log(commands.length + 1);
-      found = true;
-      break;
+      oxygenLocation = pos2;
     }
+    queue.push([commands.concat(j), pos2]);
   }
-  if (found) break;
 }
+
+const visited2: Set<string> = new Set([oxygenLocation.join(",")]);
+const queue2: [number[], number][] = [[oxygenLocation, 0]];
+
+let part2 = 0;
+while (queue2.length) {
+  const [pos, steps] = queue2.pop()!;
+  part2 = Math.max(part2, steps);
+  for (const [dx, dy] of directions) {
+    const pos2 = [pos[0] + dx, pos[1] + dy];
+    const coord2 = pos2.join(",");
+    if (areaMap.get(coord2)! === 0) continue;
+    if (visited2.has(coord2)) continue;
+    visited2.add(coord2);
+    queue2.push([pos2, steps + 1]);
+  }
+}
+
+console.log(part2);
