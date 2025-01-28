@@ -54,67 +54,78 @@ for (let r = 1; r < rMax - 1; r++) {
 }
 console.log(part1);
 
-// const robotPath: (string | number)[] = [];
-// let steps = 1;
-// let endOfPath = false;
-// while (!endOfPath) {
-//   let [r2, c2] = [robotPos[0] + robotDir[0], robotPos[1] + robotDir[1]];
-//   if (
-//     r2 >= 0 &&
-//     c2 >= 0 &&
-//     r2 < rMax &&
-//     c2 < cMax &&
-//     scaffold[r2][c2] === "#"
-//   ) {
-//     steps++;
-//   } else {
-//     robotPath.push(steps);
-//     steps = 1;
-//     robotDir = [robotDir[1], -robotDir[0]];
-//     [r2, c2] = [robotPos[0] + robotDir[0], robotPos[1] + robotDir[1]];
-//     if (
-//       r2 >= 0 &&
-//       c2 >= 0 &&
-//       r2 < rMax &&
-//       c2 < cMax &&
-//       scaffold[r2][c2] === "#"
-//     ) {
-//       robotPath.push("R");
-//     } else {
-//       robotDir = [-robotDir[0], -robotDir[1]];
-//       [r2, c2] = [robotPos[0] + robotDir[0], robotPos[1] + robotDir[1]];
-//       if (
-//         r2 >= 0 &&
-//         c2 >= 0 &&
-//         r2 < rMax &&
-//         c2 < cMax &&
-//         scaffold[r2][c2] === "#"
-//       ) {
-//         robotPath.push("L");
-//       } else {
-//         endOfPath = true;
-//       }
-//     }
-//   }
-//   robotPos = [r2, c2];
-// }
-// robotPath.shift();
-// console.log(robotPath.join(","));
+const robotPath: (string | number)[] = [];
+let steps = 0;
+let endOfPath = false;
+while (!endOfPath) {
+  let [r2, c2] = [robotPos[0] + robotDir[0], robotPos[1] + robotDir[1]];
+  if (
+    r2 >= 0 &&
+    c2 >= 0 &&
+    r2 < rMax &&
+    c2 < cMax &&
+    scaffold[r2][c2] === "#"
+  ) {
+    steps++;
+  } else {
+    robotPath.push(steps);
+    steps = 1;
+    robotDir = [robotDir[1], -robotDir[0]];
+    [r2, c2] = [robotPos[0] + robotDir[0], robotPos[1] + robotDir[1]];
+    if (
+      r2 >= 0 &&
+      c2 >= 0 &&
+      r2 < rMax &&
+      c2 < cMax &&
+      scaffold[r2][c2] === "#"
+    ) {
+      robotPath.push("R");
+    } else {
+      robotDir = [-robotDir[0], -robotDir[1]];
+      [r2, c2] = [robotPos[0] + robotDir[0], robotPos[1] + robotDir[1]];
+      if (
+        r2 >= 0 &&
+        c2 >= 0 &&
+        r2 < rMax &&
+        c2 < cMax &&
+        scaffold[r2][c2] === "#"
+      ) {
+        robotPath.push("L");
+      } else {
+        endOfPath = true;
+      }
+    }
+  }
+  robotPos = [r2, c2];
+}
+if (robotPath[0] === 0) robotPath.shift();
 
-// R,8,L,4,R,4,R,10,R,8,R,8,L,4,R,4,R,10,R,8,L,12,L,12,R,8,R,8,R,10,R,4,R,4,L,12,L,12,R,8,R,8,R,10,R,4,R,4,L,12,L,12,R,8,R,8,R,10,R,4,R,4,R,10,R,4,R,4,R,8,L,4,R,4,R,10,R,8
-// main: A,A,B,C,B,C,B,C,C,A
-// A: R,8,L,4,R,4,R,10,R,8
-// B: L,12,L,12,R,8,R,8
-// C: R,10,R,4,R,4
+const pathString = robotPath.join(",");
+
+function generateMovementFunctions(pathString: string): string[] {
+  const reg =
+    /^(.{1,19}[^,])(?:,|\1)*(.{1,19}[^,])(?:,|\1|\2)*(.{1,19}[^,])(?:,|\1|\2|\3)*$/;
+
+  const match = pathString.match(reg);
+  if (match) {
+    const funcA = match[1];
+    const funcB = match[2];
+    const funcC = match[3];
+    const funcMain = pathString
+      .replaceAll(funcA, "A")
+      .replaceAll(funcB, "B")
+      .replaceAll(funcC, "C");
+    return [funcMain, funcA, funcB, funcC];
+  }
+
+  throw new Error("Could not generate movement functions with regex");
+}
+
+const [funcMain, funcA, funcB, funcC] = generateMovementFunctions(pathString);
 
 puzzleInput[0] = 2;
 
 const robot = intcodeGenerator(puzzleInput);
-
-const funcMain = "A,A,B,C,B,C,B,C,C,A";
-const funcA = "R,8,L,4,R,4,R,10,R,8";
-const funcB = "L,12,L,12,R,8,R,8";
-const funcC = "R,10,R,4,R,4";
 
 function displayMessage() {
   // let message: string[] = [];
