@@ -105,6 +105,10 @@ const pathString = robotPath.join(",");
 function generateMovementFunctions(pathString: string): string[] {
   const reg =
     /^(.{1,19}[^,])(?:,|\1)*(.{1,19}[^,])(?:,|\1|\2)*(.{1,19}[^,])(?:,|\1|\2|\3)*$/;
+  // Capture groups for movement functions = (.{1,19}[^,])
+  // Max length of 20 and should not finish with a comma.
+  // Non-capturing groups (?:,|\1|\2|\3) to catch any commas or
+  // additional instances of movement functions
 
   const match = pathString.match(reg);
   if (match) {
@@ -112,9 +116,9 @@ function generateMovementFunctions(pathString: string): string[] {
     const funcB = match[2];
     const funcC = match[3];
     const funcMain = pathString
-      .replaceAll(funcA, "A")
-      .replaceAll(funcB, "B")
-      .replaceAll(funcC, "C");
+      .replace(new RegExp(funcA, "g"), "A")
+      .replace(new RegExp(funcB, "g"), "B")
+      .replace(new RegExp(funcC, "g"), "C");
     return [funcMain, funcA, funcB, funcC];
   }
 
