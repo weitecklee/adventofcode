@@ -16,12 +16,18 @@ class Node {
   coords: number[];
   coordString: string;
   neighbors: Map<Node, number>;
+  isOuter: boolean;
 
   constructor(name: string, coords: number[]) {
     this.name = name;
     this.coords = coords;
     this.coordString = coords.join(",");
     this.neighbors = new Map();
+    this.isOuter =
+      coords[0] === 2 ||
+      coords[0] === rMax - 2 ||
+      coords[1] === 2 ||
+      coords[1] === cMax - 2;
   }
 }
 
@@ -113,5 +119,30 @@ while (queue.length) {
     const visited2 = new Set(visitedNodes);
     visited2.add(neighbor);
     MinHeap.push(queue, [steps + d, neighbor, visited2]);
+  }
+}
+
+const queue2: [number, number, Node][] = [[0, 0, nodeAA]];
+
+const visited = new Set();
+
+while (queue2.length) {
+  const [steps, level, currentNode] = MinHeap.pop(queue2)!;
+  if (currentNode === nodeZZ) {
+    console.log(steps);
+    break;
+  }
+  for (const [neighbor, d] of currentNode.neighbors) {
+    if ((neighbor === nodeZZ || neighbor === nodeAA) && level !== 0) continue;
+    let level2 = level;
+    if (neighbor.name === currentNode.name) {
+      if (currentNode.isOuter) level2--;
+      else level2++;
+    }
+    if (level2 < 0) continue;
+    if (visited.has(`${level2}:${neighbor.name}${neighbor.isOuter ? 1 : 2}`))
+      continue;
+    visited.add(`${level2}:${neighbor.name}${neighbor.isOuter ? 1 : 2}`);
+    MinHeap.push(queue2, [steps + d, level2, neighbor]);
   }
 }
