@@ -123,8 +123,7 @@ while (queue.length) {
 }
 
 const queue2: [number, number, Node][] = [[0, 0, nodeAA]];
-
-const visited = new Set();
+const visited2 = new Set(["0AA1"]);
 
 while (queue2.length) {
   const [steps, level, currentNode] = MinHeap.pop(queue2)!;
@@ -140,9 +139,9 @@ while (queue2.length) {
       else level2++;
     }
     if (level2 < 0) continue;
-    if (visited.has(`${level2}:${neighbor.name}${neighbor.isOuter ? 1 : 2}`))
-      continue;
-    visited.add(`${level2}:${neighbor.name}${neighbor.isOuter ? 1 : 2}`);
+    const neighborKey = `${level2}${neighbor.name}${neighbor.isOuter ? 1 : 2}`;
+    if (visited2.has(neighborKey)) continue;
+    visited2.add(neighborKey);
     MinHeap.push(queue2, [steps + d, level2, neighbor]);
   }
 }
