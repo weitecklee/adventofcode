@@ -1,10 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const puzzleInput: (string | Unit)[][] = fs
-  .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
-  .split("\n")
-  .map((a) => a.split(""));
+const puzzleInput = fs.readFileSync(path.join(__dirname, "input.txt"), "utf-8");
 
 const directions = [
   [-1, 0],
@@ -12,16 +9,6 @@ const directions = [
   [0, 1],
   [1, 0],
 ];
-
-const unitCounts: Map<string, number> = new Map([
-  ["Goblin", 0],
-  ["Elf", 0],
-]);
-
-const unitMap: Map<string, Unit[]> = new Map([
-  ["Goblin", []],
-  ["Elf", []],
-]);
 
 type QueueEntry = [number, number[], number[], number[]];
 
@@ -31,14 +18,23 @@ class Unit {
   pos: [number, number];
   species: string;
   moved: boolean;
+  area: (string | Unit)[][];
+  unitSetMap: Map<string, Set<Unit>>;
 
-  constructor(pos: [number, number], species: string) {
-    this.attackPower = 3;
+  constructor(
+    pos: [number, number],
+    species: string,
+    attackPower: number,
+    area: (string | Unit)[][],
+    unitSetMap: Map<string, Set<Unit>>
+  ) {
+    this.attackPower = attackPower;
     this.hitPoints = 200;
     this.pos = pos;
     this.species = species;
     this.moved = false;
-    unitCounts.set(species, (unitCounts.get(species) || 0) + 1);
+    this.area = area;
+    this.unitSetMap = unitSetMap;
   }
 
   move() {
@@ -54,21 +50,19 @@ class Unit {
     for (const dir of directions) {
       const [r, c] = [this.pos[0] + dir[0], this.pos[1] + dir[1]];
       if (
-        puzzleInput[r][c] instanceof Unit &&
-        puzzleInput[r][c].species !== this.species
+        this.area[r][c] instanceof Unit &&
+        this.area[r][c].species !== this.species
       ) {
-        targets.push(puzzleInput[r][c]);
+        targets.push(this.area[r][c]);
       }
     }
     if (targets.length === 0) return false;
     targets.sort((a, b) => a.hitPoints - b.hitPoints);
-    targets[0].hitPoints -= this.attackPower;
-    if (targets[0].hitPoints <= 0) {
-      puzzleInput[targets[0].pos[0]][targets[0].pos[1]] = ".";
-      unitCounts.set(
-        targets[0].species,
-        unitCounts.get(targets[0].species)! - 1
-      );
+    const target = targets[0];
+    target.hitPoints -= this.attackPower;
+    if (target.hitPoints <= 0) {
+      this.area[target.pos[0]][target.pos[1]] = ".";
+      this.unitSetMap.get(target.species)!.delete(target);
     }
     return true;
   }
@@ -85,9 +79,9 @@ class Unit {
       if (dMin >= 0 && d > dMin) break;
       if (visited.has(`${r2},${c2}`)) continue;
       visited.add(`${r2},${c2}`);
-      if (puzzleInput[r2][c2] === "#") continue;
-      if (puzzleInput[r2][c2] instanceof Unit) {
-        if ((puzzleInput[r2][c2] as Unit).species !== this.species) {
+      if (this.area[r2][c2] === "#") continue;
+      if (this.area[r2][c2] instanceof Unit) {
+        if ((this.area[r2][c2] as Unit).species !== this.species) {
           targets.push([r2, c2, ...move0]);
           dMin = d;
         }
@@ -106,55 +100,92 @@ class Unit {
         this.pos[0] + targets[0][2],
         this.pos[1] + targets[0][3],
       ];
-      puzzleInput[r2][c2] = this;
-      puzzleInput[this.pos[0]][this.pos[1]] = ".";
+      this.area[r2][c2] = this;
+      this.area[this.pos[0]][this.pos[1]] = ".";
       this.pos = [r2, c2];
     }
   }
 }
 
-for (let r = 0; r < puzzleInput.length; r++) {
-  for (let c = 0; c < puzzleInput[r].length; c++) {
-    if (puzzleInput[r][c] === "E") {
-      puzzleInput[r][c] = new Unit([r, c], "Elf");
-      unitMap.get("Elf")!.push(puzzleInput[r][c] as Unit);
-    } else if (puzzleInput[r][c] === "G") {
-      puzzleInput[r][c] = new Unit([r, c], "Goblin");
-      unitMap.get("Goblin")!.push(puzzleInput[r][c] as Unit);
-    }
-  }
-}
+function simulate(elfAttackPower: number): [number, number] {
+  const area: (string | Unit)[][] = puzzleInput
+    .split("\n")
+    .map((a) => a.split(""));
 
-let round = 0;
-let gameOver = false;
-while (true) {
-  for (let r = 0; r < puzzleInput.length; r++) {
-    for (let c = 0; c < puzzleInput[r].length; c++) {
-      if (
-        puzzleInput[r][c] instanceof Unit &&
-        !(puzzleInput[r][c] as Unit).moved
-      ) {
-        if (unitCounts.get("Elf") === 0 || unitCounts.get("Goblin") === 0) {
-          gameOver = true;
-          break;
-        }
-        (puzzleInput[r][c] as Unit).move();
+  const unitSetMap: Map<string, Set<Unit>> = new Map([
+    ["Goblin", new Set()],
+    ["Elf", new Set()],
+  ]);
+
+  for (let r = 0; r < area.length; r++) {
+    for (let c = 0; c < area[r].length; c++) {
+      if (area[r][c] === "E") {
+        area[r][c] = new Unit([r, c], "Elf", elfAttackPower, area, unitSetMap);
+        unitSetMap.get("Elf")!.add(area[r][c] as Unit);
+      } else if (area[r][c] === "G") {
+        area[r][c] = new Unit([r, c], "Goblin", 3, area, unitSetMap);
+        unitSetMap.get("Goblin")!.add(area[r][c] as Unit);
       }
     }
-    if (gameOver) break;
   }
-  if (gameOver) break;
-  unitMap.get("Elf")!.forEach((u) => {
-    u.moved = false;
-  });
-  unitMap.get("Goblin")!.forEach((u) => {
-    u.moved = false;
-  });
-  round++;
+
+  let round = 0;
+  let gameOver = false;
+  while (true) {
+    for (let r = 0; r < area.length; r++) {
+      for (let c = 0; c < area[r].length; c++) {
+        if (area[r][c] instanceof Unit && !(area[r][c] as Unit).moved) {
+          if (
+            unitSetMap.get("Elf")!.size === 0 ||
+            unitSetMap.get("Goblin")!.size === 0
+          ) {
+            gameOver = true;
+            break;
+          }
+          (area[r][c] as Unit).move();
+        }
+      }
+      if (gameOver) break;
+    }
+    if (gameOver) break;
+    unitSetMap.get("Elf")!.forEach((u) => {
+      u.moved = false;
+    });
+    unitSetMap.get("Goblin")!.forEach((u) => {
+      u.moved = false;
+    });
+    round++;
+  }
+
+  return [
+    unitSetMap.get("Elf")!.size,
+    round *
+      (Array.from(unitSetMap.get("Elf")!).reduce(
+        (a, b) => a + Math.max(b.hitPoints, 0),
+        0
+      ) +
+        Array.from(unitSetMap.get("Goblin")!).reduce(
+          (a, b) => a + Math.max(b.hitPoints, 0),
+          0
+        )),
+  ];
 }
 
-console.log(
-  round *
-    (unitMap.get("Elf")!.reduce((a, b) => a + Math.max(b.hitPoints, 0), 0) +
-      unitMap.get("Goblin")!.reduce((a, b) => a + Math.max(b.hitPoints, 0), 0))
-);
+console.log(simulate(3)[1]);
+
+const nElves = puzzleInput.match(/E/g)!.length;
+
+let lo = 4;
+let hi = 200;
+let part2 = 0;
+while (lo < hi) {
+  const mid = Math.floor(lo + (hi - lo) / 2);
+  const [nElfSurvivors, outcome] = simulate(mid);
+  if (nElfSurvivors === nElves) {
+    hi = mid;
+    part2 = outcome;
+  } else {
+    lo = mid + 1;
+  }
+}
+console.log(part2);
