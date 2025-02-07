@@ -19,11 +19,11 @@ class Group {
   attacker?: Group;
   id: number;
 
-  constructor(line: string, army: Army, id: number) {
+  constructor(line: string, army: Army, id: number, boost: number) {
     const nums = line.match(/\d+/g)!.map(Number);
     this.nUnits = nums[0];
     this.hitPoints = nums[1];
-    this.attackDamage = nums[2];
+    this.attackDamage = nums[2] + boost;
     this.initiative = nums[3];
     const immMatch = line.match(/immune to (.*?)(;|\))/);
     if (immMatch) {
@@ -53,7 +53,6 @@ class Group {
   }
 
   findTarget() {
-    this.target = undefined;
     let maxDamage = 0;
     for (const group of this.army.enemy!.groups) {
       if (group.attacker) continue;
@@ -85,17 +84,24 @@ class Group {
     }
   }
 
-  attackTarget() {
+  attackTarget(): number {
+    let unitsLost = 0;
     if (this.target) {
-      const unitsLost = Math.floor(
-        this.damageToTarget(this.target) / this.target.hitPoints
+      unitsLost = Math.min(
+        Math.floor(this.damageToTarget(this.target) / this.target.hitPoints),
+        this.target.nUnits
       );
       this.target.nUnits -= unitsLost;
       if (this.target.nUnits <= 0) {
         this.target.army.groups.delete(this.target);
       }
-      this.target.attacker = undefined;
     }
+    return unitsLost;
+  }
+
+  reset() {
+    this.target = undefined;
+    this.attacker = undefined;
   }
 }
 
@@ -104,37 +110,65 @@ class Army {
   name: string;
   enemy?: Army;
 
-  constructor(lines: string[]) {
+  constructor(lines: string[], boost: number = 0) {
     this.name = lines[0];
     this.groups = new Set(
-      lines.slice(1).map((l, i) => new Group(l, this, i + 1))
+      lines.slice(1).map((l, i) => new Group(l, this, i + 1, boost))
     );
   }
-}
 
-const immune = new Army(puzzleInput[0]);
-const infection = new Army(puzzleInput[1]);
-immune.enemy = infection;
-infection.enemy = immune;
-
-while (immune.groups.size > 0 && infection.groups.size > 0) {
-  const groups = Array.from(immune.groups).concat(Array.from(infection.groups));
-  groups.sort((a, b) => {
-    if (a.effectivePower != b.effectivePower)
-      return b.effectivePower - a.effectivePower;
-    return b.initiative - a.initiative;
-  });
-  for (const group of groups) {
-    group.findTarget();
-  }
-  groups.sort((a, b) => b.initiative - a.initiative);
-  for (const group of groups) {
-    if (group.nUnits <= 0) continue;
-    group.attackTarget();
+  get nUnits(): number {
+    return Array.from(this.groups).reduce((a, b) => a + b.nUnits, 0);
   }
 }
 
-console.log(
-  Array.from(immune.groups).reduce((a, b) => a + b.nUnits, 0) +
-    Array.from(infection.groups).reduce((a, b) => a + b.nUnits, 0)
-);
+function reset(...armies: Army[]) {
+  for (const army of armies) {
+    for (const group of army.groups) {
+      group.reset();
+    }
+  }
+}
+
+function battle(boost: number = 0): Army | null {
+  const army1 = new Army(puzzleInput[0], boost);
+  const army2 = new Army(puzzleInput[1]);
+  army1.enemy = army2;
+  army2.enemy = army1;
+  while (army1.groups.size > 0 && army2.groups.size > 0) {
+    reset(army1, army2);
+    const groups = Array.from(army1.groups).concat(Array.from(army2.groups));
+    groups.sort((a, b) => {
+      if (a.effectivePower != b.effectivePower)
+        return b.effectivePower - a.effectivePower;
+      return b.initiative - a.initiative;
+    });
+    for (const group of groups) {
+      group.findTarget();
+    }
+    groups.sort((a, b) => b.initiative - a.initiative);
+    let unitsLost = 0;
+    for (const group of groups) {
+      if (group.nUnits <= 0) continue;
+      unitsLost += group.attackTarget();
+    }
+    if (unitsLost === 0) {
+      // stalemate
+      return null;
+    }
+  }
+  if (army1.groups.size) return army1;
+  return army2;
+}
+
+console.log(battle()!.nUnits);
+
+let i = 0;
+while (true) {
+  i++;
+  const winner = battle(i);
+  if (winner?.name === "Immune System:") {
+    console.log(winner?.nUnits);
+    break;
+  }
+}
