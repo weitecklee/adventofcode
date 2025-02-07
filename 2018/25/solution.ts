@@ -6,60 +6,61 @@ const puzzleInput = fs
   .split("\n")
   .map((a) => a.split(",").map(Number));
 
-function calcDist(p1: number[], p2: number[]): number {
+type Point = [number, number, number, number];
+
+function calcDist(p1: Point, p2: Point): number {
   return p1.reduce((a, b, i) => a + Math.abs(b - p2[i]), 0);
 }
 
-const edges: [number, number][] = [];
+const points = puzzleInput as Point[];
+const edges: [Point, Point][] = [];
 
-for (let i = 0; i < puzzleInput.length; i++) {
-  for (let j = i + 1; j < puzzleInput.length; j++) {
-    if (calcDist(puzzleInput[i], puzzleInput[j]) <= 3) edges.push([i, j]);
+for (let i = 0; i < points.length; i++) {
+  for (let j = i + 1; j < points.length; j++) {
+    if (calcDist(points[i], points[j]) <= 3) edges.push([points[i], points[j]]);
   }
 }
 
-class UnionFind {
-  parent: number[];
-  size: number[];
+class UnionFind<T> {
+  parent: Map<T, T>;
+  size: Map<T, number>;
   count: number;
-  constructor(nElements: number, edges: [number, number][]) {
-    this.parent = Array(nElements)
-      .fill(undefined)
-      .map((_, i) => i);
-    this.size = Array(nElements).fill(1);
-    this.count = nElements;
+  constructor(elements: T[], edges: [T, T][]) {
+    this.count = elements.length;
+    this.parent = new Map(elements.map((a) => [a, a]));
+    this.size = new Map(elements.map((a) => [a, 1]));
     this.initialize(edges);
   }
 
-  initialize(edges: [number, number][]) {
+  initialize(edges: [T, T][]) {
     for (const [a, b] of edges) {
       this.union(a, b);
     }
   }
 
-  findParent(a: number): number {
-    while (a !== this.parent[a]) {
-      this.parent[a] = this.parent[this.parent[a]];
-      a = this.parent[a];
+  findParent(a: T): T {
+    if (a !== this.parent.get(a)) {
+      this.parent.set(a, this.findParent(this.parent.get(a)!));
     }
-    return a;
+    return this.parent.get(a)!;
   }
 
-  union(a: number, b: number): void {
-    const parentA = this.findParent(a);
-    const parentB = this.findParent(b);
-    if (parentA !== parentB) {
-      if (this.size[parentA] > this.size[parentB]) {
-        this.parent[parentB] = parentA;
-        this.size[parentA]++;
+  union(a: T, b: T): void {
+    const rootA = this.findParent(a);
+    const rootB = this.findParent(b);
+
+    if (rootA !== rootB) {
+      if (this.size.get(rootA)! > this.size.get(rootB)!) {
+        this.parent.set(rootB, rootA);
+        this.size.set(rootA, this.size.get(rootA)! + this.size.get(rootB)!);
       } else {
-        this.parent[parentA] = parentB;
-        this.size[parentB]++;
+        this.parent.set(rootA, rootB);
+        this.size.set(rootB, this.size.get(rootB)! + this.size.get(rootA)!);
       }
       this.count--;
     }
   }
 }
 
-const uf = new UnionFind(puzzleInput.length, edges);
+const uf = new UnionFind(puzzleInput, edges);
 console.log(uf.count);
