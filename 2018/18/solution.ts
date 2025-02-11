@@ -119,6 +119,10 @@ class Area {
     }
     return nWood * nLumber;
   }
+
+  get stringForm(): string {
+    return this.area.map((a) => a.map((b) => b.state).join("")).join("");
+  }
 }
 
 function part1(): number {
@@ -131,4 +135,44 @@ function part1(): number {
   return area.resourceValue;
 }
 
+function part2(): number {
+  const area = new Area(puzzleInput);
+  let i = 0;
+  const memo: Map<string, number> = new Map([[area.stringForm, 0]]);
+  const memo2: Map<number, string> = new Map([[0, area.stringForm]]);
+
+  while (true) {
+    i++;
+    area.iterate();
+    const stringForm = area.stringForm;
+    if (memo.has(stringForm)) {
+      break;
+    }
+    memo.set(stringForm, i);
+    memo2.set(i, stringForm);
+  }
+
+  const areaString = area.stringForm;
+  const period = i - memo.get(areaString)!;
+  const timeBeforePeriod = memo.get(areaString)!;
+  const timeLeftOver = (1000000000 - timeBeforePeriod) % period;
+
+  return memo2
+    .get(timeBeforePeriod + timeLeftOver)!
+    .split("")
+    .reduce(
+      (a, b) => {
+        if (b === "|") {
+          a[0]++;
+        } else if (b === "#") {
+          a[1]++;
+        }
+        return a;
+      },
+      [0, 0]
+    )
+    .reduce((a, b) => a * b, 1);
+}
+
 console.log(part1());
+console.log(part2());
