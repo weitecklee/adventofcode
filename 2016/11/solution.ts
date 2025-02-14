@@ -45,11 +45,41 @@ function isDone(floors: Floors): boolean {
   return true;
 }
 
+// generator + microchip pairs are interchangeable.
+// i.e., a state where "microchipA and generatorA on floor 1, microchipB and generatorB on floor 2"
+// is equivalent to "microchipB and generatorB on floor 1, microchipA and generatorA on floor 2"
+// stateString should account for this to allow for better pruning of states
 function stateString(floors: Floors, currLoc: number): string {
+  const stringMap: Map<string, number> = new Map();
+  let i = 0;
+  for (const [generators, microchips] of floors) {
+    for (const gen of generators) {
+      if (!stringMap.has(gen)) {
+        stringMap.set(gen, i);
+        i++;
+      }
+    }
+    for (const chip of microchips) {
+      if (!stringMap.has(chip)) {
+        stringMap.set(chip, i);
+        i++;
+      }
+    }
+  }
+
   return (
     currLoc +
     floors
-      .map((a) => a.map((b) => Array.from(b).sort().join(",")).join(";"))
+      .map((a) =>
+        a
+          .map((b) =>
+            Array.from(b)
+              .map((c) => stringMap.get(c)!)
+              .sort()
+              .join(",")
+          )
+          .join(";")
+      )
       .join("|")
   );
 }
@@ -77,12 +107,7 @@ function pushNewEntry(
   const state = stateString(copy, destLoc);
   if (visited.has(state) && visited.get(state)! <= steps) return;
   visited.set(state, steps);
-  MinHeap.push(queue, [
-    heuristic(copy) * 0.9 + steps * 0.1,
-    steps,
-    destLoc,
-    copy,
-  ]);
+  MinHeap.push(queue, [heuristic(copy) + steps, steps, destLoc, copy]);
 }
 
 const floors = puzzleInput.map(parseLine);
