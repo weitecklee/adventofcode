@@ -6,11 +6,17 @@ const puzzleInput = fs
   .split("\n")
   .map((a) => a.split("-").map(Number)) as [number, number][];
 
+const MAXIMUMIP = 4294967295;
+
 class RangeCollection {
   ranges: [number, number][];
-  constructor(ranges: [number, number][]) {
-    this.ranges = ranges.sort((a, b) => a[0] - b[0]);
-    this.addRange(ranges[0]);
+  constructor(ranges?: [number, number][]) {
+    if (ranges && ranges.length) {
+      this.ranges = ranges.sort((a, b) => a[0] - b[0]);
+      this.addRange(ranges[0]);
+    } else {
+      this.ranges = [];
+    }
   }
 
   addRange(newRange: [number, number]) {
@@ -32,17 +38,19 @@ class RangeCollection {
   }
 
   get lowestNonBlockedIP(): number {
+    if (this.ranges.length === 0) return 0;
     return this.ranges[0][1] + 1;
   }
 
   get nNonBlockedIPs(): number {
+    if (this.ranges.length === 0) return MAXIMUMIP + 1;
     let res = 0;
     let curr = -1;
     for (const range of this.ranges) {
       res += range[0] - curr - 1;
       curr = range[1];
     }
-    return res + 4294967295 - this.ranges[this.ranges.length - 1][1];
+    return res + MAXIMUMIP - this.ranges[this.ranges.length - 1][1];
   }
 }
 
