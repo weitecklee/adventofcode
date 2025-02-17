@@ -9,27 +9,8 @@ const puzzleInput = fs
 class RangeCollection {
   ranges: [number, number][];
   constructor(ranges: [number, number][]) {
-    this.ranges = ranges;
-    this.initialize();
-  }
-
-  initialize() {
-    this.ranges.sort((a, b) => a[0] - b[0]);
-    const ranges: [number, number][] = [];
-    let curr = this.ranges[0];
-    for (let i = 1; i < this.ranges.length; i++) {
-      if (this.ranges[i][1] < curr[0] - 1) {
-        ranges.push(this.ranges[i]);
-      } else if (curr[1] + 1 < this.ranges[i][0]) {
-        ranges.push(curr);
-        curr = this.ranges[i];
-      } else {
-        curr[0] = Math.min(curr[0], this.ranges[i][0]);
-        curr[1] = Math.max(curr[1], this.ranges[i][1]);
-      }
-    }
-    ranges.push(curr);
-    this.ranges = ranges;
+    this.ranges = ranges.sort((a, b) => a[0] - b[0]);
+    this.addRange(ranges[0]);
   }
 
   addRange(newRange: [number, number]) {
