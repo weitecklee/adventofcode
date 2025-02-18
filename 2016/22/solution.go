@@ -1,13 +1,13 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
 	"math"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -72,6 +72,44 @@ func part1(nodes []Node) int {
 	return pairs
 }
 
+type Item struct {
+	priority int
+	steps    int
+	pos      [2]int
+	index    int
+}
+
+type PriorityQueue []*Item
+
+func (pq PriorityQueue) Len() int { return len(pq) }
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].priority < pq[j].priority
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
+}
+
+func (pq *PriorityQueue) Push(x any) {
+	n := len(*pq)
+	item := x.(*Item)
+	item.index = n
+	*pq = append(*pq, item)
+}
+
+func (pq *PriorityQueue) Pop() any {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	old[n-1] = nil
+	item.index = -1
+	*pq = old[0 : n-1]
+	return item
+}
+
 func dist(a, b [2]int) int {
 	return int(math.Abs(float64(a[0]-b[0]))) + int(math.Abs(float64(a[1]-b[1])))
 }
@@ -104,16 +142,19 @@ func part2(nodes []Node) int {
 		{-1, 0},
 	}
 
-	queue := [][4]int{{0, 0, emptyNode.pos[0], emptyNode.pos[1]}}
+	var queue PriorityQueue
+	heap.Init(&queue)
+	heap.Push(&queue, &Item{dist(emptyNode.pos, target), 0, emptyNode.pos, 0})
 	visited := map[[2]int]int{}
 
 	for len(queue) > 0 {
-		curr, x, y := queue[0][1], queue[0][2], queue[0][3]
-		queue = queue[1:]
-		if x == target[0] && y == target[1] {
-			steps = curr
+		item := heap.Pop(&queue).(*Item)
+		if item.pos == target {
+			steps = item.steps
 			break
 		}
+
+		curr, x, y := item.steps, item.pos[0], item.pos[1]
 		curr++
 
 		for _, d := range directions {
@@ -129,12 +170,8 @@ func part2(nodes []Node) int {
 				continue
 			}
 			visited[[2]int{x2, y2}] = curr
-			queue = append(queue, [4]int{curr + dist(target, [2]int{x2, y2}), curr, x2, y2})
+			heap.Push(&queue, &Item{dist([2]int{x2, y2}, target) + curr, curr, [2]int{x2, y2}, 0})
 		}
-
-		sort.Slice(queue, func(i, j int) bool {
-			return queue[i][0] < queue[j][0]
-		})
 	}
 
 	return steps + 1 + (xMax-1)*5
