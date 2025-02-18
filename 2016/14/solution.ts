@@ -12,12 +12,19 @@ function hasher(i: number): string {
     .digest("hex");
 }
 
+function hasher2(n: number): string {
+  let h = hasher(n);
+  for (let i = 0; i < 2016; i++) {
+    h = crypto.createHash("md5").update(h).digest("hex");
+  }
+  return h;
+}
+
 const tripletRegex = /(\w)\1{2}/;
 const quintupletRegex = /(\w)\1{4}/g;
 
-function part1(): number {
+function solve(hashFunction: (arg0: number) => string): number {
   let i = 0;
-  let n = 0;
   const triplets: [number, string][] = [];
   const quintuplets: Map<string, number[]> = new Map(
     "1234567890abcdef".split("").map((c) => [c, []])
@@ -25,7 +32,7 @@ function part1(): number {
 
   const keyIndices: number[] = [];
   while (keyIndices.length < 64) {
-    const h = hasher(i);
+    const h = hashFunction(i);
     let match: RegExpMatchArray | null;
     if ((match = h.match(tripletRegex))) {
       triplets.push([i, match[1]]);
@@ -50,7 +57,8 @@ function part1(): number {
     }
     i++;
   }
-  return keyIndices[63];
+  return keyIndices[keyIndices.length - 1];
 }
 
-console.log(part1());
+console.log(solve(hasher));
+console.log(solve(hasher2));
