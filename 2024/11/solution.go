@@ -32,7 +32,7 @@ func parseInput(puzzleInput *[]string) *map[int]int {
 	return &stoneMap
 }
 
-func blink(stoneMap *map[int]int) *map[int]int {
+func blink(stoneMap *map[int]int) {
 	newStoneMap := make(map[int]int)
 	for n, k := range *stoneMap {
 		if n == 0 {
@@ -52,7 +52,7 @@ func blink(stoneMap *map[int]int) *map[int]int {
 			newStoneMap[n*2024] += k
 		}
 	}
-	return &newStoneMap
+	*stoneMap = newStoneMap
 }
 
 func nStones(stoneMap *map[int]int) int {
@@ -65,11 +65,11 @@ func nStones(stoneMap *map[int]int) int {
 
 func solve(stoneMap *map[int]int) (int, int) {
 	for i := 0; i < 25; i++ {
-		stoneMap = blink(stoneMap)
+		blink(stoneMap)
 	}
 	part1 := nStones(stoneMap)
 	for i := 25; i < 75; i++ {
-		stoneMap = blink(stoneMap)
+		blink(stoneMap)
 	}
 	part2 := nStones(stoneMap)
 	return part1, part2
