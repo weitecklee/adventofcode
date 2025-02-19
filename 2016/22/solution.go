@@ -119,7 +119,7 @@ func part2(nodes []Node) int {
 	})
 	visited := map[[2]int]int{}
 
-	for len(*queue) > 0 {
+	for len(queue.PriorityQueue) > 0 {
 		item := heap.Pop(queue).(*utils.Item[Value])
 
 		if item.Value.pos == target {
