@@ -23,8 +23,7 @@ func main() {
 	}
 	puzzleInput := strings.Split(string(data), "\n")
 	trailMap := parseInput(&puzzleInput)
-	fmt.Println(part1(trailMap))
-	fmt.Println(part2(trailMap))
+	fmt.Println(solve(trailMap))
 }
 
 func parseInput(puzzleInput *[]string) *[][]int {
@@ -51,7 +50,7 @@ func findTrailheads(trailMap *[][]int) *[][2]int {
 	return &trailheads
 }
 
-func calcScore(trailMap *[][]int, start *[2]int) int {
+func calcNumTrails(trailMap *[][]int, start *[2]int, isPart2 bool) int {
 	var queue [][2]int
 	visited := make(map[[2]int]struct{})
 	res := 0
@@ -68,7 +67,7 @@ func calcScore(trailMap *[][]int, start *[2]int) int {
 			if (*trailMap)[r2][c2]-(*trailMap)[r][c] != 1 {
 				continue
 			}
-			if _, ok := visited[[2]int{r2, c2}]; ok {
+			if _, ok := visited[[2]int{r2, c2}]; ok && !isPart2 {
 				continue
 			}
 			visited[[2]int{r2, c2}] = struct{}{}
@@ -82,46 +81,13 @@ func calcScore(trailMap *[][]int, start *[2]int) int {
 	return res
 }
 
-func part1(trailMap *[][]int) int {
+func solve(trailMap *[][]int) (int, int) {
 	trailheads := findTrailheads(trailMap)
-	res := 0
+	part1 := 0
+	part2 := 0
 	for _, head := range *trailheads {
-		res += calcScore(trailMap, &head)
+		part1 += calcNumTrails(trailMap, &head, false)
+		part2 += calcNumTrails(trailMap, &head, true)
 	}
-	return res
-}
-
-func calcRating(trailMap *[][]int, start *[2]int) int {
-	var queue [][2]int
-	res := 0
-	queue = append(queue, *start)
-	for len(queue) > 0 {
-		pos := queue[0]
-		r, c := pos[0], pos[1]
-		queue = queue[1:]
-		for _, dir := range directions {
-			r2, c2 := pos[0]+dir[0], pos[1]+dir[1]
-			if r2 < 0 || c2 < 0 || r2 > len(*trailMap)-1 || c2 > len((*trailMap)[0])-1 {
-				continue
-			}
-			if (*trailMap)[r2][c2]-(*trailMap)[r][c] != 1 {
-				continue
-			}
-			if (*trailMap)[r2][c2] == 9 {
-				res++
-				continue
-			}
-			queue = append(queue, [2]int{r2, c2})
-		}
-	}
-	return res
-}
-
-func part2(trailMap *[][]int) int {
-	trailheads := findTrailheads(trailMap)
-	res := 0
-	for _, head := range *trailheads {
-		res += calcRating(trailMap, &head)
-	}
-	return res
+	return part1, part2
 }
