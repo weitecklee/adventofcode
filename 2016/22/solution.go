@@ -10,6 +10,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/weitecklee/adventofcode/utils"
 )
 
 func main() {
@@ -72,42 +74,9 @@ func part1(nodes []Node) int {
 	return pairs
 }
 
-type Item struct {
-	priority int
-	steps    int
-	pos      [2]int
-	index    int
-}
-
-type PriorityQueue []*Item
-
-func (pq PriorityQueue) Len() int { return len(pq) }
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].priority < pq[j].priority
-}
-
-func (pq PriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
-
-func (pq *PriorityQueue) Push(x any) {
-	n := len(*pq)
-	item := x.(*Item)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq *PriorityQueue) Pop() any {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	old[n-1] = nil
-	item.index = -1
-	*pq = old[0 : n-1]
-	return item
+type Value struct {
+	steps int
+	pos   [2]int
 }
 
 func dist(a, b [2]int) int {
@@ -142,19 +111,23 @@ func part2(nodes []Node) int {
 		{-1, 0},
 	}
 
-	var queue PriorityQueue
-	heap.Init(&queue)
-	heap.Push(&queue, &Item{dist(emptyNode.pos, target), 0, emptyNode.pos, 0})
+	queue := utils.NewMinHeap[Value]()
+
+	heap.Push(queue, &utils.Item[Value]{
+		Priority: dist(emptyNode.pos, target),
+		Value:    Value{steps: 0, pos: emptyNode.pos},
+	})
 	visited := map[[2]int]int{}
 
-	for len(queue) > 0 {
-		item := heap.Pop(&queue).(*Item)
-		if item.pos == target {
-			steps = item.steps
+	for len(*queue) > 0 {
+		item := heap.Pop(queue).(*utils.Item[Value])
+
+		if item.Value.pos == target {
+			steps = item.Value.steps
 			break
 		}
 
-		curr, x, y := item.steps, item.pos[0], item.pos[1]
+		curr, x, y := item.Value.steps, item.Value.pos[0], item.Value.pos[1]
 		curr++
 
 		for _, d := range directions {
@@ -170,7 +143,7 @@ func part2(nodes []Node) int {
 				continue
 			}
 			visited[[2]int{x2, y2}] = curr
-			heap.Push(&queue, &Item{dist([2]int{x2, y2}, target) + curr, curr, [2]int{x2, y2}, 0})
+			heap.Push(queue, &utils.Item[Value]{Priority: dist([2]int{x2, y2}, target) + curr, Value: Value{steps: curr, pos: [2]int{x2, y2}}})
 		}
 	}
 

@@ -1,4 +1,4 @@
-module adventofcode
+module github.com/weitecklee/adventofcode
 
 go 1.23
 
