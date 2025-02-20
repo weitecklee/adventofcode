@@ -19,6 +19,7 @@ func main() {
 	}
 	puzzleInput := parseInput(strings.Split(string(data), "\n"))
 	fmt.Println(part1(puzzleInput))
+	fmt.Println(part2(puzzleInput))
 }
 
 func parseInput(data []string) []int {
@@ -41,20 +42,58 @@ func prune(secretNum int) int {
 	return secretNum % 16777216
 }
 
-func secretNumberN(num, n int) int {
-	secretNumber := num
+func generateSecretNumbers(num, n int) []int {
+	secretNumbers := make([]int, n)
 	for i := 0; i < n; i++ {
-		secretNumber = prune(mix(secretNumber, secretNumber*64))
-		secretNumber = prune(mix(secretNumber, secretNumber/32))
-		secretNumber = prune(mix(secretNumber, secretNumber*2048))
+		num = prune(mix(num, num*64))
+		num = prune(mix(num, num/32))
+		num = prune(mix(num, num*2048))
+		secretNumbers[i] = num
 	}
-	return secretNumber
+	return secretNumbers
 }
 
 func part1(puzzleInput []int) int {
 	res := 0
 	for _, n := range puzzleInput {
-		res += secretNumberN(n, 2000)
+		res += generateSecretNumbers(n, 2000)[1999]
+	}
+	return res
+}
+
+func part2(puzzleInput []int) int {
+	sequenceScoresAll := make(map[[4]int]int)
+	var sequence [4]int
+	for _, n := range puzzleInput {
+		secretNumbers := generateSecretNumbers(n, 2000)
+		prices := make([]int, len(secretNumbers))
+		for i, secretNum := range secretNumbers {
+			prices[i] = secretNum % 10
+		}
+		sequenceScores := make(map[[4]int]int)
+		var currSequence []int
+		for i := 1; i < 5; i++ {
+			currSequence = append(currSequence, prices[i]-prices[i-1])
+		}
+		copy(sequence[:], currSequence)
+		sequenceScores[sequence] = prices[4]
+		for i := 5; i < len(secretNumbers); i++ {
+			currSequence = currSequence[1:]
+			currSequence = append(currSequence, prices[i]-prices[i-1])
+			copy(sequence[:], currSequence)
+			if _, ok := sequenceScores[sequence]; !ok {
+				sequenceScores[sequence] = prices[i]
+			}
+		}
+		for seq, score := range sequenceScores {
+			sequenceScoresAll[seq] += score
+		}
+	}
+	res := 0
+	for _, score := range sequenceScoresAll {
+		if score > res {
+			res = score
+		}
 	}
 	return res
 }
