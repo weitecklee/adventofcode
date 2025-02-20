@@ -25,7 +25,7 @@ func main() {
 	fmt.Println(part2(puzzleInput))
 }
 
-func parseInput(data []string) *[][]int {
+func parseInput(data []string) [][]int {
 	numbers := make([][]int, len(data))
 	numRegex := regexp.MustCompile(`\d+`)
 	for i, s := range data {
@@ -40,52 +40,52 @@ func parseInput(data []string) *[][]int {
 		}
 		numbers[i] = nums
 	}
-	return &numbers
+	return numbers
 }
 
-func isSafe(nums *[]int) bool {
-	increasing := (*nums)[1] > (*nums)[0]
-	for i := 1; i < len(*nums); i++ {
-		diff := utils.AbsInt(((*nums)[i] - (*nums)[i-1]))
+func isSafe(nums []int) bool {
+	increasing := nums[1] > nums[0]
+	for i := 1; i < len(nums); i++ {
+		diff := utils.AbsInt((nums[i] - nums[i-1]))
 		if diff < 1 || diff > 3 {
 			return false
 		}
-		if ((*nums)[i] > (*nums)[i-1]) != increasing {
+		if (nums[i] > nums[i-1]) != increasing {
 			return false
 		}
 	}
 	return true
 }
 
-func isSafeWithTolerance(nums *[]int) bool {
+func isSafeWithTolerance(nums []int) bool {
 	if isSafe(nums) {
 		return true
 	}
-	for i := range *nums {
-		nums2 := make([]int, 0, len(*nums)-1)
-		nums2 = append(nums2, (*nums)[:i]...)
-		nums2 = append(nums2, (*nums)[i+1:]...)
-		if isSafe(&nums2) {
+	for i := range nums {
+		nums2 := make([]int, 0, len(nums)-1)
+		nums2 = append(nums2, (nums)[:i]...)
+		nums2 = append(nums2, (nums)[i+1:]...)
+		if isSafe(nums2) {
 			return true
 		}
 	}
 	return false
 }
 
-func part1(puzzleInput *[][]int) int {
+func part1(puzzleInput [][]int) int {
 	res := 0
-	for _, nums := range *puzzleInput {
-		if isSafe(&nums) {
+	for _, nums := range puzzleInput {
+		if isSafe(nums) {
 			res++
 		}
 	}
 	return res
 }
 
-func part2(puzzleInput *[][]int) int {
+func part2(puzzleInput [][]int) int {
 	res := 0
-	for _, nums := range *puzzleInput {
-		if isSafeWithTolerance(&nums) {
+	for _, nums := range puzzleInput {
+		if isSafeWithTolerance(nums) {
 			res++
 		}
 	}
