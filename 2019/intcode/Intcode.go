@@ -42,6 +42,8 @@ func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
 }
 
 func (ic *IntcodeProgram) Run() {
+	defer close(ic.inChan)
+	defer close(ic.outChan)
 	defer ic.wg.Done()
 	for ic.programIndex >= 0 {
 		opcode := ic.Program[ic.programIndex] % 100
@@ -133,13 +135,11 @@ func (ic *IntcodeProgram) Run() {
 			ic.programIndex++
 		case 99:
 			// halt
-			ic.programIndex = -99
+			return
 		default:
 			panic(fmt.Sprintf("Unknown opcode: %d", ic.Program[ic.programIndex]))
 		}
 		ic.programIndex++
 	}
 
-	close(ic.inChan)
-	close(ic.outChan)
 }
