@@ -20,8 +20,7 @@ func main() {
 	}
 	puzzleInput := strings.Split((string(data)), "\n")
 	equations := parseInput(puzzleInput)
-	fmt.Println(part1(equations))
-	fmt.Println(part2(equations))
+	fmt.Println(solve(equations))
 }
 
 type Equation struct {
@@ -29,7 +28,7 @@ type Equation struct {
 	numbers []int
 }
 
-func (e *Equation) canBeTrue() bool {
+func (e *Equation) canBeTrue() (bool, bool) {
 	curr := []int{e.numbers[0]}
 	for _, n2 := range e.numbers[1:] {
 		curr2 := make([]int, 0, len(curr)*2)
@@ -43,21 +42,14 @@ func (e *Equation) canBeTrue() bool {
 				curr2 = append(curr2, prod)
 			}
 		}
-		if len(curr2) == 0 {
-			return false
-		}
 		curr = curr2
 	}
 	for _, n := range curr {
 		if n == e.result {
-			return true
+			return true, true
 		}
 	}
-	return false
-}
-
-func (e *Equation) canBeTrueWithConcat() bool {
-	curr := []int{e.numbers[0]}
+	curr = []int{e.numbers[0]}
 	for _, n2 := range e.numbers[1:] {
 		curr2 := make([]int, 0, len(curr)*3)
 		for _, n := range curr {
@@ -76,18 +68,14 @@ func (e *Equation) canBeTrueWithConcat() bool {
 				curr2 = append(curr2, concat)
 			}
 		}
-		if len(curr2) == 0 {
-			return false
-		}
 		curr = curr2
 	}
 	for _, n := range curr {
 		if n == e.result {
-			return true
+			return false, true
 		}
 	}
-	return false
-
+	return false, false
 }
 
 func parseInput(puzzleInput []string) []Equation {
@@ -108,22 +96,17 @@ func parseInput(puzzleInput []string) []Equation {
 	return equations
 }
 
-func part1(equations []Equation) int {
-	res := 0
+func solve(equations []Equation) (int, int) {
+	part1 := 0
+	part2 := 0
 	for _, eq := range equations {
-		if eq.canBeTrue() {
-			res += eq.result
+		withoutConcat, withConcat := eq.canBeTrue()
+		if withoutConcat {
+			part1 += eq.result
+			part2 += eq.result
+		} else if withConcat {
+			part2 += eq.result
 		}
 	}
-	return res
-}
-
-func part2(equations []Equation) int {
-	res := 0
-	for _, eq := range equations {
-		if eq.canBeTrue() || eq.canBeTrueWithConcat() {
-			res += eq.result
-		}
-	}
-	return res
+	return part1, part2
 }
