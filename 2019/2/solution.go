@@ -40,7 +40,8 @@ func part1(puzzleInput []int) int {
 	intcodeChan := make(chan int)
 	puzzleInput[1] = 12
 	puzzleInput[2] = 2
-	go intcode.IntcodeProgram(puzzleInput, intcodeChan)
+	ic := intcode.NewIntcodeProgram(puzzleInput, intcodeChan)
+	go ic.Run()
 	return <-intcodeChan
 }
 
@@ -50,7 +51,8 @@ func part2(puzzleInput []int) int {
 			intcodeChan := make(chan int)
 			puzzleInput[1] = noun
 			puzzleInput[2] = verb
-			go intcode.IntcodeProgram(puzzleInput, intcodeChan)
+			ic := intcode.NewIntcodeProgram(puzzleInput, intcodeChan)
+			go ic.Run()
 			if <-intcodeChan == 19690720 {
 				return noun*100 + verb
 			}

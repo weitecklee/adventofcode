@@ -2,34 +2,44 @@ package intcode
 
 import "fmt"
 
-func getParams(program map[int]int, parameterModes []int, nParams, programIndex, relativeBase int) []int {
-	parameters := make([]int, nParams)
-	for j := 0; j < nParams; j++ {
-		if j >= len(parameterModes) || parameterModes[j] == 0 {
-			// position mode
-			parameters[j] = program[programIndex+j+1]
-		} else if parameterModes[j] == 1 {
-			// immediate mode
-			parameters[j] = programIndex + j + 1
-		} else if parameterModes[j] == 2 {
-			// relative move
-			parameters[j] = program[programIndex+j+1] + relativeBase
-		}
-	}
-	return parameters
+type IntcodeProgram struct {
+	program      map[int]int
+	programIndex int
+	relativeBase int
+	channel      chan int
 }
 
-func IntcodeProgram(prog []int, intcodeChan chan int) {
+func NewIntcodeProgram(prog []int, intcodeChan chan int) *IntcodeProgram {
 	program := make(map[int]int)
 	for i, n := range prog {
 		program[i] = n
 	}
-	programIndex := 0
-	relativeBase := 0
+	ic := &IntcodeProgram{program, 0, 0, intcodeChan}
+	return ic
+}
 
-	for programIndex >= 0 {
-		opcode := program[programIndex] % 100
-		parameterModeNumber := program[programIndex] / 100
+func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
+	parameters := make([]int, nParams)
+	for j := 0; j < nParams; j++ {
+		if j >= len(parameterModes) || parameterModes[j] == 0 {
+			// position mode
+			parameters[j] = ic.program[ic.programIndex+j+1]
+		} else if parameterModes[j] == 1 {
+			// immediate mode
+			parameters[j] = ic.programIndex + j + 1
+		} else if parameterModes[j] == 2 {
+			// relative move
+			parameters[j] = ic.program[ic.programIndex+j+1] + ic.relativeBase
+		}
+	}
+	return parameters
+
+}
+
+func (ic *IntcodeProgram) Run() {
+	for ic.programIndex >= 0 {
+		opcode := ic.program[ic.programIndex] % 100
+		parameterModeNumber := ic.program[ic.programIndex] / 100
 		parameterModes := make([]int, 0, 4)
 		for parameterModeNumber > 0 {
 			parameterModes = append(parameterModes, parameterModeNumber%10)
@@ -41,10 +51,10 @@ func IntcodeProgram(prog []int, intcodeChan chan int) {
 		case 5:
 			fallthrough
 		case 6:
-			tmp := getParams(program, parameterModes, 2, programIndex, relativeBase)
+			tmp := ic.getParams(parameterModes, 2)
 			params = make([]int, len(tmp))
 			for i, n := range tmp {
-				params[i] = program[n]
+				params[i] = ic.program[n]
 			}
 		case 1:
 			fallthrough
@@ -53,76 +63,76 @@ func IntcodeProgram(prog []int, intcodeChan chan int) {
 		case 7:
 			fallthrough
 		case 8:
-			params = getParams(program, parameterModes, 3, programIndex, relativeBase)
+			params = ic.getParams(parameterModes, 3)
 		case 3:
 			fallthrough
 		case 4:
 			fallthrough
 		case 9:
-			params = getParams(program, parameterModes, 1, programIndex, relativeBase)
+			params = ic.getParams(parameterModes, 1)
 		}
 
 		switch opcode {
 		case 1:
 			// add
-			program[params[2]] = program[params[0]] + program[params[1]]
-			programIndex += 3
+			ic.program[params[2]] = ic.program[params[0]] + ic.program[params[1]]
+			ic.programIndex += 3
 		case 2:
 			// multiply
-			program[params[2]] = program[params[0]] * program[params[1]]
-			programIndex += 3
+			ic.program[params[2]] = ic.program[params[0]] * ic.program[params[1]]
+			ic.programIndex += 3
 		case 3:
 			// save input
-			program[params[0]] = <-intcodeChan
-			programIndex++
+			ic.program[params[0]] = <-ic.channel
+			ic.programIndex++
 		case 4:
 			// output
-			intcodeChan <- program[params[0]]
-			programIndex++
+			ic.channel <- ic.program[params[0]]
+			ic.programIndex++
 		case 5:
 			// jump if true
 			if params[0] != 0 {
-				programIndex = params[1]
+				ic.programIndex = params[1]
 				continue
 			} else {
-				programIndex += 2
+				ic.programIndex += 2
 			}
 		case 6:
 			// jump if false
 			if params[0] == 0 {
-				programIndex = params[1]
+				ic.programIndex = params[1]
 				continue
 			} else {
-				programIndex += 2
+				ic.programIndex += 2
 			}
 		case 7:
 			// less than
-			if program[params[0]] < program[params[1]] {
-				program[params[2]] = 1
+			if ic.program[params[0]] < ic.program[params[1]] {
+				ic.program[params[2]] = 1
 			} else {
-				program[params[2]] = 0
+				ic.program[params[2]] = 0
 			}
-			programIndex += 3
+			ic.programIndex += 3
 		case 8:
 			// equal
-			if program[params[0]] == program[params[1]] {
-				program[params[2]] = 1
+			if ic.program[params[0]] == ic.program[params[1]] {
+				ic.program[params[2]] = 1
 			} else {
-				program[params[2]] = 0
+				ic.program[params[2]] = 0
 			}
-			programIndex += 3
+			ic.programIndex += 3
 		case 9:
 			// adjust relative base
-			relativeBase += program[params[0]]
-			programIndex++
+			ic.relativeBase += ic.program[params[0]]
+			ic.programIndex++
 		case 99:
 			// halt
-			programIndex = -99
+			ic.programIndex = -99
 		default:
-			panic(fmt.Sprintf("Unknown opcode: %d", program[programIndex]))
+			panic(fmt.Sprintf("Unknown opcode: %d", ic.program[ic.programIndex]))
 		}
-		programIndex++
+		ic.programIndex++
 	}
 
-	intcodeChan <- program[0]
+	ic.channel <- ic.program[0]
 }
