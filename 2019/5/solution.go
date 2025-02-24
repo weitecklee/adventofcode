@@ -38,32 +38,31 @@ func parseInput(data []string) []int {
 }
 
 func part1(puzzleInput []int) int {
-	intcodeChan := make(chan int)
-	puzzleInput[1] = 12
-	puzzleInput[2] = 2
+	inChan := make(chan int)
+	outChan := make(chan int)
 	var wg sync.WaitGroup
-	ic := intcode.NewIntcodeProgram(puzzleInput, make(chan int), intcodeChan, &wg)
+	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
 	wg.Add(1)
 	go ic.Run()
-	wg.Wait()
-	return ic.Program[0]
+	inChan <- 1
+	var outputs []int
+	for {
+		v, ok := <-outChan
+		if !ok {
+			break
+		}
+		outputs = append(outputs, v)
+	}
+	return outputs[len(outputs)-1]
 }
 
 func part2(puzzleInput []int) int {
-	for noun := range 100 {
-		for verb := range 100 {
-			intcodeChan := make(chan int)
-			puzzleInput[1] = noun
-			puzzleInput[2] = verb
-			var wg sync.WaitGroup
-			ic := intcode.NewIntcodeProgram(puzzleInput, make(chan int), intcodeChan, &wg)
-			wg.Add(1)
-			go ic.Run()
-			wg.Wait()
-			if ic.Program[0] == 19690720 {
-				return noun*100 + verb
-			}
-		}
-	}
-	return -1
+	inChan := make(chan int)
+	outChan := make(chan int)
+	var wg sync.WaitGroup
+	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
+	wg.Add(1)
+	go ic.Run()
+	inChan <- 5
+	return <-outChan
 }

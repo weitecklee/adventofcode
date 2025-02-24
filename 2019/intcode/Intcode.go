@@ -1,20 +1,25 @@
 package intcode
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type IntcodeProgram struct {
-	program      map[int]int
+	Program      map[int]int
 	programIndex int
 	relativeBase int
-	channel      chan int
+	inChan       chan int
+	outChan      chan int
+	wg           *sync.WaitGroup
 }
 
-func NewIntcodeProgram(prog []int, intcodeChan chan int) *IntcodeProgram {
+func NewIntcodeProgram(prog []int, inChan, outChan chan int, wg *sync.WaitGroup) *IntcodeProgram {
 	program := make(map[int]int)
 	for i, n := range prog {
 		program[i] = n
 	}
-	ic := &IntcodeProgram{program, 0, 0, intcodeChan}
+	ic := &IntcodeProgram{program, 0, 0, inChan, outChan, wg}
 	return ic
 }
 
@@ -23,13 +28,13 @@ func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
 	for j := 0; j < nParams; j++ {
 		if j >= len(parameterModes) || parameterModes[j] == 0 {
 			// position mode
-			parameters[j] = ic.program[ic.programIndex+j+1]
+			parameters[j] = ic.Program[ic.programIndex+j+1]
 		} else if parameterModes[j] == 1 {
 			// immediate mode
 			parameters[j] = ic.programIndex + j + 1
 		} else if parameterModes[j] == 2 {
 			// relative move
-			parameters[j] = ic.program[ic.programIndex+j+1] + ic.relativeBase
+			parameters[j] = ic.Program[ic.programIndex+j+1] + ic.relativeBase
 		}
 	}
 	return parameters
@@ -37,9 +42,10 @@ func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
 }
 
 func (ic *IntcodeProgram) Run() {
+	defer ic.wg.Done()
 	for ic.programIndex >= 0 {
-		opcode := ic.program[ic.programIndex] % 100
-		parameterModeNumber := ic.program[ic.programIndex] / 100
+		opcode := ic.Program[ic.programIndex] % 100
+		parameterModeNumber := ic.Program[ic.programIndex] / 100
 		parameterModes := make([]int, 0, 4)
 		for parameterModeNumber > 0 {
 			parameterModes = append(parameterModes, parameterModeNumber%10)
@@ -54,7 +60,7 @@ func (ic *IntcodeProgram) Run() {
 			tmp := ic.getParams(parameterModes, 2)
 			params = make([]int, len(tmp))
 			for i, n := range tmp {
-				params[i] = ic.program[n]
+				params[i] = ic.Program[n]
 			}
 		case 1:
 			fallthrough
@@ -75,19 +81,19 @@ func (ic *IntcodeProgram) Run() {
 		switch opcode {
 		case 1:
 			// add
-			ic.program[params[2]] = ic.program[params[0]] + ic.program[params[1]]
+			ic.Program[params[2]] = ic.Program[params[0]] + ic.Program[params[1]]
 			ic.programIndex += 3
 		case 2:
 			// multiply
-			ic.program[params[2]] = ic.program[params[0]] * ic.program[params[1]]
+			ic.Program[params[2]] = ic.Program[params[0]] * ic.Program[params[1]]
 			ic.programIndex += 3
 		case 3:
 			// save input
-			ic.program[params[0]] = <-ic.channel
+			ic.Program[params[0]] = <-ic.inChan
 			ic.programIndex++
 		case 4:
 			// output
-			ic.channel <- ic.program[params[0]]
+			ic.outChan <- ic.Program[params[0]]
 			ic.programIndex++
 		case 5:
 			// jump if true
@@ -107,32 +113,33 @@ func (ic *IntcodeProgram) Run() {
 			}
 		case 7:
 			// less than
-			if ic.program[params[0]] < ic.program[params[1]] {
-				ic.program[params[2]] = 1
+			if ic.Program[params[0]] < ic.Program[params[1]] {
+				ic.Program[params[2]] = 1
 			} else {
-				ic.program[params[2]] = 0
+				ic.Program[params[2]] = 0
 			}
 			ic.programIndex += 3
 		case 8:
 			// equal
-			if ic.program[params[0]] == ic.program[params[1]] {
-				ic.program[params[2]] = 1
+			if ic.Program[params[0]] == ic.Program[params[1]] {
+				ic.Program[params[2]] = 1
 			} else {
-				ic.program[params[2]] = 0
+				ic.Program[params[2]] = 0
 			}
 			ic.programIndex += 3
 		case 9:
 			// adjust relative base
-			ic.relativeBase += ic.program[params[0]]
+			ic.relativeBase += ic.Program[params[0]]
 			ic.programIndex++
 		case 99:
 			// halt
 			ic.programIndex = -99
 		default:
-			panic(fmt.Sprintf("Unknown opcode: %d", ic.program[ic.programIndex]))
+			panic(fmt.Sprintf("Unknown opcode: %d", ic.Program[ic.programIndex]))
 		}
 		ic.programIndex++
 	}
 
-	ic.channel <- ic.program[0]
+	close(ic.inChan)
+	close(ic.outChan)
 }
