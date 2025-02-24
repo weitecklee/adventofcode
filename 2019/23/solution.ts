@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import intcodeGenerator, { IntcodeGenerator } from "../intcode";
+import intcodeGenerator, { IntcodeGenerator } from "../intcode/intcode";
 
 const puzzleInput = fs
   .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
