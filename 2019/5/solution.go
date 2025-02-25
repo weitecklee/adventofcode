@@ -39,26 +39,26 @@ func parseInput(data []string) []int {
 
 func part1(puzzleInput []int) int {
 	inChan := make(chan int)
+	defer close(inChan)
 	outChan := make(chan int)
+	defer close(outChan)
 	var wg sync.WaitGroup
 	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
 	wg.Add(1)
 	go ic.Run()
 	inChan <- 1
 	var outputs []int
-	for {
-		v, ok := <-outChan
-		if !ok {
-			break
-		}
-		outputs = append(outputs, v)
+	for ic.Active {
+		outputs = append(outputs, <-outChan)
 	}
 	return outputs[len(outputs)-1]
 }
 
 func part2(puzzleInput []int) int {
 	inChan := make(chan int)
+	defer close(inChan)
 	outChan := make(chan int)
+	defer close(outChan)
 	var wg sync.WaitGroup
 	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
 	wg.Add(1)

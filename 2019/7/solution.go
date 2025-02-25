@@ -116,14 +116,11 @@ func amplifierOutput(program, sequence []int, withFeedback bool) int {
 func part1(puzzleInput []int) int {
 	sl := []int{0, 1, 2, 3, 4}
 	perms := generatePermutations(sl)
-	res := make([]int, len(perms))
-	for i, perm := range perms {
-		res[i] = amplifierOutput(puzzleInput, perm, false)
-	}
 	max := 0
-	for _, n := range res {
-		if n > max {
-			max = n
+	for _, perm := range perms {
+		res := amplifierOutput(puzzleInput, perm, false)
+		if res > max {
+			max = res
 		}
 	}
 	return max
@@ -132,14 +129,11 @@ func part1(puzzleInput []int) int {
 func part2(puzzleInput []int) int {
 	sl := []int{5, 6, 7, 8, 9}
 	perms := generatePermutations(sl)
-	res := make([]int, len(perms))
-	for i, perm := range perms {
-		res[i] = amplifierOutput(puzzleInput, perm, true)
-	}
 	max := 0
-	for _, n := range res {
-		if n > max {
-			max = n
+	for _, perm := range perms {
+		res := amplifierOutput(puzzleInput, perm, true)
+		if res > max {
+			max = res
 		}
 	}
 	return max
