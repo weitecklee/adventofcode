@@ -41,7 +41,6 @@ func runBOOST(puzzleInput []int, initialInput int) int {
 	inChan := make(chan int)
 	defer close(inChan)
 	outChan := make(chan int)
-	defer close(outChan)
 	var wg sync.WaitGroup
 	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
 	wg.Add(1)

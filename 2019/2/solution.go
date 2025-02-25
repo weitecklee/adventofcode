@@ -40,12 +40,10 @@ func parseInput(data []string) []int {
 func part1(puzzleInput []int) int {
 	puzzleInput[1] = 12
 	puzzleInput[2] = 2
+	var wg sync.WaitGroup
 	inChan := make(chan int)
 	defer close(inChan)
-	outChan := make(chan int)
-	defer close(outChan)
-	var wg sync.WaitGroup
-	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
+	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, make(chan int), &wg)
 	wg.Add(1)
 	go ic.Run()
 	wg.Wait()
@@ -53,16 +51,14 @@ func part1(puzzleInput []int) int {
 }
 
 func part2(puzzleInput []int) int {
+	var wg sync.WaitGroup
 	inChan := make(chan int)
 	defer close(inChan)
-	outChan := make(chan int)
-	defer close(outChan)
-	var wg sync.WaitGroup
 	for noun := range 100 {
 		for verb := range 100 {
 			puzzleInput[1] = noun
 			puzzleInput[2] = verb
-			ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
+			ic := intcode.NewIntcodeProgram(puzzleInput, inChan, make(chan int), &wg)
 			wg.Add(1)
 			go ic.Run()
 			wg.Wait()

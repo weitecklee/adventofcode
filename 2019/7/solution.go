@@ -63,26 +63,21 @@ func generatePermutations(sl []int) [][]int {
 
 func amplifierOutput(program, sequence []int, withFeedback bool) int {
 	var wg sync.WaitGroup
-	inChanA := make(chan int)
+	inChanA := make(chan int, 1)
 	defer close(inChanA)
 	outChanA := make(chan int)
-	defer close(outChanA)
 	inChanB := make(chan int)
 	defer close(inChanB)
 	outChanB := make(chan int)
-	defer close(outChanB)
 	inChanC := make(chan int)
 	defer close(inChanC)
 	outChanC := make(chan int)
-	defer close(outChanC)
 	inChanD := make(chan int)
 	defer close(inChanD)
 	outChanD := make(chan int)
-	defer close(outChanD)
 	inChanE := make(chan int)
 	defer close(inChanE)
 	outChanE := make(chan int)
-	defer close(outChanE)
 	ampA := intcode.NewIntcodeProgram(program, inChanA, outChanA, &wg)
 	ampB := intcode.NewIntcodeProgram(program, inChanB, outChanB, &wg)
 	ampC := intcode.NewIntcodeProgram(program, inChanC, outChanC, &wg)
@@ -99,18 +94,23 @@ func amplifierOutput(program, sequence []int, withFeedback bool) int {
 	inChanC <- sequence[2]
 	inChanD <- sequence[3]
 	inChanE <- sequence[4]
-	outputE := 0
+	var outputA, outputE int
+	var ok bool
 	for {
 		inChanA <- outputE
-		inChanB <- <-outChanA
+		if outputA, ok = <-outChanA; !ok {
+			break
+		}
+		inChanB <- outputA
 		inChanC <- <-outChanB
 		inChanD <- <-outChanC
 		inChanE <- <-outChanD
 		outputE = <-outChanE
-		if !withFeedback || !ampA.IsActive() {
+		if !withFeedback {
 			return outputE
 		}
 	}
+	return outputE
 }
 
 func part1(puzzleInput []int) int {

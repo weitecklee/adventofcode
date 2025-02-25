@@ -45,6 +45,7 @@ func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
 func (ic *IntcodeProgram) Run() {
 	ic.active = true
 	defer ic.wg.Done()
+	defer close(ic.outChan)
 	defer func() { ic.active = false }()
 	for ic.programIndex >= 0 {
 		opcode := ic.Program[ic.programIndex] % 100

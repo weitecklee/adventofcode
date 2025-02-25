@@ -41,15 +41,14 @@ func part1(puzzleInput []int) int {
 	inChan := make(chan int)
 	defer close(inChan)
 	outChan := make(chan int)
-	defer close(outChan)
 	var wg sync.WaitGroup
 	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
 	wg.Add(1)
 	go ic.Run()
 	inChan <- 1
 	var outputs []int
-	for ic.IsActive() {
-		outputs = append(outputs, <-outChan)
+	for output := range outChan {
+		outputs = append(outputs, output)
 	}
 	return outputs[len(outputs)-1]
 }
@@ -58,7 +57,6 @@ func part2(puzzleInput []int) int {
 	inChan := make(chan int)
 	defer close(inChan)
 	outChan := make(chan int)
-	defer close(outChan)
 	var wg sync.WaitGroup
 	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
 	wg.Add(1)
