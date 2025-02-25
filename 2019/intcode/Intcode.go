@@ -12,7 +12,7 @@ type IntcodeProgram struct {
 	inChan       chan int
 	outChan      chan int
 	wg           *sync.WaitGroup
-	Active       bool
+	active       bool
 }
 
 func NewIntcodeProgram(prog []int, inChan, outChan chan int, wg *sync.WaitGroup) *IntcodeProgram {
@@ -43,9 +43,9 @@ func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
 }
 
 func (ic *IntcodeProgram) Run() {
-	ic.Active = true
+	ic.active = true
 	defer ic.wg.Done()
-	defer func() { ic.Active = false }()
+	defer func() { ic.active = false }()
 	for ic.programIndex >= 0 {
 		opcode := ic.Program[ic.programIndex] % 100
 		parameterModeNumber := ic.Program[ic.programIndex] / 100
@@ -143,4 +143,8 @@ func (ic *IntcodeProgram) Run() {
 		ic.programIndex++
 	}
 
+}
+
+func (ic *IntcodeProgram) IsActive() bool {
+	return ic.active
 }

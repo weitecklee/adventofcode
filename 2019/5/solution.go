@@ -48,7 +48,7 @@ func part1(puzzleInput []int) int {
 	go ic.Run()
 	inChan <- 1
 	var outputs []int
-	for ic.Active {
+	for ic.IsActive() {
 		outputs = append(outputs, <-outChan)
 	}
 	return outputs[len(outputs)-1]

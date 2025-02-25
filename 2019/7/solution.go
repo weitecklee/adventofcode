@@ -107,7 +107,7 @@ func amplifierOutput(program, sequence []int, withFeedback bool) int {
 		inChanD <- <-outChanC
 		inChanE <- <-outChanD
 		outputE = <-outChanE
-		if !withFeedback || !ampA.Active {
+		if !withFeedback || !ampA.IsActive() {
 			return outputE
 		}
 	}
