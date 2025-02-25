@@ -22,6 +22,7 @@ func main() {
 	}
 	puzzleInput := parseInput(strings.Split(string(data), ","))
 	fmt.Println(part1(puzzleInput))
+	fmt.Println(part2(puzzleInput))
 }
 
 func parseInput(data []string) []int {
@@ -60,18 +61,28 @@ func generatePermutations(sl []int) [][]int {
 	return res
 }
 
-func amplifierOutput(program, sequence []int) int {
+func amplifierOutput(program, sequence []int, withFeedback bool) int {
 	var wg sync.WaitGroup
 	inChanA := make(chan int)
+	defer close(inChanA)
 	outChanA := make(chan int)
+	defer close(outChanA)
 	inChanB := make(chan int)
+	defer close(inChanB)
 	outChanB := make(chan int)
+	defer close(outChanB)
 	inChanC := make(chan int)
+	defer close(inChanC)
 	outChanC := make(chan int)
+	defer close(outChanC)
 	inChanD := make(chan int)
+	defer close(inChanD)
 	outChanD := make(chan int)
+	defer close(outChanD)
 	inChanE := make(chan int)
+	defer close(inChanE)
 	outChanE := make(chan int)
+	defer close(outChanE)
 	ampA := intcode.NewIntcodeProgram(program, inChanA, outChanA, &wg)
 	ampB := intcode.NewIntcodeProgram(program, inChanB, outChanB, &wg)
 	ampC := intcode.NewIntcodeProgram(program, inChanC, outChanC, &wg)
@@ -79,21 +90,27 @@ func amplifierOutput(program, sequence []int) int {
 	ampE := intcode.NewIntcodeProgram(program, inChanE, outChanE, &wg)
 	wg.Add(5)
 	go ampA.Run()
-	inChanA <- sequence[0]
-	inChanA <- 0
 	go ampB.Run()
-	inChanB <- sequence[1]
-	inChanB <- <-outChanA
 	go ampC.Run()
-	inChanC <- sequence[2]
-	inChanC <- <-outChanB
 	go ampD.Run()
-	inChanD <- sequence[3]
-	inChanD <- <-outChanC
 	go ampE.Run()
+	inChanA <- sequence[0]
+	inChanB <- sequence[1]
+	inChanC <- sequence[2]
+	inChanD <- sequence[3]
 	inChanE <- sequence[4]
-	inChanE <- <-outChanD
-	return <-outChanE
+	outputE := 0
+	for {
+		inChanA <- outputE
+		inChanB <- <-outChanA
+		inChanC <- <-outChanB
+		inChanD <- <-outChanC
+		inChanE <- <-outChanD
+		outputE = <-outChanE
+		if !withFeedback || !ampA.Active {
+			return outputE
+		}
+	}
 }
 
 func part1(puzzleInput []int) int {
@@ -101,7 +118,23 @@ func part1(puzzleInput []int) int {
 	perms := generatePermutations(sl)
 	res := make([]int, len(perms))
 	for i, perm := range perms {
-		res[i] = amplifierOutput(puzzleInput, perm)
+		res[i] = amplifierOutput(puzzleInput, perm, false)
+	}
+	max := 0
+	for _, n := range res {
+		if n > max {
+			max = n
+		}
+	}
+	return max
+}
+
+func part2(puzzleInput []int) int {
+	sl := []int{5, 6, 7, 8, 9}
+	perms := generatePermutations(sl)
+	res := make([]int, len(perms))
+	for i, perm := range perms {
+		res[i] = amplifierOutput(puzzleInput, perm, true)
 	}
 	max := 0
 	for _, n := range res {
