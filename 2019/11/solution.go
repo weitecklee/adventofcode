@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/weitecklee/adventofcode/2019/intcode"
 )
@@ -39,28 +38,26 @@ func parseInput(data []string) []int {
 }
 
 func runRobot(puzzleInput []int, startingPaint int) map[[2]int]int {
-	inChan := make(chan int, 1)
-	defer close(inChan)
-	outChan := make(chan int)
-	var wg sync.WaitGroup
-	robot := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
-	wg.Add(1)
+	ch := make(chan int)
+	robot := intcode.NewIntcodeProgram(puzzleInput, ch)
 	go robot.Run()
 
 	panels := make(map[[2]int]int)
 	robotPos := [2]int{0, 0}
 	robotDir := [2]int{-1, 0}
 	panels[robotPos] = startingPaint
-	inChan <- panels[robotPos]
-	for paint := range outChan {
-		panels[robotPos] = paint
-		if <-outChan == 1 {
+	for {
+		if <-ch == intcode.ENDSIGNAL {
+			break
+		}
+		ch <- panels[robotPos]
+		panels[robotPos] = <-ch
+		if <-ch == 1 {
 			robotDir[0], robotDir[1] = robotDir[1], -robotDir[0]
 		} else {
 			robotDir[0], robotDir[1] = -robotDir[1], robotDir[0]
 		}
 		robotPos[0], robotPos[1] = robotPos[0]+robotDir[0], robotPos[1]+robotDir[1]
-		inChan <- panels[robotPos]
 	}
 	return panels
 

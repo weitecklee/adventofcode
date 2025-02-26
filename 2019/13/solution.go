@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/weitecklee/adventofcode/2019/intcode"
 )
@@ -38,18 +37,14 @@ func parseInput(data []string) []int {
 }
 
 func part1(puzzleInput []int) int {
-	var wg sync.WaitGroup
-	inChan := make(chan int)
-	defer close(inChan)
-	outChan := make(chan int)
+	ch := make(chan int)
 	res := 0
-	arcade := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
+	arcade := intcode.NewIntcodeProgram(puzzleInput, ch)
 	var tileId int
-	wg.Add(1)
 	go arcade.Run()
-	for range outChan {
-		<-outChan
-		tileId = <-outChan
+	for range ch {
+		<-ch
+		tileId = <-ch
 		if tileId == 2 {
 			res++
 		}
@@ -58,22 +53,23 @@ func part1(puzzleInput []int) int {
 }
 
 func part2(puzzleInput []int) int {
-	var wg sync.WaitGroup
-	inChan := make(chan int)
-	defer close(inChan)
-	outChan := make(chan int)
+	ch := make(chan int)
 	puzzleInput[0] = 2
-	arcade := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
+	arcade := intcode.NewIntcodeProgram(puzzleInput, ch)
 	var x, tileId, score, ballPos, paddlePos int
-	wg.Add(1)
 	go arcade.Run()
-	for {
-		for x = range outChan {
-			if x == intcode.REQUESTSIGNAL || x == intcode.ENDSIGNAL {
-				break
+	for x = range ch {
+		if x == intcode.REQUESTSIGNAL {
+			if ballPos > paddlePos {
+				ch <- 1
+			} else if ballPos < paddlePos {
+				ch <- -1
+			} else {
+				ch <- 0
 			}
-			<-outChan
-			tileId = <-outChan
+		} else {
+			<-ch
+			tileId = <-ch
 			if tileId == 3 {
 				paddlePos = x
 			} else if tileId == 4 {
@@ -81,16 +77,6 @@ func part2(puzzleInput []int) int {
 			} else if x == -1 {
 				score = tileId
 			}
-		}
-		if x == intcode.ENDSIGNAL {
-			break
-		}
-		if ballPos > paddlePos {
-			inChan <- 1
-		} else if ballPos < paddlePos {
-			inChan <- -1
-		} else {
-			inChan <- 0
 		}
 	}
 	return score

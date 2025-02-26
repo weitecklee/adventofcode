@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/weitecklee/adventofcode/2019/intcode"
 )
@@ -62,50 +61,46 @@ func generatePermutations(sl []int) [][]int {
 }
 
 func amplifierOutput(program, sequence []int, withFeedback bool) int {
-	var wg sync.WaitGroup
-	inChanA := make(chan int, 1)
-	defer close(inChanA)
-	outChanA := make(chan int)
-	inChanB := make(chan int)
-	defer close(inChanB)
-	outChanB := make(chan int)
-	inChanC := make(chan int)
-	defer close(inChanC)
-	outChanC := make(chan int)
-	inChanD := make(chan int)
-	defer close(inChanD)
-	outChanD := make(chan int)
-	inChanE := make(chan int)
-	defer close(inChanE)
-	outChanE := make(chan int)
-	ampA := intcode.NewIntcodeProgram(program, inChanA, outChanA, &wg)
-	ampB := intcode.NewIntcodeProgram(program, inChanB, outChanB, &wg)
-	ampC := intcode.NewIntcodeProgram(program, inChanC, outChanC, &wg)
-	ampD := intcode.NewIntcodeProgram(program, inChanD, outChanD, &wg)
-	ampE := intcode.NewIntcodeProgram(program, inChanE, outChanE, &wg)
-	wg.Add(5)
+	chA := make(chan int)
+	chB := make(chan int)
+	chC := make(chan int)
+	chD := make(chan int)
+	chE := make(chan int)
+	ampA := intcode.NewIntcodeProgram(program, chA)
+	ampB := intcode.NewIntcodeProgram(program, chB)
+	ampC := intcode.NewIntcodeProgram(program, chC)
+	ampD := intcode.NewIntcodeProgram(program, chD)
+	ampE := intcode.NewIntcodeProgram(program, chE)
 	go ampA.Run()
 	go ampB.Run()
 	go ampC.Run()
 	go ampD.Run()
 	go ampE.Run()
-	inChanA <- sequence[0]
-	inChanB <- sequence[1]
-	inChanC <- sequence[2]
-	inChanD <- sequence[3]
-	inChanE <- sequence[4]
-	var outputA, outputE int
-	var ok bool
+	<-chA
+	<-chB
+	<-chC
+	<-chD
+	<-chE
+	chA <- sequence[0]
+	chB <- sequence[1]
+	chC <- sequence[2]
+	chD <- sequence[3]
+	chE <- sequence[4]
+	var outputE int
 	for {
-		inChanA <- outputE
-		if outputA, ok = <-outChanA; !ok {
+		if <-chA == intcode.ENDSIGNAL {
 			break
 		}
-		inChanB <- outputA
-		inChanC <- <-outChanB
-		inChanD <- <-outChanC
-		inChanE <- <-outChanD
-		outputE = <-outChanE
+		<-chB
+		<-chC
+		<-chD
+		<-chE
+		chA <- outputE
+		chB <- <-chA
+		chC <- <-chB
+		chD <- <-chC
+		chE <- <-chD
+		outputE = <-chE
 		if !withFeedback {
 			return outputE
 		}

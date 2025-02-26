@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/weitecklee/adventofcode/2019/intcode"
 )
@@ -38,29 +37,26 @@ func parseInput(data []string) []int {
 }
 
 func part1(puzzleInput []int) int {
-	inChan := make(chan int)
-	defer close(inChan)
-	outChan := make(chan int)
-	var wg sync.WaitGroup
-	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
-	wg.Add(1)
+	ch := make(chan int)
+	ic := intcode.NewIntcodeProgram(puzzleInput, ch)
 	go ic.Run()
-	inChan <- 1
-	var outputs []int
-	for output := range outChan {
-		outputs = append(outputs, output)
+	<-ch
+	ch <- 1
+	var output int
+	for {
+		tmp := <-ch
+		if tmp == intcode.ENDSIGNAL {
+			return output
+		}
+		output = tmp
 	}
-	return outputs[len(outputs)-1]
 }
 
 func part2(puzzleInput []int) int {
-	inChan := make(chan int)
-	defer close(inChan)
-	outChan := make(chan int)
-	var wg sync.WaitGroup
-	ic := intcode.NewIntcodeProgram(puzzleInput, inChan, outChan, &wg)
-	wg.Add(1)
+	ch := make(chan int)
+	ic := intcode.NewIntcodeProgram(puzzleInput, ch)
 	go ic.Run()
-	inChan <- 5
-	return <-outChan
+	<-ch
+	ch <- 5
+	return <-ch
 }

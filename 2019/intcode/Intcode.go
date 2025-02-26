@@ -3,28 +3,26 @@ package intcode
 import (
 	"fmt"
 	"math"
-	"sync"
 )
 
 type IntcodeProgram struct {
 	Program      map[int]int
 	programIndex int
 	relativeBase int
-	inChan       chan int
-	outChan      chan int
-	wg           *sync.WaitGroup
-	active       bool
+	ch           chan int
 }
 
-const REQUESTSIGNAL = math.MaxInt
-const ENDSIGNAL = math.MinInt
+const (
+	REQUESTSIGNAL = math.MaxInt
+	ENDSIGNAL     = math.MinInt
+)
 
-func NewIntcodeProgram(prog []int, inChan, outChan chan int, wg *sync.WaitGroup) *IntcodeProgram {
+func NewIntcodeProgram(prog []int, ch chan int) *IntcodeProgram {
 	program := make(map[int]int)
 	for i, n := range prog {
 		program[i] = n
 	}
-	ic := &IntcodeProgram{program, 0, 0, inChan, outChan, wg, false}
+	ic := &IntcodeProgram{program, 0, 0, ch}
 	return ic
 }
 
@@ -47,10 +45,7 @@ func (ic *IntcodeProgram) getParams(parameterModes []int, nParams int) []int {
 }
 
 func (ic *IntcodeProgram) Run() {
-	ic.active = true
-	defer ic.wg.Done()
-	defer close(ic.outChan)
-	defer func() { ic.active = false }()
+	defer close(ic.ch)
 	for ic.programIndex >= 0 {
 		opcode := ic.Program[ic.programIndex] % 100
 		parameterModeNumber := ic.Program[ic.programIndex] / 100
@@ -97,12 +92,12 @@ func (ic *IntcodeProgram) Run() {
 			ic.programIndex += 3
 		case 3:
 			// save input
-			ic.outChan <- REQUESTSIGNAL
-			ic.Program[params[0]] = <-ic.inChan
+			ic.ch <- REQUESTSIGNAL
+			ic.Program[params[0]] = <-ic.ch
 			ic.programIndex++
 		case 4:
 			// output
-			ic.outChan <- ic.Program[params[0]]
+			ic.ch <- ic.Program[params[0]]
 			ic.programIndex++
 		case 5:
 			// jump if true
@@ -142,7 +137,7 @@ func (ic *IntcodeProgram) Run() {
 			ic.programIndex++
 		case 99:
 			// halt
-			ic.outChan <- ENDSIGNAL
+			ic.ch <- ENDSIGNAL
 			return
 		default:
 			panic(fmt.Sprintf("Unknown opcode: %d", ic.Program[ic.programIndex]))
@@ -150,8 +145,4 @@ func (ic *IntcodeProgram) Run() {
 		ic.programIndex++
 	}
 
-}
-
-func (ic *IntcodeProgram) IsActive() bool {
-	return ic.active
 }
