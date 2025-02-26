@@ -2,6 +2,7 @@ package intcode
 
 import (
 	"fmt"
+	"math"
 	"sync"
 )
 
@@ -14,6 +15,9 @@ type IntcodeProgram struct {
 	wg           *sync.WaitGroup
 	active       bool
 }
+
+const REQUESTSIGNAL = math.MaxInt
+const ENDSIGNAL = math.MinInt
 
 func NewIntcodeProgram(prog []int, inChan, outChan chan int, wg *sync.WaitGroup) *IntcodeProgram {
 	program := make(map[int]int)
@@ -93,6 +97,7 @@ func (ic *IntcodeProgram) Run() {
 			ic.programIndex += 3
 		case 3:
 			// save input
+			ic.outChan <- REQUESTSIGNAL
 			ic.Program[params[0]] = <-ic.inChan
 			ic.programIndex++
 		case 4:
@@ -137,6 +142,7 @@ func (ic *IntcodeProgram) Run() {
 			ic.programIndex++
 		case 99:
 			// halt
+			ic.outChan <- ENDSIGNAL
 			return
 		default:
 			panic(fmt.Sprintf("Unknown opcode: %d", ic.Program[ic.programIndex]))
