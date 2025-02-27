@@ -24,8 +24,8 @@ const cloneRC = (commands: number[]) => {
 const directions = [
   [0, 1],
   [0, -1],
-  [1, 0],
   [-1, 0],
+  [1, 0],
 ];
 
 const reverse = (d: number) => {
