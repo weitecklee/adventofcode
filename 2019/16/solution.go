@@ -21,6 +21,7 @@ func main() {
 	}
 	puzzleInput := parseInput(string(data))
 	fmt.Println(part1(puzzleInput))
+	fmt.Println(part2(puzzleInput))
 }
 
 func parseInput(s string) []int {
@@ -73,6 +74,50 @@ func part1(puzzleInput []int) string {
 	var sb strings.Builder
 	for i := range 8 {
 		sb.WriteByte(byte(puzzleInput[i]) + '0')
+	}
+	return sb.String()
+}
+
+/*
+	Trick to Part 2 is that the offset is in the 2nd half of the list.
+	There, the output digits can be calculated by starting from the
+	end and working backwards, adding another digit each time.
+	The pattern for the 2nd half of the list will always look like this:
+	0 0 0 ... 1 1 1 1 1 1
+	0 0 0 ... 0 1 1 1 1 1
+	0 0 0 ... 0 0 1 1 1 1
+	0 0 0 ... 0 0 0 1 1 1
+	0 0 0 ... 0 0 0 0 1 1
+	0 0 0 ... 0 0 0 0 0 1
+	Therefore, you only need the digits after the offset. Everything before
+	will not contribute anything to what we're looking for.
+*/
+
+func fft2(nums []int) []int {
+	res := make([]int, len(nums))
+	res[len(nums)-1] = nums[len(nums)-1]
+	for i := len(nums) - 2; i >= 0; i-- {
+		res[i] = (res[i+1] + nums[i]) % 10
+	}
+	return res
+}
+
+func part2(puzzleInput []int) string {
+	offset := 0
+	for i := range 7 {
+		offset = offset*10 + puzzleInput[i]
+	}
+	extendedInput := make([]int, len(puzzleInput)*10000)
+	for i := range 10000 {
+		copy(extendedInput[i*len(puzzleInput):], puzzleInput)
+	}
+	extendedInput = extendedInput[offset:]
+	for range 100 {
+		extendedInput = fft2(extendedInput)
+	}
+	var sb strings.Builder
+	for i := range 8 {
+		sb.WriteByte(byte(extendedInput[i]) + '0')
 	}
 	return sb.String()
 }
