@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -24,6 +25,8 @@ func main() {
 	}
 	nodeMap, allKeys := parseInput(string(data))
 	fmt.Println(part1(nodeMap, allKeys))
+	nodeMap2, allKeys2 := parseInput2(string(data))
+	fmt.Println(part2(nodeMap2, allKeys2))
 }
 
 type Node struct {
@@ -41,6 +44,21 @@ type Value struct {
 	steps    int
 	currNode *Node
 	keys     uint32
+}
+
+type Value2 struct {
+	steps     int
+	currNodes []*Node
+	keys      uint32
+}
+
+func (v *Value2) State() string {
+	var sb strings.Builder
+	for _, node := range v.currNodes {
+		sb.WriteRune(node.sym)
+	}
+	sb.WriteString(strconv.Itoa(int(v.keys)))
+	return sb.String()
 }
 
 func parseInput(s string) (map[rune]*Node, uint32) {
@@ -155,6 +173,113 @@ func part1(nodeMap map[rune]*Node, allKeys uint32) int {
 					keys:     keys,
 				},
 			})
+		}
+	}
+	return -1
+}
+
+func parseInput2(s string) (map[rune]*Node, uint32) {
+	maze := strings.Split(s, "\n")
+	var startR, startC int
+	for r, row := range maze {
+		for c, ch := range row {
+			if ch == '@' {
+				startR = r
+				startC = c
+				break
+			}
+		}
+		if startR != 0 {
+			break
+		}
+	}
+	tmp := []byte(maze[startR-1])
+	tmp[startC-1] = '1' // first new entrance
+	tmp[startC] = '#'
+	tmp[startC+1] = '2' // second new entrance
+	maze[startR-1] = string(tmp)
+	tmp = []byte(maze[startR])
+	tmp[startC-1] = '#'
+	tmp[startC] = '#'
+	tmp[startC+1] = '#'
+	maze[startR] = string(tmp)
+	tmp = []byte(maze[startR+1])
+	tmp[startC-1] = '3' // third new entrance
+	tmp[startC] = '#'
+	tmp[startC+1] = '4' // fourth new entrance
+	maze[startR+1] = string(tmp)
+
+	var allKeys uint32
+	nodeMap := make(map[rune]*Node)
+	for r, row := range maze {
+		for c, ch := range row {
+			if ch != '#' && ch != '.' {
+				nodeMap[ch] = &Node{ch, [2]int{r, c}, make(map[*Node]int)}
+				if unicode.IsLetter(ch) && ch == unicode.ToLower(ch) {
+					allKeys = addKey(allKeys, ch)
+				}
+			}
+		}
+	}
+	for _, node := range nodeMap {
+		findNeighbors(maze, node, nodeMap)
+	}
+	return nodeMap, allKeys
+}
+
+func part2(nodeMap map[rune]*Node, allKeys uint32) int {
+	queue := utils.NewMinHeap[Value2]()
+	initial := Value2{
+		steps:     0,
+		currNodes: []*Node{nodeMap['1'], nodeMap['2'], nodeMap['3'], nodeMap['4']},
+		keys:      0,
+	}
+	heap.Push(queue, &utils.Item[Value2]{
+		Priority: 0,
+		Value:    initial,
+	})
+	visited := make(map[string]int)
+	visited[initial.State()] = 0
+
+	for len(queue.PriorityQueue) > 0 {
+		item := heap.Pop(queue).(*utils.Item[Value2])
+		if item.Value.keys == allKeys {
+			return item.Value.steps
+		}
+		for i, node := range item.Value.currNodes {
+			for neighbor, d := range node.neighbors {
+				tmp := make([]*Node, len(item.Value.currNodes))
+				copy(tmp, item.Value.currNodes)
+				tmp[i] = neighbor
+				steps := item.Value.steps + d
+				keys := item.Value.keys
+				ch := neighbor.sym
+
+				if unicode.IsLetter(ch) {
+					if ch == unicode.ToLower(ch) {
+						if !hasKey(item.Value.keys, ch) {
+							keys = addKey(item.Value.keys, ch)
+						}
+					} else if !hasKey(item.Value.keys, unicode.ToLower(ch)) {
+						continue
+					}
+				}
+				curr := Value2{
+					steps:     steps,
+					currNodes: tmp,
+					keys:      keys,
+				}
+				state := curr.State()
+
+				if n, ok := visited[state]; ok && n <= steps {
+					continue
+				}
+				visited[state] = steps
+				heap.Push(queue, &utils.Item[Value2]{
+					Priority: steps,
+					Value:    curr,
+				})
+			}
 		}
 	}
 	return -1
