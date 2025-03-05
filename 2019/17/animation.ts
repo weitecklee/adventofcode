@@ -158,7 +158,7 @@ function draw() {
   while (true) {
     const ret = robot.next();
     if (ret.done) {
-      console.log(`\x1b[${rMax}B\x1b[?${cMax}h`);
+      console.log(`\x1b[${rMax}B\x1b[?25h`);
       return;
     }
     if (ret.value === 10) {
