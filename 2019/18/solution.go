@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -25,14 +24,26 @@ func main() {
 	}
 	nodeMap, allKeys := parseInput(string(data))
 	fmt.Println(part1(nodeMap, allKeys))
-	nodeMap2, allKeys2 := parseInput2(string(data))
-	fmt.Println(part2(nodeMap2, allKeys2))
+	nodeMap2, allKeys2, regionalKeys := parseInput2(string(data))
+	fmt.Println(part2(nodeMap2, allKeys2, regionalKeys))
 }
 
 type Node struct {
 	sym       rune
 	pos       [2]int
 	neighbors map[*Node]int
+}
+
+func (n *Node) IsStart() bool {
+	return !unicode.IsLetter(n.sym)
+}
+
+func (n *Node) IsKey() bool {
+	return unicode.IsLetter(n.sym) && n.sym == unicode.ToLower(n.sym)
+}
+
+func (n *Node) IsGate() bool {
+	return unicode.IsLetter(n.sym) && n.sym != unicode.ToLower(n.sym)
 }
 
 type QueueEntry struct {
@@ -52,13 +63,13 @@ type Value2 struct {
 	keys      uint32
 }
 
-func (v *Value2) State() string {
-	var sb strings.Builder
-	for _, node := range v.currNodes {
-		sb.WriteRune(node.sym)
+func (v *Value2) State() [5]rune {
+	var state [5]rune
+	for i, node := range v.currNodes {
+		state[i] = node.sym
 	}
-	sb.WriteString(strconv.Itoa(int(v.keys)))
-	return sb.String()
+	state[4] = rune(v.keys)
+	return state
 }
 
 func parseInput(s string) (map[rune]*Node, uint32) {
@@ -120,6 +131,10 @@ func hasKey(mask uint32, key rune) bool {
 	return mask&(1<<(key-'a')) != 0
 }
 
+func missingKeys(regionalKeys, keys uint32) bool {
+	return regionalKeys&^keys != 0
+}
+
 func part1(nodeMap map[rune]*Node, allKeys uint32) int {
 	queue := utils.NewMinHeap[Value]()
 	start := nodeMap['@']
@@ -148,18 +163,15 @@ func part1(nodeMap map[rune]*Node, allKeys uint32) int {
 			// 1. picking up a new key => update keys and state
 			// 2. at a gate without the key => discontinue
 			// 3. all others => continue
-			if ch != '@' {
-				if ch == unicode.ToLower(ch) {
-					if !hasKey(item.Value.keys, ch) {
-						// picking up  new key
-						keys = addKey(item.Value.keys, ch)
-						state[1] = rune(keys)
-					}
-				} else if !hasKey(item.Value.keys, unicode.ToLower(ch)) {
-					// at gate without key
-					continue
-				}
+			if neighbor.IsKey() && !hasKey(item.Value.keys, ch) {
+				// picking up  new key
+				keys = addKey(item.Value.keys, ch)
+				state[1] = rune(keys)
+			} else if neighbor.IsGate() && !hasKey(item.Value.keys, unicode.ToLower(ch)) {
+				// at gate without key
+				continue
 			}
+
 			// all others (passing through gate, already picked up key, back at starting location)
 			if n, ok := visited[state]; ok && n <= steps {
 				continue
@@ -178,7 +190,7 @@ func part1(nodeMap map[rune]*Node, allKeys uint32) int {
 	return -1
 }
 
-func parseInput2(s string) (map[rune]*Node, uint32) {
+func parseInput2(s string) (map[rune]*Node, uint32, [4]uint32) {
 	maze := strings.Split(s, "\n")
 	var startR, startC int
 	for r, row := range maze {
@@ -224,10 +236,38 @@ func parseInput2(s string) (map[rune]*Node, uint32) {
 	for _, node := range nodeMap {
 		findNeighbors(maze, node, nodeMap)
 	}
-	return nodeMap, allKeys
+	regionalKeys := findRegionalKeys(nodeMap)
+	return nodeMap, allKeys, regionalKeys
 }
 
-func part2(nodeMap map[rune]*Node, allKeys uint32) int {
+func findRegionalKeys(nodeMap map[rune]*Node) [4]uint32 {
+	var regionalKeys [4]uint32
+	for i := range 4 {
+		start := nodeMap[rune('1'+i)]
+		visited := make(map[rune]struct{})
+		queue := []*Node{start}
+		visited[start.sym] = struct{}{}
+		var keys uint32
+		for len(queue) > 0 {
+			curr := queue[0]
+			queue = queue[1:]
+			for neighbor := range curr.neighbors {
+				if _, ok := visited[neighbor.sym]; ok {
+					continue
+				}
+				visited[neighbor.sym] = struct{}{}
+				if neighbor.IsKey() {
+					keys = addKey(keys, neighbor.sym)
+				}
+				queue = append(queue, neighbor)
+			}
+		}
+		regionalKeys[i] = keys
+	}
+	return regionalKeys
+}
+
+func part2(nodeMap map[rune]*Node, allKeys uint32, regionalKeys [4]uint32) int {
 	queue := utils.NewMinHeap[Value2]()
 	initial := Value2{
 		steps:     0,
@@ -238,7 +278,7 @@ func part2(nodeMap map[rune]*Node, allKeys uint32) int {
 		Priority: 0,
 		Value:    initial,
 	})
-	visited := make(map[string]int)
+	visited := make(map[[5]rune]int)
 	visited[initial.State()] = 0
 
 	for len(queue.PriorityQueue) > 0 {
@@ -247,6 +287,11 @@ func part2(nodeMap map[rune]*Node, allKeys uint32) int {
 			return item.Value.steps
 		}
 		for i, node := range item.Value.currNodes {
+			// check if region has keys to pick up, otherwise skip
+			if !missingKeys(regionalKeys[i], item.Value.keys) {
+				continue
+			}
+
 			for neighbor, d := range node.neighbors {
 				tmp := make([]*Node, len(item.Value.currNodes))
 				copy(tmp, item.Value.currNodes)
@@ -255,14 +300,10 @@ func part2(nodeMap map[rune]*Node, allKeys uint32) int {
 				keys := item.Value.keys
 				ch := neighbor.sym
 
-				if unicode.IsLetter(ch) {
-					if ch == unicode.ToLower(ch) {
-						if !hasKey(item.Value.keys, ch) {
-							keys = addKey(item.Value.keys, ch)
-						}
-					} else if !hasKey(item.Value.keys, unicode.ToLower(ch)) {
-						continue
-					}
+				if neighbor.IsKey() && !hasKey(item.Value.keys, ch) {
+					keys = addKey(item.Value.keys, ch)
+				} else if neighbor.IsGate() && !hasKey(item.Value.keys, unicode.ToLower(ch)) {
+					continue
 				}
 				curr := Value2{
 					steps:     steps,
