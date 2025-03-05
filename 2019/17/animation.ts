@@ -22,11 +22,6 @@ while (true) {
   }
 }
 
-const tileBlocks: Map<string, string> = new Map([
-  ["#", "█"],
-  [".", " "],
-]);
-
 const directions = [
   [-1, 0],
   [1, 0],
@@ -34,9 +29,10 @@ const directions = [
   [0, 1],
 ];
 const directionsASCII = ["^", "v", "<", ">"];
+const robotSet: Set<number> = new Set();
 
 for (const c of directionsASCII) {
-  tileBlocks.set(c, c);
+  robotSet.add(c.charCodeAt(0));
 }
 
 let robotPos: number[] = [];
@@ -151,9 +147,14 @@ robot.next(10);
 
 console.log("\x1b[?25l");
 
+const scaffoldTile = "#".charCodeAt(0);
+const visited: Set<number> = new Set();
+
 function draw() {
   const messages: string[] = [];
   let message: string[] = [];
+  let r = 0;
+  let c = 0;
   while (true) {
     const ret = robot.next();
     if (ret.done) {
@@ -164,8 +165,22 @@ function draw() {
       if (message.length === 0) break;
       messages.push(message.join(""));
       message = [];
+      r++;
+      c = 0;
     } else {
-      message.push(tileBlocks.get(String.fromCharCode(ret.value))!);
+      if (ret.value === scaffoldTile) {
+        if (visited.has(r * 100 + c)) {
+          message.push("█");
+        } else {
+          message.push("▒");
+        }
+      } else if (robotSet.has(ret.value)) {
+        visited.add(r * 100 + c);
+        message.push(String.fromCharCode(ret.value));
+      } else {
+        message.push(" ");
+      }
+      c++;
     }
   }
   console.log(messages.join("\n"));
