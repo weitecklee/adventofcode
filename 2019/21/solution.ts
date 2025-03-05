@@ -64,7 +64,24 @@ console.log(springdroid.next().value);
 
 const springdroid2 = intcodeGenerator(puzzleInput);
 
-const commands2 = ["RUN"];
+// same as above, but now check if E and H are both holes
+// set T to (E || H) and do another "AND T J"
+
+const commands2 = [
+  "NOT A J",
+  "NOT B T",
+  "OR T J",
+  "NOT C T",
+  "OR T J",
+  "NOT D T",
+  "NOT T T",
+  "AND T J",
+  "NOT E T",
+  "NOT T T",
+  "OR H T",
+  "AND T J",
+  "RUN",
+];
 
 let line: string[] = [];
 
@@ -72,13 +89,18 @@ displayMessage(springdroid2);
 line.push(String.fromCharCode(inputCommands(springdroid2, commands2)));
 
 displayMessage(springdroid2, 10);
-while (true) {
-  const ret = springdroid2.next();
-  if (ret.done) break;
-  if (ret.value === 10) {
-    console.log(line.join(""));
-    line = [];
-  } else {
-    line.push(String.fromCharCode(ret.value));
+springdroid2.next();
+const v = springdroid2.next().value;
+if (v !== 10) {
+  console.log(v);
+} else
+  while (true) {
+    const ret = springdroid2.next();
+    if (ret.done) break;
+    if (ret.value === 10) {
+      console.log(line.join(""));
+      line = [];
+    } else {
+      line.push(String.fromCharCode(ret.value));
+    }
   }
-}
