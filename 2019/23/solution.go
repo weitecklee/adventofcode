@@ -42,6 +42,19 @@ type Packet struct {
 	y   int
 }
 
+func collectPackets(packets *[]Packet, ch chan int) {
+	var ret, x, y int
+	for {
+		ret = <-ch
+		if ret == intcode.REQUESTSIGNAL {
+			break
+		}
+		x = <-ch
+		y = <-ch
+		*packets = append(*packets, Packet{ret, x, y})
+	}
+}
+
 func part1(puzzleInput []int) int {
 	network := make(map[int]chan int, 50)
 	for i := range 50 {
@@ -54,22 +67,13 @@ func part1(puzzleInput []int) int {
 	}
 	var packet Packet
 	var packets []Packet
-	var ret, x, y int
 	var ch chan int
 
 	for i := range 50 {
 		ch = network[i]
 		<-ch
 		ch <- -1
-		for {
-			ret = <-ch
-			if ret == intcode.REQUESTSIGNAL {
-				break
-			}
-			x = <-ch
-			y = <-ch
-			packets = append(packets, Packet{ret, x, y})
-		}
+		collectPackets(&packets, ch)
 	}
 
 	for len(packets) > 0 {
@@ -82,15 +86,7 @@ func part1(puzzleInput []int) int {
 		ch <- packet.x
 		<-ch
 		ch <- packet.y
-		for {
-			ret = <-ch
-			if ret == intcode.REQUESTSIGNAL {
-				break
-			}
-			x = <-ch
-			y = <-ch
-			packets = append(packets, Packet{ret, x, y})
-		}
+		collectPackets(&packets, ch)
 	}
 
 	return -1
@@ -109,7 +105,6 @@ func part2(puzzleInput []int) int {
 	}
 	var packet, natPacket Packet
 	var packets []Packet
-	var ret, x, y int
 	var ch chan int
 	natHistory := make(map[int]struct{})
 
@@ -117,15 +112,7 @@ func part2(puzzleInput []int) int {
 		ch = network[i]
 		<-ch
 		ch <- -1
-		for {
-			ret = <-ch
-			if ret == intcode.REQUESTSIGNAL {
-				break
-			}
-			x = <-ch
-			y = <-ch
-			packets = append(packets, Packet{ret, x, y})
-		}
+		collectPackets(&packets, ch)
 	}
 
 	for {
@@ -140,34 +127,17 @@ func part2(puzzleInput []int) int {
 			ch <- packet.x
 			<-ch
 			ch <- packet.y
-			for {
-				ret = <-ch
-				if ret == intcode.REQUESTSIGNAL {
-					break
-				}
-				x = <-ch
-				y = <-ch
-				packets = append(packets, Packet{ret, x, y})
-			}
+			collectPackets(&packets, ch)
 		}
 
-		ch, x, y = network[0], natPacket.x, natPacket.y
-		if _, ok := natHistory[y]; ok {
-			return y
+		ch = network[0]
+		if _, ok := natHistory[natPacket.y]; ok {
+			return natPacket.y
 		}
-		natHistory[y] = struct{}{}
-		ch <- x
+		natHistory[natPacket.y] = struct{}{}
+		ch <- natPacket.x
 		<-ch
-		ch <- y
-
-		for {
-			ret = <-ch
-			if ret == intcode.REQUESTSIGNAL {
-				break
-			}
-			x = <-ch
-			y = <-ch
-			packets = append(packets, Packet{ret, x, y})
-		}
+		ch <- natPacket.y
+		collectPackets(&packets, ch)
 	}
 }
