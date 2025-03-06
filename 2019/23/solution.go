@@ -93,14 +93,11 @@ func solve(puzzleInput []int) (int, int) {
 			collectPackets(&packets, ch)
 		}
 
-		ch = network[0]
 		if _, ok := natHistory[natPacket.y]; ok {
 			return part1, natPacket.y
 		}
 		natHistory[natPacket.y] = struct{}{}
-		ch <- natPacket.x
-		<-ch
-		ch <- natPacket.y
-		collectPackets(&packets, ch)
+		natPacket.dst = 0
+		packets = append(packets, natPacket)
 	}
 }
