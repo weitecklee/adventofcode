@@ -21,6 +21,7 @@ func main() {
 	}
 	puzzleInput := parseInput(strings.Split(string(data), ","))
 	fmt.Println(part1(puzzleInput))
+	fmt.Println(part2(puzzleInput))
 }
 
 func parseInput(data []string) []int {
@@ -94,4 +95,79 @@ func part1(puzzleInput []int) int {
 
 	return -1
 
+}
+
+func part2(puzzleInput []int) int {
+	network := make(map[int]chan int, 50)
+	for i := range 50 {
+		ch := make(chan int)
+		ic := intcode.NewIntcodeProgram(puzzleInput, ch)
+		go ic.Run()
+		<-ch
+		ch <- i
+		network[i] = ch
+	}
+	var packet, natPacket Packet
+	var packets []Packet
+	var ret, x, y int
+	var ch chan int
+	natHistory := make(map[int]struct{})
+
+	for i := range 50 {
+		ch = network[i]
+		<-ch
+		ch <- -1
+		for {
+			ret = <-ch
+			if ret == intcode.REQUESTSIGNAL {
+				break
+			}
+			x = <-ch
+			y = <-ch
+			packets = append(packets, Packet{ret, x, y})
+		}
+	}
+
+	for {
+		for len(packets) > 0 {
+			packet = packets[0]
+			packets = packets[1:]
+			if packet.dst == 255 {
+				natPacket = packet
+				continue
+			}
+			ch = network[packet.dst]
+			ch <- packet.x
+			<-ch
+			ch <- packet.y
+			for {
+				ret = <-ch
+				if ret == intcode.REQUESTSIGNAL {
+					break
+				}
+				x = <-ch
+				y = <-ch
+				packets = append(packets, Packet{ret, x, y})
+			}
+		}
+
+		ch, x, y = network[0], natPacket.x, natPacket.y
+		if _, ok := natHistory[y]; ok {
+			return y
+		}
+		natHistory[y] = struct{}{}
+		ch <- x
+		<-ch
+		ch <- y
+
+		for {
+			ret = <-ch
+			if ret == intcode.REQUESTSIGNAL {
+				break
+			}
+			x = <-ch
+			y = <-ch
+			packets = append(packets, Packet{ret, x, y})
+		}
+	}
 }
