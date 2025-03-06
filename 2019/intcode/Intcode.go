@@ -15,6 +15,7 @@ type IntcodeProgram struct {
 const (
 	REQUESTSIGNAL = math.MaxInt
 	ENDSIGNAL     = math.MinInt
+	STOPSIGNAL    = math.MinInt
 )
 
 func NewIntcodeProgram(prog []int, ch chan int) *IntcodeProgram {
@@ -93,7 +94,11 @@ func (ic *IntcodeProgram) Run() {
 		case 3:
 			// save input
 			ic.ch <- REQUESTSIGNAL
-			ic.Program[params[0]] = <-ic.ch
+			received := <-ic.ch
+			if received == STOPSIGNAL {
+				return
+			}
+			ic.Program[params[0]] = received
 			ic.programIndex++
 		case 4:
 			// output
