@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -20,8 +21,7 @@ func main() {
 		panic(err)
 	}
 	puzzleInput := parseInput(strings.Split(string(data), ","))
-	fmt.Println(part1(puzzleInput))
-	fmt.Println(part2(puzzleInput))
+	fmt.Println(solve(puzzleInput))
 }
 
 func parseInput(data []string) []int {
@@ -55,61 +55,21 @@ func collectPackets(packets *[]Packet, ch chan int) {
 	}
 }
 
-func part1(puzzleInput []int) int {
+func solve(puzzleInput []int) (int, int) {
 	network := make(map[int]chan int, 50)
-	for i := range 50 {
-		ch := make(chan int)
-		ic := intcode.NewIntcodeProgram(puzzleInput, ch)
-		go ic.Run()
-		<-ch
-		ch <- i
-		network[i] = ch
-	}
-	var packet Packet
-	var packets []Packet
-	var ch chan int
-
-	for i := range 50 {
-		ch = network[i]
-		<-ch
-		ch <- -1
-		collectPackets(&packets, ch)
-	}
-
-	for len(packets) > 0 {
-		packet = packets[0]
-		packets = packets[1:]
-		if packet.dst == 255 {
-			return packet.y
-		}
-		ch = network[packet.dst]
-		ch <- packet.x
-		<-ch
-		ch <- packet.y
-		collectPackets(&packets, ch)
-	}
-
-	return -1
-
-}
-
-func part2(puzzleInput []int) int {
-	network := make(map[int]chan int, 50)
-	for i := range 50 {
-		ch := make(chan int)
-		ic := intcode.NewIntcodeProgram(puzzleInput, ch)
-		go ic.Run()
-		<-ch
-		ch <- i
-		network[i] = ch
-	}
 	var packet, natPacket Packet
 	var packets []Packet
 	var ch chan int
 	natHistory := make(map[int]struct{})
+	part1 := math.MinInt
 
 	for i := range 50 {
-		ch = network[i]
+		ch := make(chan int)
+		ic := intcode.NewIntcodeProgram(puzzleInput, ch)
+		go ic.Run()
+		<-ch
+		ch <- i
+		network[i] = ch
 		<-ch
 		ch <- -1
 		collectPackets(&packets, ch)
@@ -120,6 +80,9 @@ func part2(puzzleInput []int) int {
 			packet = packets[0]
 			packets = packets[1:]
 			if packet.dst == 255 {
+				if part1 == math.MinInt {
+					part1 = packet.y
+				}
 				natPacket = packet
 				continue
 			}
@@ -132,7 +95,7 @@ func part2(puzzleInput []int) int {
 
 		ch = network[0]
 		if _, ok := natHistory[natPacket.y]; ok {
-			return natPacket.y
+			return part1, natPacket.y
 		}
 		natHistory[natPacket.y] = struct{}{}
 		ch <- natPacket.x
