@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"sort"
 	"strings"
 )
 
@@ -63,10 +62,20 @@ func calcBasinSize(area [][]int, lowPoint [2]int) int {
 	return len(visited)
 }
 
+func updateTop3(top3 *[3]int, n int) {
+	for i := range top3 {
+		if n > top3[i] {
+			copy(top3[i+1:], top3[i:])
+			top3[i] = n
+			break
+		}
+	}
+}
+
 func solve(area [][]int) (int, int) {
 	var isLowPoint bool
 	var r2, c2, part1 int
-	var basinSizes []int
+	var basinSizesTop3 [3]int
 	for r, row := range area {
 		for c, ht := range row {
 			isLowPoint = true
@@ -82,13 +91,12 @@ func solve(area [][]int) (int, int) {
 			}
 			if isLowPoint {
 				part1 += ht + 1
-				basinSizes = append(basinSizes, calcBasinSize(area, [2]int{r, c}))
+				updateTop3(&basinSizesTop3, calcBasinSize(area, [2]int{r, c}))
 			}
 		}
 	}
-	sort.Ints(basinSizes)
 	part2 := 1
-	for _, size := range basinSizes[len(basinSizes)-3:] {
+	for _, size := range basinSizesTop3 {
 		part2 *= size
 	}
 	return part1, part2
