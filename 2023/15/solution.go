@@ -66,11 +66,8 @@ func parseStep(s string) (string, byte, int) {
 }
 
 func part2(puzzleInput []string) int {
-	hashmap := [256]*[]*Lens{}
-	for i := range 256 {
-		hashmap[i] = &[]*Lens{}
-	}
-	var box *[]*Lens
+	var hashmap [256][]*Lens
+	var box []*Lens
 	var label string
 	var op byte
 	var boxNum, focalLength int
@@ -80,25 +77,26 @@ loop:
 		boxNum = hashString(label)
 		box = hashmap[boxNum]
 		if op == '-' {
-			for i, lens := range *box {
+			for i, lens := range box {
 				if lens.label == label {
-					*box = slices.Delete(*box, i, i+1)
+					hashmap[boxNum] = slices.Delete(box, i, i+1)
 					break
 				}
 			}
 		} else if op == '=' {
-			for _, lens := range *box {
+			for _, lens := range box {
 				if lens.label == label {
 					lens.focalLength = focalLength
 					continue loop
 				}
 			}
-			*box = append(*box, &Lens{label, focalLength})
+			hashmap[boxNum] = append(box, &Lens{label, focalLength})
 		}
 	}
+
 	res := 0
 	for i, box := range hashmap {
-		for j, lens := range *box {
+		for j, lens := range box {
 			res += (i + 1) * (j + 1) * lens.focalLength
 		}
 	}
