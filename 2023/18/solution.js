@@ -39,10 +39,10 @@ function calculateSolution(instructions) {
     [x1, y1] = [x0, y0];
     switch (dir) {
       case "U":
-        y1 = y0 - dist;
+        y1 = y0 + dist;
         break;
       case "D":
-        y1 = y0 + dist;
+        y1 = y0 - dist;
         break;
       case "L":
         x1 = x0 - dist;
