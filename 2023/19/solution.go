@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,7 @@ func main() {
 	}
 	workflowMap, parts := parseInput(strings.Split(string(data), "\n\n"))
 	fmt.Println(part1(workflowMap, parts))
+	fmt.Println(part2(workflowMap))
 }
 
 var (
@@ -38,7 +40,7 @@ type Rule struct {
 func NewRule(str string) *Rule {
 	match := ruleRegex.FindStringSubmatch(str)
 	if match == nil {
-		panic(fmt.Sprintf("Error matching rule regex with: %s", str))
+		return &Rule{'x', '>', 0, str}
 	}
 	n, err := strconv.Atoi(match[3])
 	if err != nil {
@@ -54,10 +56,23 @@ func (r *Rule) AssessPart(p Part) bool {
 	return p[r.category] > r.n
 }
 
+func (r *Rule) Reverse() *Rule {
+	var comp byte = '<'
+	if comp == r.comp {
+		comp = '>'
+	}
+	n := r.n
+	if r.comp == '>' {
+		n++
+	} else {
+		n--
+	}
+	return &Rule{r.category, comp, n, r.dst}
+}
+
 type Workflow struct {
-	name    string
-	rules   []*Rule
-	lastDst string
+	name  string
+	rules []*Rule
 }
 
 func NewWorkflow(str string) *Workflow {
@@ -67,11 +82,11 @@ func NewWorkflow(str string) *Workflow {
 	}
 	name := match[1]
 	ruleParts := strings.Split(match[2], ",")
-	rules := make([]*Rule, len(ruleParts)-1)
-	for j, rulePart := range ruleParts[:len(ruleParts)-1] {
+	rules := make([]*Rule, len(ruleParts))
+	for j, rulePart := range ruleParts {
 		rules[j] = NewRule(rulePart)
 	}
-	return &Workflow{name, rules, ruleParts[len(ruleParts)-1]}
+	return &Workflow{name, rules}
 }
 
 func (w *Workflow) AssessPart(p Part) string {
@@ -80,7 +95,7 @@ func (w *Workflow) AssessPart(p Part) string {
 			return rule.dst
 		}
 	}
-	return w.lastDst
+	return ""
 }
 
 type Part map[byte]int
@@ -145,6 +160,56 @@ func part1(workflowMap map[string]*Workflow, parts []Part) int {
 		if part.Assess(workflowMap) {
 			res += part.Rating()
 		}
+	}
+	return res
+}
+
+type QueueEntry struct {
+	rules    []*Rule
+	workflow *Workflow
+}
+
+func part2(workflowMap map[string]*Workflow) int {
+	queue := []QueueEntry{{[]*Rule{}, workflowMap["in"]}}
+	var combinations [][]*Rule
+	for len(queue) > 0 {
+		rules := queue[0].rules
+		workflow := queue[0].workflow
+		queue = queue[1:]
+		for i := range workflow.rules {
+			currentRules := slices.Clone(rules)
+			for j := range i {
+				currentRules = append(currentRules, workflow.rules[j].Reverse())
+			}
+			currentRules = append(currentRules, workflow.rules[i])
+
+			if workflow.rules[i].dst == "A" {
+				combinations = append(combinations, currentRules)
+			} else if workflow.rules[i].dst != "R" {
+				queue = append(queue, QueueEntry{currentRules, workflowMap[workflow.rules[i].dst]})
+			}
+		}
+	}
+
+	res := 0
+	for _, combo := range combinations {
+		approved := map[byte][]int{'x': {1, 4000}, 'm': {1, 4000}, 'a': {1, 4000}, 's': {1, 4000}}
+		for _, rule := range combo {
+			if rule.comp == '>' {
+				if approved[rule.category][0] < rule.n+1 {
+					approved[rule.category][0] = rule.n + 1
+				}
+			} else {
+				if approved[rule.category][1] > rule.n-1 {
+					approved[rule.category][1] = rule.n - 1
+				}
+			}
+		}
+		count := 1
+		for _, bounds := range approved {
+			count *= bounds[1] - bounds[0] + 1
+		}
+		res += count
 	}
 	return res
 }
