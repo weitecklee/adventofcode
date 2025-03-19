@@ -16,8 +16,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	puzzleInput := parseInput(string(data))
-	fmt.Println(part1(puzzleInput))
+	fileBlocks := parseInput(string(data))
+	fileBlocks2 := slices.Clone(fileBlocks)
+	fmt.Println(part1(fileBlocks))
+	fmt.Println(part2(fileBlocks2))
 }
 
 func parseInput(data string) []int {
@@ -25,10 +27,6 @@ func parseInput(data string) []int {
 	for i, ch := range data {
 		puzzleInput[i] = int(ch - '0')
 	}
-	return puzzleInput
-}
-
-func part1(puzzleInput []int) int {
 	totalBlocks := 0
 	for _, n := range puzzleInput {
 		totalBlocks += n
@@ -43,10 +41,24 @@ func part1(puzzleInput []int) int {
 		}
 		j += n
 	}
+	return fileBlocks
+}
+
+func computeChecksum(fileBlocks []int) int {
+	res := 0
+	for i, n := range fileBlocks {
+		if n >= 0 {
+			res += i * n
+		}
+	}
+	return res
+}
+
+func part1(fileBlocks []int) int {
 	left := 0
-	right := totalBlocks - 1
+	right := len(fileBlocks) - 1
 	for {
-		for left < totalBlocks && fileBlocks[left] >= 0 {
+		for left < len(fileBlocks) && fileBlocks[left] >= 0 {
 			left++
 		}
 		for fileBlocks[right] < 0 {
@@ -57,12 +69,40 @@ func part1(puzzleInput []int) int {
 		}
 		fileBlocks[left], fileBlocks[right] = fileBlocks[right], fileBlocks[left]
 	}
-	res := 0
-	for i, n := range fileBlocks {
-		if n < 0 {
-			break
+	return computeChecksum(fileBlocks)
+}
+
+func part2(fileBlocks []int) int {
+	right := len(fileBlocks) - 1
+	for right >= 0 {
+		left := right
+		for fileBlocks[left] == fileBlocks[right] {
+			left--
 		}
-		res += i * n
+		size := right - left
+		i := 0
+		for i < len(fileBlocks) {
+			for i < len(fileBlocks) && fileBlocks[i] >= 0 {
+				i++
+			}
+			j := i
+			for j < len(fileBlocks) && fileBlocks[j] < 0 {
+				j++
+			}
+			if j-i >= size {
+				break
+			}
+			i = j + 1
+		}
+		if i < right {
+			for k := range size {
+				fileBlocks[i+k], fileBlocks[right-k] = fileBlocks[right-k], fileBlocks[i+k]
+			}
+		}
+		right = left
+		for right >= 0 && fileBlocks[right] <= 0 {
+			right--
+		}
 	}
-	return res
+	return computeChecksum(fileBlocks)
 }
