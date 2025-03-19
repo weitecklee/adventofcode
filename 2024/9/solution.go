@@ -16,10 +16,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fileBlocks := parseInput(string(data))
-	fileBlocks2 := slices.Clone(fileBlocks)
-	fmt.Println(part1(fileBlocks))
-	fmt.Println(part2(fileBlocks2))
+	puzzleInput := parseInput(string(data))
+	fmt.Println(part1(puzzleInput))
+	fmt.Println(part2(puzzleInput))
 }
 
 func parseInput(data string) []int {
@@ -27,82 +26,90 @@ func parseInput(data string) []int {
 	for i, ch := range data {
 		puzzleInput[i] = int(ch - '0')
 	}
-	totalBlocks := 0
-	for _, n := range puzzleInput {
-		totalBlocks += n
-	}
-	fileBlocks := slices.Repeat([]int{-1}, totalBlocks)
-	j := 0
-	for i, n := range puzzleInput {
-		if i%2 == 0 {
-			for k := range n {
-				fileBlocks[j+k] = i / 2
-			}
-		}
-		j += n
-	}
-	return fileBlocks
+	return puzzleInput
 }
 
-func computeChecksum(fileBlocks []int) int {
-	res := 0
-	for i, n := range fileBlocks {
-		if n >= 0 {
-			res += i * n
-		}
-	}
-	return res
-}
-
-func part1(fileBlocks []int) int {
+func part1(puzzleInput []int) int {
+	// use double pointers, put in `right` files into `left` empty blocks,
+	// compute checksum as we go
 	left := 0
-	right := len(fileBlocks) - 1
-	for {
-		for left < len(fileBlocks) && fileBlocks[left] >= 0 {
-			left++
-		}
-		for fileBlocks[right] < 0 {
-			right--
-		}
-		if left >= right {
-			break
-		}
-		fileBlocks[left], fileBlocks[right] = fileBlocks[right], fileBlocks[left]
+	right := len(puzzleInput) - 1
+	if right%2 == 1 {
+		right--
 	}
-	return computeChecksum(fileBlocks)
+	var checksum, pos int
+	waitingToBeSlotted := puzzleInput[right] // file blocks waiting to be slotted
+	for left < right {
+		if left%2 == 1 {
+			// odd index -> empty block
+			for range puzzleInput[left] {
+				if waitingToBeSlotted == 0 {
+					// still have empty space, find the next file block
+					right -= 2
+					waitingToBeSlotted = puzzleInput[right]
+				}
+				checksum += right / 2 * pos
+				pos++
+				waitingToBeSlotted--
+			}
+		} else {
+			// even index -> file block
+			for range puzzleInput[left] {
+				checksum += left / 2 * pos
+				pos++
+			}
+		}
+		left++
+	}
+	for range waitingToBeSlotted {
+		checksum += right / 2 * pos
+		pos++
+	}
+	return checksum
 }
 
-func part2(fileBlocks []int) int {
-	right := len(fileBlocks) - 1
+func part2(puzzleInput []int) int {
+	posMap := make(map[int]int, len(puzzleInput))
+	// map of (file/empty) block to position, position points to start of block
+	pos := 0
+	for i, n := range puzzleInput {
+		posMap[i] = pos
+		pos += n
+	}
+
+	checksum := 0
+	puzzleInput2 := slices.Clone(puzzleInput)
+	right := len(puzzleInput) - 1
+	if right%2 == 1 {
+		right--
+	}
 	for right >= 0 {
-		left := right
-		for fileBlocks[left] == fileBlocks[right] {
-			left--
+		// find first empty block that fits
+		pos := 1
+		for pos < right && puzzleInput2[pos] < puzzleInput2[right] {
+			pos += 2
 		}
-		size := right - left
-		i := 0
-		for i < len(fileBlocks) {
-			for i < len(fileBlocks) && fileBlocks[i] >= 0 {
-				i++
+
+		if pos < right {
+			// if found, slot file blocks in
+			// have to account for if any files previously slotted in
+			// so must compare old puzzleInput[pos] and new puzzleInput2[pos]
+			for j := range puzzleInput2[right] {
+				checksum += (puzzleInput[pos] - puzzleInput2[pos] + posMap[pos] + j) * (right / 2)
 			}
-			j := i
-			for j < len(fileBlocks) && fileBlocks[j] < 0 {
-				j++
-			}
-			if j-i >= size {
-				break
-			}
-			i = j + 1
+			puzzleInput2[pos] -= puzzleInput2[right]
+			puzzleInput2[right] = 0
 		}
-		if i < right {
-			for k := range size {
-				fileBlocks[i+k], fileBlocks[right-k] = fileBlocks[right-k], fileBlocks[i+k]
-			}
-		}
-		right = left
-		for right >= 0 && fileBlocks[right] <= 0 {
-			right--
+
+		right -= 2
+	}
+
+	// add up files that were not moved
+	for i := 0; i < len(puzzleInput2); i += 2 {
+		for j := range puzzleInput2[i] {
+			checksum += (posMap[i] + j) * i / 2
 		}
 	}
-	return computeChecksum(fileBlocks)
+
+	return checksum
 }
