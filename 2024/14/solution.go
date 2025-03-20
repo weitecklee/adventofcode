@@ -19,6 +19,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(part1(parseInput(strings.Split(string(data), "\n"))))
+	fmt.Println(part2(parseInput(strings.Split(string(data), "\n"))))
 }
 
 const (
@@ -98,6 +99,38 @@ func part1(robots []*Robot) int {
 	res := 1
 	for i := range 4 {
 		res *= quadrants[i+1]
+	}
+	return res
+}
+
+func displayMessage(posMap map[[2]int]struct{}) {
+	var sb strings.Builder
+	for row := range HEIGHT {
+		sb.Reset()
+		for col := range WIDTH {
+			if _, ok := posMap[[2]int{col, row}]; ok {
+				sb.WriteRune('█')
+			} else {
+				sb.WriteByte(' ')
+			}
+		}
+		fmt.Println(sb.String())
+	}
+}
+
+func part2(robots []*Robot) int {
+	res := 0
+	for {
+		res++
+		posMap := make(map[[2]int]struct{}, len(robots))
+		for _, robot := range robots {
+			robot.Simulate(1)
+			posMap[robot.p] = struct{}{}
+		}
+		if len(posMap) == len(robots) {
+			// displayMessage(posMap)
+			break
+		}
 	}
 	return res
 }
