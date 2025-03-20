@@ -19,6 +19,7 @@ func main() {
 	}
 	computerMap := parseInput(strings.Split(string(data), "\n"))
 	fmt.Println(part1(computerMap))
+	fmt.Println(part2(computerMap))
 }
 
 type Computer struct {
@@ -78,4 +79,52 @@ func part1(computerMap map[string]*Computer) int {
 		}
 	}
 	return res
+}
+
+func isSupersetOf[T comparable](mapA, mapB map[T]struct{}) bool {
+	for k := range mapB {
+		if _, ok := mapA[k]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func part2(computerMap map[string]*Computer) string {
+	largestSet := make(map[*Computer]struct{})
+	computers := make([]*Computer, 0, len(computerMap))
+	for _, computer := range computerMap {
+		computers = append(computers, computer)
+	}
+	for i, computer := range computers {
+		checked := make(map[*Computer]struct{})
+		for j := i + 1; j < len(computers); j++ {
+			if _, ok := computer.neighbors[computers[j]]; !ok {
+				continue
+			}
+			if _, ok := checked[computers[j]]; ok {
+				continue
+			}
+			checked[computers[j]] = struct{}{}
+			network := make(map[*Computer]struct{})
+			network[computer] = struct{}{}
+			network[computers[j]] = struct{}{}
+			for k := j + 1; k < len(computers); k++ {
+				if isSupersetOf(computers[k].neighbors, network) {
+					checked[computers[k]] = struct{}{}
+					network[computers[k]] = struct{}{}
+				}
+			}
+			if len(network) > len(largestSet) {
+				largestSet = network
+			}
+		}
+
+	}
+	names := make([]string, 0, len(largestSet))
+	for computer := range largestSet {
+		names = append(names, computer.name)
+	}
+	sort.Strings(names)
+	return strings.Join(names, ",")
 }
