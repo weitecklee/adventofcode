@@ -19,11 +19,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	parseInput(strings.Split(string(data), "\n\n"))
-	fmt.Println(part1())
+	fmt.Println(part1(parseInput(strings.Split(string(data), "\n\n"))))
+	fmt.Println(part2(parseInput(strings.Split(string(data), "\n\n"))))
 }
 
-var monkeyMap = make(map[int]*Monkey)
+var PRIME = 1
 
 type Monkey struct {
 	id             int
@@ -32,6 +32,8 @@ type Monkey struct {
 	test           func(i *Item) bool
 	ifTrue         int
 	ifFalse        int
+	ifTrueMonkey   *Monkey
+	ifFalseMonKey  *Monkey
 	itemsInspected int
 }
 
@@ -79,6 +81,8 @@ func NewMonkey(id int, items []int, operStr string, testN, trueN, falseN int) *M
 		},
 		trueN,
 		falseN,
+		nil,
+		nil,
 		0,
 	}
 }
@@ -91,16 +95,20 @@ func (m *Monkey) InspectItem(item *Item) {
 	m.oper(item)
 }
 
-func (m *Monkey) TakeTurn() {
+func (m *Monkey) TakeTurn(withRelief bool) {
 	for len(m.items) > 0 {
 		item := m.items[0]
 		m.items = m.items[1:]
 		m.InspectItem(item)
-		Relief(item)
-		if m.test(item) {
-			monkeyMap[m.ifTrue].AddItem(item)
+		if withRelief {
+			Relief(item)
 		} else {
-			monkeyMap[m.ifFalse].AddItem(item)
+			Normalize(item)
+		}
+		if m.test(item) {
+			m.ifTrueMonkey.AddItem(item)
+		} else {
+			m.ifFalseMonKey.AddItem(item)
 		}
 		m.itemsInspected++
 	}
@@ -114,7 +122,13 @@ func Relief(item *Item) {
 	item.worryLevel /= 3
 }
 
-func parseInput(data []string) {
+func Normalize(item *Item) {
+	item.worryLevel %= PRIME
+}
+
+func parseInput(data []string) map[int]*Monkey {
+	PRIME = 1
+	monkeyMap := make(map[int]*Monkey, len(data))
 	for _, block := range data {
 		lines := strings.Split(block, "\n")
 		id := utils.ExtractInts(lines[0])[0]
@@ -123,15 +137,16 @@ func parseInput(data []string) {
 		trueN := utils.ExtractInts(lines[4])[0]
 		falseN := utils.ExtractInts(lines[5])[0]
 		monkeyMap[id] = NewMonkey(id, items, lines[2], testN, trueN, falseN)
+		PRIME *= testN
 	}
+	for _, monkey := range monkeyMap {
+		monkey.ifTrueMonkey = monkeyMap[monkey.ifTrue]
+		monkey.ifFalseMonKey = monkeyMap[monkey.ifFalse]
+	}
+	return monkeyMap
 }
 
-func part1() int {
-	for range 20 {
-		for i := 0; i < len(monkeyMap); i++ {
-			monkeyMap[i].TakeTurn()
-		}
-	}
+func calcMonkeyBusinessLevel(monkeyMap map[int]*Monkey) int {
 	topTwo := [2]int{}
 	for _, monkey := range monkeyMap {
 		for i, n := range topTwo {
@@ -143,4 +158,22 @@ func part1() int {
 		}
 	}
 	return topTwo[0] * topTwo[1]
+}
+
+func part1(monkeyMap map[int]*Monkey) int {
+	for range 20 {
+		for i := 0; i < len(monkeyMap); i++ {
+			monkeyMap[i].TakeTurn(true)
+		}
+	}
+	return calcMonkeyBusinessLevel(monkeyMap)
+}
+
+func part2(monkeyMap map[int]*Monkey) int {
+	for range 10000 {
+		for i := 0; i < len(monkeyMap); i++ {
+			monkeyMap[i].TakeTurn(false)
+		}
+	}
+	return calcMonkeyBusinessLevel(monkeyMap)
 }
