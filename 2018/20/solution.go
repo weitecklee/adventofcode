@@ -20,12 +20,6 @@ func main() {
 	fmt.Println(solve(facilityMap))
 }
 
-type Point struct {
-	pos          [2]int
-	isRoom       bool
-	doorsToReach int
-}
-
 type QueueEntry struct {
 	pos   [2]int
 	doors int
@@ -38,47 +32,52 @@ var directions = [][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
 // when `|` is encountered, go back to start of branch, top of stack becomes current pos again.
 // when `)` is encounted, branch is done, pop value off stack to become new current pos.
 
-func createMap(puzzleInput string) map[[2]int]*Point {
-	facilityMap := make(map[[2]int]*Point)
-	curr := [2]int{0, 0}
-	facilityMap[curr] = &Point{curr, true, 0}
-	currStack := [][2]int{}
+// facilityMap is map of <pos, isRoom>
+// isRoom = !isDoor
+
+func createMap(puzzleInput string) map[[2]int]bool {
+	facilityMap := make(map[[2]int]bool)
+	pos := [2]int{0, 0}
+	facilityMap[pos] = true
+	posStack := [][2]int{}
 	for _, ch := range puzzleInput {
 		switch ch {
 		case 'N':
-			curr[1]++
-			facilityMap[curr] = &Point{curr, false, -1}
-			curr[1]++
-			facilityMap[curr] = &Point{curr, true, -1}
+			pos[1]++
+			facilityMap[pos] = false
+			pos[1]++
+			facilityMap[pos] = true
 		case 'E':
-			curr[0]++
-			facilityMap[curr] = &Point{curr, false, -1}
-			curr[0]++
-			facilityMap[curr] = &Point{curr, true, -1}
+			pos[0]++
+			facilityMap[pos] = false
+			pos[0]++
+			facilityMap[pos] = true
 		case 'W':
-			curr[0]--
-			facilityMap[curr] = &Point{curr, false, -1}
-			curr[0]--
-			facilityMap[curr] = &Point{curr, true, -1}
+			pos[0]--
+			facilityMap[pos] = false
+			pos[0]--
+			facilityMap[pos] = true
 		case 'S':
-			curr[1]--
-			facilityMap[curr] = &Point{curr, false, -1}
-			curr[1]--
-			facilityMap[curr] = &Point{curr, true, -1}
+			pos[1]--
+			facilityMap[pos] = false
+			pos[1]--
+			facilityMap[pos] = true
 		case '|':
-			curr = currStack[len(currStack)-1]
+			pos = posStack[len(posStack)-1]
 		case '(':
-			currStack = append(currStack, curr)
+			posStack = append(posStack, pos)
 		case ')':
-			curr = currStack[len(currStack)-1]
-			currStack = currStack[:len(currStack)-1]
+			pos = posStack[len(posStack)-1]
+			posStack = posStack[:len(posStack)-1]
 		}
 	}
 	return facilityMap
 }
 
-func solve(facilityMap map[[2]int]*Point) (int, int) {
+func solve(facilityMap map[[2]int]bool) (int, int) {
 	queue := []QueueEntry{{[2]int{0, 0}, 0}}
+	visited := make(map[[2]int]struct{})
+	visited[[2]int{0, 0}] = struct{}{}
 	part1 := 0
 	part2 := 0
 	for len(queue) > 0 {
@@ -86,7 +85,7 @@ func solve(facilityMap map[[2]int]*Point) (int, int) {
 		queue = queue[1:]
 		pos := curr.pos
 		doors := curr.doors
-		if facilityMap[pos].isRoom {
+		if facilityMap[pos] {
 			if doors > part1 {
 				part1 = doors
 			}
@@ -102,10 +101,10 @@ func solve(facilityMap map[[2]int]*Point) (int, int) {
 				// any pos not in facilityMap is not room or door, i.e., it's a wall
 				continue
 			}
-			if facilityMap[pos2].doorsToReach >= 0 {
+			if _, exists := visited[pos2]; exists {
 				continue
 			}
-			facilityMap[pos2].doorsToReach = doors
+			visited[pos2] = struct{}{}
 			queue = append(queue, QueueEntry{pos2, doors})
 		}
 	}
