@@ -71,10 +71,7 @@ func (ch *Character) Equip(item *Item) {
 }
 
 func (ch *Character) Attack(target *Character) {
-	damage := ch.damage - target.armor
-	if damage < 1 {
-		damage = 1
-	}
+	damage := max(ch.damage-target.armor, 1)
 	target.hp -= damage
 }
 
