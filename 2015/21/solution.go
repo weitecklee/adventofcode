@@ -58,10 +58,8 @@ type Item struct {
 var playerBase = &Item{"Player", 100, 0, 0, 0}
 
 type Character struct {
-	hp     int
-	cost   int
-	damage int
-	armor  int
+	Item
+	equipment []*Item
 }
 
 func (ch *Character) Equip(item *Item) {
@@ -69,6 +67,7 @@ func (ch *Character) Equip(item *Item) {
 	ch.cost += item.cost
 	ch.damage += item.damage
 	ch.armor += item.armor
+	ch.equipment = append(ch.equipment, item)
 }
 
 func (ch *Character) Attack(target *Character) {
@@ -79,8 +78,8 @@ func (ch *Character) Attack(target *Character) {
 	target.hp -= damage
 }
 
-func NewCharacter(equipment []*Item) *Character {
-	ch := &Character{0, 0, 0, 0}
+func NewCharacter(base *Item, equipment []*Item) *Character {
+	ch := &Character{*base, make([]*Item, 0, len(equipment))}
 	for _, item := range equipment {
 		ch.Equip(item)
 	}
@@ -164,8 +163,8 @@ func solve(bossBase *Item, shops [][]*Item) (int, int) {
 		for _, armor := range armorShop {
 			for _, ring1 := range ringShop {
 				for _, ring2 := range ringShop {
-					player := NewCharacter([]*Item{playerBase, weapon, armor, ring1, ring2})
-					boss := NewCharacter([]*Item{bossBase})
+					player := NewCharacter(playerBase, []*Item{weapon, armor, ring1, ring2})
+					boss := NewCharacter(bossBase, []*Item{})
 					scenarios = append(scenarios, [2]*Character{player, boss})
 				}
 			}
