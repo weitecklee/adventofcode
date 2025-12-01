@@ -20,7 +20,7 @@ fn parse_input(puzzle_input: String) -> Vec<i32> {
         .collect()
 }
 
-fn part1(turns: &Vec<i32>) -> i32 {
+fn part1(turns: &[i32]) -> i32 {
     let mut dial = 50;
     let mut res = 0;
     for turn in turns {
@@ -33,7 +33,7 @@ fn part1(turns: &Vec<i32>) -> i32 {
     res
 }
 
-fn part2(turns: &Vec<i32>) -> i32 {
+fn part2(turns: &[i32]) -> i32 {
     let mut dial = 50;
     let mut res = 0;
     let mut prev = dial;
