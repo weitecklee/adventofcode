@@ -24,6 +24,7 @@ class Monkey {
       this.monkey2 = parts[2];
     }
   }
+
   yell() {
     switch (this.type) {
       case "number":
@@ -53,3 +54,22 @@ for (const [name, job] of input) {
 }
 
 console.log(monkeys.get("root").yell());
+
+monkeys.get("root").type = "-";
+let lo = 0;
+let hi = 331120084396440 * 2;
+
+while (lo < hi) {
+  const mid = Math.floor(lo + (hi - lo) / 2);
+  monkeys.get("humn").number = mid;
+  const res = monkeys.get("root").yell();
+  if (res === 0) {
+    console.log(mid);
+    break;
+  }
+  if (res > 0) {
+    lo = mid + 1;
+  } else {
+    hi = mid - 1;
+  }
+}

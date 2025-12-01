@@ -9,19 +9,10 @@ import java.util.regex.Pattern;
 class Solver {
 
   public static class Pair {
-    private int p1n1;
-    private int p1n2;
-    private int p2n1;
-    private int p2n2;
     private boolean overlap1;
     private boolean overlap2;
 
     public Pair(int p1n1, int p1n2, int p2n1, int p2n2) {
-      this.p1n1 = p1n1;
-      this.p1n2 = p1n2;
-      this.p2n1 = p2n1;
-      this.p2n2 = p2n2;
-
       this.overlap1 = (p1n1 >= p2n1 && p1n1 <= p2n2 && p1n2 >= p2n1 && p1n2 <= p2n2) || (p2n1 >= p1n1 && p2n1 <= p1n2 && p2n2 >= p1n1 && p2n2 <= p1n2);
       this.overlap2 = (p1n1 >= p2n1 && p1n1 <= p2n2) || (p1n2 >= p2n1 && p1n2 <= p2n2) || (p2n1 >= p1n1 && p2n1 <= p1n2) || (p2n2 >= p1n1 && p2n2 <= p1n2);
     }
