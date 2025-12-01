@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/weitecklee/adventofcode/utils"
 )
 
 func main() {
@@ -53,19 +55,22 @@ func part1(puzzleInput []int) int {
 func part2(puzzleInput []int) int {
 	dial := 50
 	res := 0
+	prev := dial
 	for _, n := range puzzleInput {
-		inc := 1
-		if n < 0 {
-			n *= -1
-			inc = -1
+		res += utils.AbsInt(n) / 100
+		dial += n % 100
+		if (prev < 0 && dial >= 0) || (prev > 0 && dial <= 0) {
+			res++
 		}
-		for range n {
-			dial += inc
-			dial %= 100
-			if dial == 0 {
-				res++
-			}
+		if prev < 100 && dial >= 100 {
+			res++
+			dial -= 100
 		}
+		if prev > -100 && dial <= -100 {
+			res++
+			dial += 100
+		}
+		prev = dial
 	}
 	return res
 }

@@ -33,16 +33,22 @@ function part1(turns: number[]): number {
 function part2(turns: number[]): number {
   let dial = 50;
   let res = 0;
+  let prev = dial;
   for (let turn of turns) {
-    let inc = Math.sign(turn);
-    turn = Math.abs(turn);
-    for (let i = 0; i < turn; i++) {
-      dial += inc;
-      dial %= 100;
-      if (dial === 0) {
-        res++;
-      }
+    res += Math.floor(Math.abs(turn) / 100);
+    dial += turn % 100;
+    if ((prev < 0 && dial >= 0) || (prev > 0 && dial <= 0)) {
+      res++;
     }
+    if (prev < 100 && dial >= 100) {
+      res++;
+      dial -= 100;
+    }
+    if (prev > -100 && dial <= -100) {
+      res++;
+      dial += 100;
+    }
+    prev = dial;
   }
   return res;
 }
