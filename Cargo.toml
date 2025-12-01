@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 
 [workspace]
-members = ["2022/1/solution_2022_1"]
+members = ["2022/1/solution_2022_1", "2025/1/solution_2025_1"]
