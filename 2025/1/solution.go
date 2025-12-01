@@ -61,12 +61,7 @@ func part2(puzzleInput []int) int {
 		}
 		for range n {
 			dial += inc
-			if dial >= 100 {
-				dial -= 100
-			}
-			if dial < 0 {
-				dial += 100
-			}
+			dial %= 100
 			if dial == 0 {
 				res++
 			}
