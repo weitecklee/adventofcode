@@ -35,21 +35,23 @@ fn part2(ranges: &[[i64; 2]]) -> i64 {
 }
 
 fn is_invalid_id(n: i64) -> bool {
-    let s = n.to_string();
-    let mid = s.len() / 2;
-    s[0..mid] == s[mid..]
+    let mut buf = itoa::Buffer::new();
+    let b = buf.format(n).as_bytes();
+    let mid = b.len() / 2;
+    b[0..mid] == b[mid..]
 }
 
 fn is_invalid_id2(n: i64) -> bool {
-    let s = n.to_string();
-    let l = s.len();
+    let mut buf = itoa::Buffer::new();
+    let b = buf.format(n).as_bytes();
+    let l = b.len();
     for chunk_size in 1..=l / 2 {
         if !l.is_multiple_of(chunk_size) {
             continue;
         }
 
-        let first = &&s.as_bytes()[..chunk_size];
-        if s.as_bytes().chunks(chunk_size).all(|c| c == *first) {
+        let first = &b[..chunk_size];
+        if b.chunks(chunk_size).all(|c| c == first) {
             return true;
         }
     }
