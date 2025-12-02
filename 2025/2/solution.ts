@@ -30,7 +30,7 @@ function part2(ranges: number[][]): number {
 }
 
 // So much easier when the regexp engine supports backreferences!
-// Looking at you, Go
+// Looking at you, Go and Rust :P
 const reg1 = /^(.+)\1$/g;
 const reg2 = /^(.+)\1+$/g;
 

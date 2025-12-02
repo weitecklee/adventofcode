@@ -9,5 +9,7 @@ edition = "2024"
 members = [
   "2022/1/solution_2022_1",
   "2024/1/solution_2024_1",
+  "2024/2/solution_2024_2",
   "2025/1/solution_2025_1",
+  "2025/2/solution_2025_2",
 ]
