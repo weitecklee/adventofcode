@@ -65,7 +65,7 @@ func isInvalidId(n int) bool {
 func isInvalidId2(n int) bool {
 	s := strconv.Itoa(n)
 	l := len(s)
-	for i := 1; i < l; i++ {
+	for i := 1; i <= l/2; i++ {
 		if l%i != 0 {
 			continue
 		}
