@@ -24,7 +24,12 @@ func getInput(year, day string) {
 	sessionCookie := os.Getenv("AOC_SESSION_COOKIE")
 	if sessionCookie == "" {
 		fmt.Println("Error: AOC_SESSION_COOKIE environment variable not set")
-		return
+		fmt.Println("Enter cookie value: ")
+		fmt.Scanln(&sessionCookie)
+		if sessionCookie == "" {
+			return
+		}
+		os.Setenv("AOC_SESSION_COOKIE", sessionCookie)
 	}
 
 	url := "https://adventofcode.com/" + year + "/day/" + day + "/input"
@@ -65,6 +70,10 @@ func getInput(year, day string) {
 	}
 
 	dir := filepath.Join(wd, year, day)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, 0755)
+	}
+
 	filePath := filepath.Join(dir, "input.txt")
 
 	err = os.WriteFile(filePath, body, 0644)
