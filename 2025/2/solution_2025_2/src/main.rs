@@ -13,57 +13,45 @@ fn main() {
 fn parse_input(puzzle_input: String) -> Vec<[i64; 2]> {
     puzzle_input
         .split(",")
-        .map(|s| s.split("-").collect())
-        .map(|ss: Vec<&str>| [ss[0].parse::<i64>().unwrap(), ss[1].parse::<i64>().unwrap()])
+        .map(|s| {
+            let (a, b) = s.split_once("-").unwrap();
+            [a.parse().unwrap(), b.parse().unwrap()]
+        })
         .collect()
 }
 
 fn part1(ranges: &[[i64; 2]]) -> i64 {
     ranges
         .par_iter()
-        .map(|pair| pair[0]..=pair[1])
-        .map(|r| r.filter(|n| is_invalid_id(*n)))
-        .map(|r| r.sum::<i64>())
+        .map(|[a, b]| (*a..=*b).filter(|n| is_invalid_id(*n)).sum::<i64>())
         .sum()
 }
 
 fn part2(ranges: &[[i64; 2]]) -> i64 {
     ranges
         .par_iter()
-        .map(|pair| pair[0]..=pair[1])
-        .map(|r| r.filter(|n| is_invalid_id2(*n)))
-        .map(|r| r.sum::<i64>())
+        .map(|[a, b]| (*a..=*b).filter(|n| is_invalid_id2(*n)).sum::<i64>())
         .sum()
 }
 
 fn is_invalid_id(n: i64) -> bool {
     let s = n.to_string();
-    s[0..s.len() / 2] == s[s.len() / 2..]
+    let mid = s.len() / 2;
+    s[0..mid] == s[mid..]
 }
 
 fn is_invalid_id2(n: i64) -> bool {
     let s = n.to_string();
     let l = s.len();
-    for i in 1..=l / 2 {
-        if !l.is_multiple_of(i) {
+    for chunk_size in 1..=l / 2 {
+        if !l.is_multiple_of(chunk_size) {
             continue;
         }
-        let mut parts = Vec::with_capacity(l / i);
-        for j in 0..l / i {
-            parts.push(&s[i * j..i * (j + 1)])
-        }
-        if are_all_the_same_string(parts) {
+
+        let first = &&s.as_bytes()[..chunk_size];
+        if s.as_bytes().chunks(chunk_size).all(|c| c == *first) {
             return true;
         }
     }
     false
-}
-
-fn are_all_the_same_string(ss: Vec<&str>) -> bool {
-    for s in &ss[1..] {
-        if ss[0] != *s {
-            return false;
-        }
-    }
-    true
 }
