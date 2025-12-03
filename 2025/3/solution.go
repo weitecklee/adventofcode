@@ -19,6 +19,8 @@ func main() {
 	puzzleInput := parseInput(strings.Split(string(data), "\n"))
 	fmt.Println(part1(puzzleInput))
 	fmt.Println(part2(puzzleInput))
+	fmt.Println(part1_2(puzzleInput))
+	fmt.Println(part2_2(puzzleInput))
 }
 
 func parseInput(data []string) [][]int {
@@ -104,3 +106,56 @@ func findLargestJoltage(digits []int, nDigits int) int {
 	}
 	return ll.getValue()
 }
+
+func findLargestInWindow(window []int) (int, int) {
+	max := -1
+	idx := -1
+	for i, n := range window {
+		if n > max {
+			max = n
+			idx = i
+		}
+	}
+	return max, idx
+}
+
+func findLargestJoltage2(digits []int, windowLen int) int {
+	res := 0
+	idx := 0
+	for i := range windowLen {
+		n, idx2 := findLargestInWindow(digits[idx : len(digits)-windowLen+i+1])
+		idx = idx + idx2 + 1
+		res = res*10 + n
+	}
+	return res
+}
+
+func part1_2(puzzleInput [][]int) int {
+	res := 0
+	for _, row := range puzzleInput {
+		res += findLargestJoltage2(row, 2)
+	}
+	return res
+}
+
+func part2_2(puzzleInput [][]int) int {
+	res := 0
+	for _, row := range puzzleInput {
+		res += findLargestJoltage2(row, 12)
+	}
+	return res
+}
+
+/*
+	Implementation #1: Linked list struct with number of nodes equal to batteries.
+	The method starts from the end of the row. When a node receives a value, it
+	first checks if the next node	(if there is one) is empty, and passes the value
+	on if true. Otherwise, it	checks if the value is equal to higher than the one
+	it has. If so, it takes that value and passes its old value down(if possible).
+	Implementation #2: Sliding window.
+	Window is constructed starting from next possible index of row, ending at end
+	of row but leaving enough elements for remaining batteries.
+
+	Implementation #1: avg 192µs
+	Implementation #2: avg 99µs
+*/
