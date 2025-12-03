@@ -31,28 +31,22 @@ fn is_safe(level: &[i32]) -> bool {
     if sign == 0 {
         return false;
     }
-    for (i, n) in level.iter().skip(1).enumerate() {
-        if (n - level[i]).signum() != sign {
-            return false;
-        }
-        if (n - level[i]).abs() > 3 {
-            return false;
-        }
-    }
-    true
+
+    level.windows(2).all(|w| {
+        let diff = w[1] - w[0];
+        diff.signum() == sign && diff.abs() <= 3
+    })
 }
 
 fn is_safe_with_tolerance(level: &[i32]) -> bool {
     if is_safe(level) {
         return true;
     }
-    for (i, _) in level.iter().enumerate() {
+
+    (0..level.len()).any(|i| {
         let mut level2 = Vec::with_capacity(level.len() - 1);
         level2.extend_from_slice(&level[..i]);
         level2.extend_from_slice(&level[i + 1..]);
-        if is_safe(&level2) {
-            return true;
-        }
-    }
-    false
+        is_safe(&level2)
+    })
 }
