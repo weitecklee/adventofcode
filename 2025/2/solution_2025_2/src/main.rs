@@ -3,14 +3,14 @@ use std::{fs, time::Instant};
 
 fn main() {
     let puzzle_input = fs::read_to_string("../input.txt").expect("Error reading input.txt");
-    let ranges = parse_input(puzzle_input);
+    let ranges = parse_input(&puzzle_input);
     println!("{}", part1(&ranges));
     let now = Instant::now();
     println!("{}", part2(&ranges));
     println!("Elapsed: {}", now.elapsed().as_secs_f32())
 }
 
-fn parse_input(puzzle_input: String) -> Vec<[i64; 2]> {
+fn parse_input(puzzle_input: &str) -> Vec<[i64; 2]> {
     puzzle_input
         .split(",")
         .map(|s| {

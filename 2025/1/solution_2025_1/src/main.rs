@@ -2,12 +2,12 @@ use std::fs;
 
 fn main() {
     let puzzle_input = fs::read_to_string("../input.txt").expect("Error reading input.txt");
-    let turns = parse_input(puzzle_input);
+    let turns = parse_input(&puzzle_input);
     println!("{}", part1(&turns));
     println!("{}", part2(&turns));
 }
 
-fn parse_input(puzzle_input: String) -> Vec<i32> {
+fn parse_input(puzzle_input: &str) -> Vec<i32> {
     puzzle_input
         .lines()
         .map(|line| {
