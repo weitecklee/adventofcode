@@ -124,7 +124,7 @@ func findLargestJoltage2(digits []int, windowLen int) int {
 	idx := 0
 	for i := range windowLen {
 		n, idx2 := findLargestInWindow(digits[idx : len(digits)-windowLen+i+1])
-		idx = idx + idx2 + 1
+		idx += idx2 + 1
 		res = res*10 + n
 	}
 	return res
