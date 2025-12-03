@@ -37,8 +37,8 @@ function findLargestInWindow(window: number[]): [number, number] {
     if (window[i] > max) {
       max = window[i];
       idx = i;
+      if (max == 9) break;
     }
-    if (max == 9) break;
   }
   return [max, idx];
 }

@@ -114,9 +114,9 @@ func findLargestInWindow(window []int) (int, int) {
 		if n > max {
 			max = n
 			idx = i
-		}
-		if max == 9 {
-			break
+			if max == 9 {
+				break
+			}
 		}
 	}
 	return max, idx
@@ -160,5 +160,5 @@ func part2_2(puzzleInput [][]int) int {
 	of row but leaving enough elements for remaining batteries.
 
 	Implementation #1: avg 192µs
-	Implementation #2: avg 87µs
+	Implementation #2: avg 84µs
 */

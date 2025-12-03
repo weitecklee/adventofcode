@@ -40,13 +40,13 @@ fn find_largest_joltage(digits: &[i64], window_len: usize) -> i64 {
 fn find_largest_in_window(window: &[i64]) -> (i64, usize) {
     let mut max = 0;
     let mut idx = 0;
-    for (i, n) in window.iter().enumerate() {
-        if *n > max {
-            max = *n;
+    for (i, &n) in window.iter().enumerate() {
+        if n > max {
+            max = n;
             idx = i;
-        }
-        if max == 9 {
-            break;
+            if max == 9 {
+                break;
+            }
         }
     }
     (max, idx)
