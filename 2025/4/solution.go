@@ -29,13 +29,6 @@ func parseInput(data []string) map[[2]int]int {
 			}
 		}
 	}
-	return papers
-}
-
-func removePaper(papers map[[2]int]int) (int, map[[2]int]int) {
-	for coord := range papers {
-		papers[coord] = 0
-	}
 	for coord := range papers {
 		a, b := coord[0], coord[1]
 		for r := a - 1; r <= a+1; r++ {
@@ -50,31 +43,53 @@ func removePaper(papers map[[2]int]int) (int, map[[2]int]int) {
 			}
 		}
 	}
+	return papers
+}
+
+func removePaper(papers map[[2]int]int) int {
 	removed := 0
-	for coord, ct := range papers {
+	for _, ct := range papers {
 		if ct < 4 {
 			removed += 1
-			delete(papers, coord)
 		}
 	}
-	return removed, papers
+	return removed
 }
 
-func part1(puzzleInput map[[2]int]int) int {
-	res, _ := removePaper(puzzleInput)
-	return res
-}
-
-func part2(puzzleInput map[[2]int]int) int {
+func removePaperContinuous(papers map[[2]int]int) int {
 	res := 0
-	var removed int
-	papers := puzzleInput
 	for {
-		removed, papers = removePaper(papers)
+		removed := 0
+		for coord, ct := range papers {
+			if ct < 4 {
+				removed += 1
+				delete(papers, coord)
+				a, b := coord[0], coord[1]
+				for r := a - 1; r <= a+1; r++ {
+					for c := b - 1; c <= b+1; c++ {
+						if r == a && c == b {
+							continue
+						}
+						tmp := [2]int{r, c}
+						if _, ok := papers[tmp]; ok {
+							papers[tmp] -= 1
+						}
+					}
+				}
+			}
+		}
 		if removed == 0 {
 			break
 		}
 		res += removed
 	}
 	return res
+}
+
+func part1(puzzleInput map[[2]int]int) int {
+	return removePaper(puzzleInput)
+}
+
+func part2(puzzleInput map[[2]int]int) int {
+	return removePaperContinuous(puzzleInput)
 }
