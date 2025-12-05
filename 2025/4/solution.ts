@@ -75,5 +75,7 @@ function part2(papers: Map<string, number>): number {
   return removePaperContinuous(papers);
 }
 
-console.log(part1(parseInput(puzzleInput)));
-console.log(part2(parseInput(puzzleInput)));
+const paperMap = parseInput(puzzleInput);
+
+console.log(part1(paperMap));
+console.log(part2(paperMap));

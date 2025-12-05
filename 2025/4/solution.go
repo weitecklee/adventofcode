@@ -16,8 +16,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(part1(parseInput(strings.Split(string(data), "\n"))))
-	fmt.Println(part2(parseInput(strings.Split(string(data), "\n"))))
+	puzzleInput := parseInput(strings.Split(string(data), "\n"))
+	fmt.Println(part1(puzzleInput))
+	fmt.Println(part2(puzzleInput))
 }
 
 func parseInput(data []string) map[[2]int]int {
