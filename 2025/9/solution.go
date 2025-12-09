@@ -48,7 +48,33 @@ func part1(puzzleInput [][2]int) int {
 	return res
 }
 
+/*
+	This method is actually imperfect but works for this puzzle input.
+	It fails for cases where a large rectangle made of two points can be
+	completely outside the input. For instance:
+
+	0,0
+	0,10
+	10,10
+	10,9
+	1,9
+	1,0
+
+	┌─────────────┐
+	│  ┌──────────┘
+	│  │
+	│  │
+	│  │
+	│  │
+	│  │
+	└──┘
+
+	The method will approve the rectangle made up of the negative space to the
+	lower right and give an incorrect answer.
+*/
+
 func doesIntersect(p1, p2 [2]int, edges [][4]int) bool {
+	// pre-sort coordinates so that x1 <= x2 && y1 <= y2
 	x1, y1, x2, y2 := p1[0], p1[1], p2[0], p2[1]
 	if x1 > x2 {
 		x1, x2 = x2, x1
@@ -56,15 +82,22 @@ func doesIntersect(p1, p2 [2]int, edges [][4]int) bool {
 	if y1 > y2 {
 		y1, y2 = y2, y1
 	}
+
+	// Use method to detect collision between two rectangles.
+	// If rectA is not completely to the left or completely to the right or
+	// completely above or completely below rectB, there is collision.
+	// Edge is just a flattened rectangle, still works.
 	for _, edge := range edges {
 		if x1 < edge[2] && x2 > edge[0] && y1 < edge[3] && y2 > edge[1] {
 			return true
 		}
 	}
+
 	return false
 }
 
 func part2(puzzleInput [][2]int) int {
+	// construct slice of edges, pre-sort coordinates so that x1 <= x2 && y1 <= y2
 	l := len(puzzleInput)
 	edges := make([][4]int, l)
 	for i := range l - 1 {
@@ -85,6 +118,7 @@ func part2(puzzleInput [][2]int) int {
 		y1, y2 = y2, y1
 	}
 	edges[l-1] = [4]int{x1, y1, x2, y2}
+
 	res := 0
 	for i, p1 := range puzzleInput {
 		for _, p2 := range puzzleInput[i+1:] {
