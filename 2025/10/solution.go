@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"slices"
 	"strings"
 
 	"github.com/weitecklee/adventofcode/utils"
@@ -26,21 +25,26 @@ func main() {
 }
 
 type Machine struct {
-	lightDiagram []bool
-	buttons      [][]int
+	lightDiagram int
+	buttons      []int
 	joltageReqs  []int
 }
 
-func NewMachine(line string) *Machine {
+func NewMachine2(line string) *Machine {
 	parts := strings.Split(line, " ")
-	lightDiagram := make([]bool, len(parts[0])-2)
+	var lightDiagram int
 	for i, ch := range parts[0][1 : len(parts[0])-1] {
-		lightDiagram[i] = ch == '#'
+		if ch == '#' {
+			lightDiagram += 1 << i
+		}
 	}
-	buttons := make([][]int, len(parts)-2)
+	buttons := make([]int, len(parts)-2)
 
 	for i, s := range parts[1 : len(parts)-1] {
-		buttons[i] = utils.ExtractInts(s)
+		nums := utils.ExtractInts(s)
+		for _, n := range nums {
+			buttons[i] += 1 << n
+		}
 	}
 
 	joltageReqs := utils.ExtractInts(parts[len(parts)-1])
@@ -54,48 +58,37 @@ func NewMachine(line string) *Machine {
 	return &m
 }
 
-func (m *Machine) doLightsMatch(lights []bool) bool {
-	for i := range lights {
-		if lights[i] != m.lightDiagram[i] {
-			return false
-		}
-	}
-	return true
-}
-
-type Value struct {
-	lights  []bool
+type LightValue struct {
+	lights  int
 	presses int
 }
 
-func (m *Machine) calcFewestPresses() int {
+func (m *Machine) fewestPressesForLights() int {
 	res := math.MaxInt
-	queue := utils.NewMinHeap[Value]()
-	heap.Push(queue, &utils.Item[Value]{
+	queue := utils.NewMinHeap[LightValue]()
+	heap.Push(queue, &utils.Item[LightValue]{
 		Priority: 0,
-		Value:    Value{make([]bool, len(m.lightDiagram)), 0},
+		Value:    LightValue{},
 	})
 
 	memo := make(map[int]int)
 
 	for len(queue.PriorityQueue) > 0 {
-		item := heap.Pop(queue).(*utils.Item[Value])
+		item := heap.Pop(queue).(*utils.Item[LightValue])
 		lights := item.Value.lights
 		presses := item.Value.presses
 
-		lightsInt := lightsToInt(lights)
-
-		if v, ok := memo[lightsInt]; ok && v <= presses {
+		if v, ok := memo[lights]; ok && v <= presses {
 			continue
 		}
 
-		memo[lightsInt] = presses
+		memo[lights] = presses
 
 		if presses >= res {
 			continue
 		}
 
-		if m.doLightsMatch(lights) {
+		if lights == m.lightDiagram {
 			if presses < res {
 				res = presses
 			}
@@ -103,24 +96,10 @@ func (m *Machine) calcFewestPresses() int {
 		}
 
 		for _, button := range m.buttons {
-			tmp := slices.Clone(lights)
-			for _, n := range button {
-				tmp[n] = !tmp[n]
-			}
-			heap.Push(queue, &utils.Item[Value]{
+			heap.Push(queue, &utils.Item[LightValue]{
 				Priority: presses + 1,
-				Value:    Value{tmp, presses + 1},
+				Value:    LightValue{lights ^ button, presses + 1},
 			})
-		}
-	}
-	return res
-}
-
-func lightsToInt(lights []bool) int {
-	res := 0
-	for i, light := range lights {
-		if light {
-			res += 1 << i
 		}
 	}
 	return res
@@ -129,7 +108,7 @@ func lightsToInt(lights []bool) int {
 func parseInput(data []string) []*Machine {
 	res := make([]*Machine, len(data))
 	for i, line := range data {
-		res[i] = NewMachine(line)
+		res[i] = NewMachine2(line)
 	}
 	return res
 }
@@ -137,7 +116,7 @@ func parseInput(data []string) []*Machine {
 func part1(machines []*Machine) int {
 	res := 0
 	for _, m := range machines {
-		res += m.calcFewestPresses()
+		res += m.fewestPressesForLights()
 	}
 	return res
 }
