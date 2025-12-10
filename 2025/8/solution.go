@@ -29,47 +29,6 @@ type Pair struct {
 	a, b, dist int
 }
 
-type UnionFind struct {
-	parent []int
-	size   []int
-}
-
-func (uf *UnionFind) FindParent(n int) int {
-	if uf.parent[n] != n {
-		uf.parent[n] = uf.FindParent(uf.parent[n])
-	}
-	return uf.parent[n]
-}
-
-func (uf *UnionFind) Union(a, b int) {
-	rootA := uf.FindParent(a)
-	rootB := uf.FindParent(b)
-
-	if rootA == rootB {
-		return
-	}
-
-	if uf.size[rootA] < uf.size[rootB] {
-		rootA, rootB = rootB, rootA
-	}
-
-	uf.parent[rootB] = rootA
-	uf.size[rootA] += uf.size[rootB]
-
-}
-
-func NewUnionFind(n int) *UnionFind {
-	uf := UnionFind{
-		make([]int, n),
-		make([]int, n),
-	}
-	for i := range uf.parent {
-		uf.parent[i] = i
-		uf.size[i] = 1
-	}
-	return &uf
-}
-
 func parseInput(data []string) []juncBox {
 	points := make([]juncBox, len(data))
 	for i, line := range data {
@@ -96,7 +55,7 @@ func solve(puzzleInput []juncBox) (int, int) {
 		}
 	}
 
-	uf := NewUnionFind(1000)
+	uf := utils.NewUnionFind(1000)
 	slices.SortFunc(pairs, func(a, b Pair) int {
 		return a.dist - b.dist
 	})
@@ -107,8 +66,8 @@ func solve(puzzleInput []juncBox) (int, int) {
 	}
 
 	sizeMap := make(map[int]int)
-	for _, p := range uf.parent {
-		sizeMap[p] = uf.size[p]
+	for _, p := range uf.Parents {
+		sizeMap[p] = uf.Sizes[p]
 	}
 
 	sizes := make([]int, 0, len(sizeMap))
@@ -127,7 +86,7 @@ func solve(puzzleInput []juncBox) (int, int) {
 	for {
 		pair := pairs[i]
 		uf.Union(pair.a, pair.b)
-		if uf.size[uf.FindParent(pair.a)] == 1000 {
+		if uf.Sizes[uf.FindParent(pair.a)] == 1000 {
 			part2 = puzzleInput[pair.a][0] * puzzleInput[pair.b][0]
 			break
 		}

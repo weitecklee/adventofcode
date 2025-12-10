@@ -59,3 +59,18 @@ func ExtractInts(s string) []int {
 	}
 	return nums
 }
+
+var signedRegex = regexp.MustCompile(`-?\d+`)
+
+func ExtractIntsSigned(s string) []int {
+	matches := signedRegex.FindAllString(s, -1)
+	nums := make([]int, len(matches))
+	for i, match := range matches {
+		n, err := strconv.Atoi(match)
+		if err != nil {
+			panic(err)
+		}
+		nums[i] = n
+	}
+	return nums
+}
