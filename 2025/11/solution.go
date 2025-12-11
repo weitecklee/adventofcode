@@ -19,6 +19,7 @@ func main() {
 	}
 	nodeMap := parseInput(strings.Split(string(data), "\n"))
 	fmt.Println(part1(nodeMap))
+	fmt.Println(part2(nodeMap))
 
 }
 
@@ -36,7 +37,7 @@ func parseInput(data []string) map[string]*Node {
 		if _, ok := nodeMap[name]; !ok {
 			node := Node{
 				name,
-				make([]*Node, 0),
+				[]*Node{},
 			}
 			nodeMap[name] = &node
 		}
@@ -46,7 +47,7 @@ func parseInput(data []string) map[string]*Node {
 			if _, ok := nodeMap[match]; !ok {
 				output := Node{
 					match,
-					make([]*Node, 0),
+					[]*Node{},
 				}
 				nodeMap[match] = &output
 			}
@@ -74,4 +75,47 @@ func part1(nodeMap map[string]*Node) int {
 	}
 
 	return res
+}
+
+func makeMemo(nodeMap map[string]*Node) map[[2]*Node]int {
+	memo := make(map[[2]*Node]int)
+	for _, node := range nodeMap {
+		for _, output := range node.outputs {
+			memo[[2]*Node{node, output}] = 1
+		}
+	}
+	return memo
+}
+
+func dfs(fromNode *Node, toNode *Node, pathMemo map[[2]*Node]int) int {
+	pair := [2]*Node{fromNode, toNode}
+	if v, ok := pathMemo[pair]; ok {
+		return v
+	}
+
+	res := 0
+	for _, node := range fromNode.outputs {
+		res += dfs(node, toNode, pathMemo)
+	}
+
+	pathMemo[pair] = res
+	return res
+}
+
+func part2(nodeMap map[string]*Node) int {
+	pathMemo := makeMemo(nodeMap)
+
+	svrNode := nodeMap["svr"]
+	dacNode := nodeMap["dac"]
+	fftNode := nodeMap["fft"]
+	outNode := nodeMap["out"]
+
+	svr2dac := dfs(svrNode, dacNode, pathMemo)
+	dac2fft := dfs(dacNode, fftNode, pathMemo)
+	fft2out := dfs(fftNode, outNode, pathMemo)
+	svr2fft := dfs(svrNode, fftNode, pathMemo)
+	fft2dac := dfs(fftNode, dacNode, pathMemo)
+	dac2out := dfs(dacNode, outNode, pathMemo)
+
+	return svr2dac*dac2fft*fft2out + svr2fft*fft2dac*dac2out
 }
