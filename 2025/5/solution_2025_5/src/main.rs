@@ -4,8 +4,8 @@ fn main() {
     let puzzle_input = fs::read_to_string("../input.txt").expect("Error reading input.txt");
     let (mut ingredient_ranges, ingredient_ids) = parse_input(&puzzle_input);
     ingredient_ranges = condense_ranges(ingredient_ranges);
-    println!("{}", part1(&ingredient_ranges, ingredient_ids));
-    println!("{}", part2(ingredient_ranges));
+    println!("{}", part1(&ingredient_ranges, &ingredient_ids));
+    println!("{}", part2(&ingredient_ranges));
 }
 
 fn parse_input(puzzle_input: &str) -> (Vec<[u64; 2]>, Vec<u64>) {
@@ -35,20 +35,13 @@ fn condense_ranges(mut ranges: Vec<[u64; 2]>) -> Vec<[u64; 2]> {
     res
 }
 
-fn part1(ranges: &[[u64; 2]], ids: Vec<u64>) -> usize {
+fn part1(ranges: &[[u64; 2]], ids: &[u64]) -> usize {
     ids.iter()
-        .filter(|&&id| {
-            for range in ranges {
-                if id >= range[0] && id <= range[1] {
-                    return true;
-                }
-            }
-            false
-        })
+        .filter(|&&id| ranges.iter().any(|r| id >= r[0] && id <= r[1]))
         .count()
 }
 
-fn part2(ranges: Vec<[u64; 2]>) -> u64 {
+fn part2(ranges: &[[u64; 2]]) -> u64 {
     ranges
         .iter()
         .fold(0, |acc, curr| acc + curr[1] - curr[0] + 1)
