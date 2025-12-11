@@ -18,9 +18,7 @@ func main() {
 		panic(err)
 	}
 	nodeMap := parseInput(strings.Split(string(data), "\n"))
-	fmt.Println(part1(nodeMap))
-	fmt.Println(part2(nodeMap))
-
+	fmt.Println(solve(nodeMap))
 }
 
 type Node struct {
@@ -57,26 +55,6 @@ func parseInput(data []string) map[string]*Node {
 	return nodeMap
 }
 
-func part1(nodeMap map[string]*Node) int {
-	youNode := nodeMap["you"]
-	outNode := nodeMap["out"]
-	queue := []*Node{youNode}
-	res := 0
-
-	for len(queue) > 0 {
-		curr := queue[0]
-		queue = queue[1:]
-		if curr == outNode {
-			res += 1
-			continue
-		}
-
-		queue = append(queue, curr.outputs...)
-	}
-
-	return res
-}
-
 func makeMemo(nodeMap map[string]*Node) map[[2]*Node]int {
 	memo := make(map[[2]*Node]int)
 	for _, node := range nodeMap {
@@ -102,9 +80,10 @@ func dfs(fromNode *Node, toNode *Node, pathMemo map[[2]*Node]int) int {
 	return res
 }
 
-func part2(nodeMap map[string]*Node) int {
+func solve(nodeMap map[string]*Node) (int, int) {
 	pathMemo := makeMemo(nodeMap)
 
+	youNode := nodeMap["you"]
 	svrNode := nodeMap["svr"]
 	dacNode := nodeMap["dac"]
 	fftNode := nodeMap["fft"]
@@ -117,5 +96,8 @@ func part2(nodeMap map[string]*Node) int {
 	fft2dac := dfs(fftNode, dacNode, pathMemo)
 	dac2out := dfs(dacNode, outNode, pathMemo)
 
-	return svr2dac*dac2fft*fft2out + svr2fft*fft2dac*dac2out
+	part1 := dfs(youNode, outNode, pathMemo)
+	part2 := svr2dac*dac2fft*fft2out + svr2fft*fft2dac*dac2out
+
+	return part1, part2
 }
