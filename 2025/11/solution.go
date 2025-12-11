@@ -21,9 +21,52 @@ func main() {
 	fmt.Println(solve(nodeMap))
 }
 
+type Graph struct {
+	nodeMap  map[string]*Node
+	pathMemo map[[2]*Node]int
+}
+
 type Node struct {
-	name    string
 	outputs []*Node
+}
+
+func NewGraph(nodeMap map[string]*Node) *Graph {
+	nNodes := len(nodeMap)
+	g := Graph{
+		nodeMap,
+		make(map[[2]*Node]int, nNodes*(nNodes-1)),
+	}
+	g.initialize()
+	return &g
+}
+
+func (g *Graph) initialize() {
+	for _, node := range g.nodeMap {
+		for _, output := range node.outputs {
+			g.pathMemo[[2]*Node{node, output}] = 1
+		}
+	}
+}
+
+func (g *Graph) NumPaths(fromStr, toStr string) int {
+	fromNode := g.nodeMap[fromStr]
+	toNode := g.nodeMap[toStr]
+	return g.dfs(fromNode, toNode)
+}
+
+func (g *Graph) dfs(fromNode *Node, toNode *Node) int {
+	pair := [2]*Node{fromNode, toNode}
+	if v, ok := g.pathMemo[pair]; ok {
+		return v
+	}
+
+	res := 0
+	for _, node := range fromNode.outputs {
+		res += g.dfs(node, toNode)
+	}
+
+	g.pathMemo[pair] = res
+	return res
 }
 
 func parseInput(data []string) map[string]*Node {
@@ -34,7 +77,6 @@ func parseInput(data []string) map[string]*Node {
 		name := matches[0]
 		if _, ok := nodeMap[name]; !ok {
 			node := Node{
-				name,
 				[]*Node{},
 			}
 			nodeMap[name] = &node
@@ -44,7 +86,6 @@ func parseInput(data []string) map[string]*Node {
 		for _, match := range matches[1:] {
 			if _, ok := nodeMap[match]; !ok {
 				output := Node{
-					match,
 					[]*Node{},
 				}
 				nodeMap[match] = &output
@@ -55,48 +96,17 @@ func parseInput(data []string) map[string]*Node {
 	return nodeMap
 }
 
-func makeMemo(nodeMap map[string]*Node) map[[2]*Node]int {
-	memo := make(map[[2]*Node]int)
-	for _, node := range nodeMap {
-		for _, output := range node.outputs {
-			memo[[2]*Node{node, output}] = 1
-		}
-	}
-	return memo
-}
-
-func dfs(fromNode *Node, toNode *Node, pathMemo map[[2]*Node]int) int {
-	pair := [2]*Node{fromNode, toNode}
-	if v, ok := pathMemo[pair]; ok {
-		return v
-	}
-
-	res := 0
-	for _, node := range fromNode.outputs {
-		res += dfs(node, toNode, pathMemo)
-	}
-
-	pathMemo[pair] = res
-	return res
-}
-
 func solve(nodeMap map[string]*Node) (int, int) {
-	pathMemo := makeMemo(nodeMap)
+	graph := NewGraph(nodeMap)
 
-	youNode := nodeMap["you"]
-	svrNode := nodeMap["svr"]
-	dacNode := nodeMap["dac"]
-	fftNode := nodeMap["fft"]
-	outNode := nodeMap["out"]
+	svr2dac := graph.NumPaths("svr", "dac")
+	dac2fft := graph.NumPaths("dac", "fft")
+	fft2out := graph.NumPaths("fft", "out")
+	svr2fft := graph.NumPaths("svr", "fft")
+	fft2dac := graph.NumPaths("fft", "dac")
+	dac2out := graph.NumPaths("dac", "out")
 
-	svr2dac := dfs(svrNode, dacNode, pathMemo)
-	dac2fft := dfs(dacNode, fftNode, pathMemo)
-	fft2out := dfs(fftNode, outNode, pathMemo)
-	svr2fft := dfs(svrNode, fftNode, pathMemo)
-	fft2dac := dfs(fftNode, dacNode, pathMemo)
-	dac2out := dfs(dacNode, outNode, pathMemo)
-
-	part1 := dfs(youNode, outNode, pathMemo)
+	part1 := graph.NumPaths("you", "out")
 	part2 := svr2dac*dac2fft*fft2out + svr2fft*fft2dac*dac2out
 
 	return part1, part2
