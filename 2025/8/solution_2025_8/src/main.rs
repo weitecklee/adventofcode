@@ -76,17 +76,17 @@ fn distance_between_points(a: &[u32; 3], b: &[u32; 3]) -> u64 {
 }
 
 fn prepare_data(points: &[[u32; 3]]) -> (Vec<Pair>, UnionFind) {
-    let mut pairs: Vec<Pair> = Vec::new();
-    for (i, p1) in points.iter().enumerate() {
-        for (j, p2) in points.iter().skip(i + 1).enumerate() {
-            let pair = Pair {
+    let mut pairs: Vec<Pair> = points
+        .iter()
+        .enumerate()
+        .flat_map(|(i, p1)| {
+            points[i + 1..].iter().enumerate().map(move |(j, p2)| Pair {
                 a: i,
                 b: i + j + 1,
                 dist: distance_between_points(p1, p2),
-            };
-            pairs.push(pair);
-        }
-    }
+            })
+        })
+        .collect();
 
     pairs.sort_by_key(|p| p.dist);
 
@@ -100,21 +100,22 @@ fn part1(pairs: &[Pair], uf: &mut UnionFind) -> usize {
         uf.union(pair.a, pair.b);
     }
 
-    let (mut m1, mut m2, mut m3) = (0, 0, 0);
+    let mut top3 = [0_usize; 3];
 
-    for s in uf.sizes.iter() {
-        if *s >= m1 {
-            m3 = m2;
-            m2 = m1;
-            m1 = *s;
-        } else if *s >= m2 {
-            m3 = m2;
-            m2 = *s;
-        } else if *s >= m3 {
-            m3 = *s;
+    for &s in &uf.sizes {
+        if s >= top3[0] {
+            top3[2] = top3[1];
+            top3[1] = top3[0];
+            top3[0] = s;
+        } else if s >= top3[1] {
+            top3[2] = top3[1];
+            top3[1] = s;
+        } else if s > top3[2] {
+            top3[2] = s;
         }
     }
-    m1 * m2 * m3
+
+    top3.iter().product()
 }
 
 fn part2(pairs: &[Pair], uf: &mut UnionFind, points: &[[u32; 3]]) -> u32 {
