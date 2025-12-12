@@ -8,42 +8,46 @@ fn main() {
     println!("{}", part2(&nodes, &mut name_map, &mut memo));
 }
 
-struct NameMap<'a> {
-    map: HashMap<&'a str, usize>,
+struct NameMap {
+    map: HashMap<String, usize>,
 }
 
-impl<'a> NameMap<'a> {
+impl NameMap {
     fn new() -> Self {
         Self {
             map: HashMap::new(),
         }
     }
 
-    fn insert(&mut self, name: &'a str) -> usize {
+    fn insert(&mut self, name: String) -> usize {
         let n = self.map.len();
         self.map.insert(name, n);
         n
     }
 
-    fn get(&mut self, name: &'a str) -> usize {
-        if let Some(&idx) = self.map.get(name) {
+    fn get_or_insert(&mut self, name: String) -> usize {
+        if let Some(&idx) = self.map.get(&name) {
             idx
         } else {
             self.insert(name)
         }
     }
+
+    fn get(&self, name: String) -> std::option::Option<&usize> {
+        self.map.get(&name)
+    }
 }
 
-fn parse_input<'a>(puzzle_input: &'a str) -> (Vec<Vec<usize>>, NameMap<'a>) {
+fn parse_input(puzzle_input: &str) -> (Vec<Vec<usize>>, NameMap) {
     let lines: Vec<&str> = puzzle_input.lines().collect();
-    let mut nodes: Vec<Vec<usize>> = vec![vec![0_usize; 0]; lines.len() + 1];
+    let mut nodes: Vec<Vec<usize>> = vec![Vec::new(); lines.len() + 1]; // +1 due to `out` node
     let mut name_map = NameMap::new();
     for line in lines {
         let (name, out_str) = line.split_once(": ").unwrap();
-        let name_idx = name_map.get(name);
+        let name_idx = name_map.get_or_insert(name.to_string());
         let outs: Vec<usize> = out_str
             .split_whitespace()
-            .map(|s| name_map.get(s))
+            .map(|s| name_map.get_or_insert(s.to_string()))
             .collect();
         nodes[name_idx] = outs;
     }
@@ -51,11 +55,11 @@ fn parse_input<'a>(puzzle_input: &'a str) -> (Vec<Vec<usize>>, NameMap<'a>) {
     (nodes, name_map)
 }
 
-fn prepare_data(nodes: &[Vec<usize>]) -> HashMap<[usize; 2], usize> {
+fn prepare_data(nodes: &[Vec<usize>]) -> HashMap<(usize, usize), usize> {
     let mut memo = HashMap::new();
     nodes.iter().enumerate().for_each(|(i, outs)| {
         outs.iter().for_each(|&j| {
-            memo.insert([i, j], 1);
+            memo.insert((i, j), 1);
         });
     });
 
@@ -66,9 +70,9 @@ fn dfs(
     from_node_idx: usize,
     to_node_idx: usize,
     nodes: &Vec<Vec<usize>>,
-    memo: &mut HashMap<[usize; 2], usize>,
+    memo: &mut HashMap<(usize, usize), usize>,
 ) -> usize {
-    let pair = [from_node_idx, to_node_idx];
+    let pair = (from_node_idx, to_node_idx);
     if let Some(&n) = memo.get(&pair) {
         return n;
     }
@@ -83,10 +87,10 @@ fn dfs(
 fn part1(
     nodes: &Vec<Vec<usize>>,
     name_map: &mut NameMap,
-    memo: &mut HashMap<[usize; 2], usize>,
+    memo: &mut HashMap<(usize, usize), usize>,
 ) -> usize {
-    let you_node_idx = name_map.get("you");
-    let out_node_idx = name_map.get("out");
+    let &you_node_idx = name_map.get("you".to_string()).unwrap();
+    let &out_node_idx = name_map.get("out".to_string()).unwrap();
 
     dfs(you_node_idx, out_node_idx, nodes, memo)
 }
@@ -94,12 +98,12 @@ fn part1(
 fn part2(
     nodes: &Vec<Vec<usize>>,
     name_map: &mut NameMap,
-    memo: &mut HashMap<[usize; 2], usize>,
+    memo: &mut HashMap<(usize, usize), usize>,
 ) -> usize {
-    let svr_node_idx = name_map.get("svr");
-    let dac_node_idx = name_map.get("dac");
-    let fft_node_idx = name_map.get("fft");
-    let out_node_idx = name_map.get("out");
+    let svr_node_idx = *name_map.get("svr".to_string()).unwrap();
+    let dac_node_idx = *name_map.get("dac".to_string()).unwrap();
+    let fft_node_idx = *name_map.get("fft".to_string()).unwrap();
+    let out_node_idx = *name_map.get("out".to_string()).unwrap();
 
     let svr2dac = dfs(svr_node_idx, dac_node_idx, nodes, memo);
     let dac2fft = dfs(dac_node_idx, fft_node_idx, nodes, memo);
