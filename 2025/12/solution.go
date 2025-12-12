@@ -23,26 +23,28 @@ func main() {
 	fmt.Println(solve(presents, regions))
 }
 
-const MAX_PRESENT_AREA = 9
-
 type Present struct {
-	shape []string
-	area  int
+	shape   []string
+	area    int
+	maxArea int
 }
 
 func NewPresent(line []string) *Present {
 	shape := line[1:]
-	var size int
+	var area int
+	var maxArea int
 	for _, line := range shape {
+		maxArea += len(line)
 		for _, ch := range line {
 			if ch == '#' {
-				size += 1
+				area += 1
 			}
 		}
 	}
 	return &Present{
 		shape,
-		size,
+		area,
+		maxArea,
 	}
 }
 
@@ -94,7 +96,7 @@ func solve(presents []*Present, regions []*Region) int {
 		var minimumAreaNeeded, minimumTrivialArea int
 		for i, count := range region.presentCounts {
 			minimumAreaNeeded += presents[i].area * count
-			minimumTrivialArea += count * MAX_PRESENT_AREA
+			minimumTrivialArea += count * presents[i].maxArea
 		}
 		if minimumAreaNeeded > region.area {
 			continue
@@ -115,6 +117,6 @@ func solve(presents []*Present, regions []*Region) int {
 	Forget it, I'm going to sleep."
 	The next morning, I saw all the memes on the subreddit, got disappointed in
 	myself, "you got me again, AoC". Anyway it turns out all the regions are
-	trivial: 	either too small to ever fit all the pieces, or are so big that
+	trivial: either too small to ever fit all the pieces, or are so big that
 	they'll	easily fit all the pieces.
 */
