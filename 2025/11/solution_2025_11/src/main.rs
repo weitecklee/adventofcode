@@ -2,10 +2,10 @@ use std::{collections::HashMap, fs, ops::Index};
 
 fn main() {
     let puzzle_input = fs::read_to_string("../input.txt").expect("Error reading input.txt");
-    let (nodes, mut name_map) = parse_input(&puzzle_input);
-    let mut memo = prepare_memo(&nodes);
-    println!("{}", part1(&nodes, &mut name_map, &mut memo));
-    println!("{}", part2(&nodes, &mut name_map, &mut memo));
+    let (nodes, name_map) = parse_input(&puzzle_input);
+    let mut graph = Graph::new(name_map, nodes);
+    println!("{}", part1(&mut graph));
+    println!("{}", part2(&mut graph));
 }
 
 struct NameMap {
@@ -42,6 +42,47 @@ impl Index<&str> for NameMap {
     }
 }
 
+struct Graph {
+    map: NameMap,
+    memo: HashMap<(usize, usize), usize>,
+    nodes: Vec<Vec<usize>>,
+}
+
+impl Graph {
+    fn new(map: NameMap, nodes: Vec<Vec<usize>>) -> Self {
+        let mut memo = HashMap::new();
+        nodes.iter().enumerate().for_each(|(i, outs)| {
+            outs.iter().for_each(|&j| {
+                memo.insert((i, j), 1);
+            });
+        });
+
+        Self { map, memo, nodes }
+    }
+
+    fn num_paths(&mut self, from: &str, to: &str) -> usize {
+        let from_idx = self.map[from];
+        let to_idx = self.map[to];
+        self.dfs(from_idx, to_idx)
+    }
+
+    fn dfs(&mut self, from_idx: usize, to_idx: usize) -> usize {
+        let pair = (from_idx, to_idx);
+        if let Some(&n) = self.memo.get(&pair) {
+            return n;
+        }
+
+        let mut res = 0;
+        for i in 0..self.nodes[from_idx].len() {
+            let out = self.nodes[from_idx][i];
+            res += self.dfs(out, to_idx);
+        }
+
+        self.memo.insert(pair, res);
+        res
+    }
+}
+
 fn parse_input(puzzle_input: &str) -> (Vec<Vec<usize>>, NameMap) {
     let lines: Vec<&str> = puzzle_input.lines().collect();
     let mut nodes: Vec<Vec<usize>> = vec![Vec::new(); lines.len() + 1]; // +1 due to `out` node
@@ -60,64 +101,13 @@ fn parse_input(puzzle_input: &str) -> (Vec<Vec<usize>>, NameMap) {
     (nodes, name_map)
 }
 
-fn prepare_memo(nodes: &[Vec<usize>]) -> HashMap<(usize, usize), usize> {
-    let mut memo = HashMap::new();
-    nodes.iter().enumerate().for_each(|(i, outs)| {
-        outs.iter().for_each(|&j| {
-            memo.insert((i, j), 1);
-        });
-    });
-
-    memo
+fn part1(graph: &mut Graph) -> usize {
+    graph.num_paths("you", "out")
 }
 
-fn dfs(
-    from_node_idx: usize,
-    to_node_idx: usize,
-    nodes: &Vec<Vec<usize>>,
-    memo: &mut HashMap<(usize, usize), usize>,
-) -> usize {
-    let pair = (from_node_idx, to_node_idx);
-    if let Some(&n) = memo.get(&pair) {
-        return n;
-    }
-
-    let mut res = 0;
-    for &out in &nodes[from_node_idx] {
-        res += dfs(out, to_node_idx, nodes, memo);
-    }
-
-    memo.insert(pair, res);
-    res
-}
-
-fn part1(
-    nodes: &Vec<Vec<usize>>,
-    name_map: &mut NameMap,
-    memo: &mut HashMap<(usize, usize), usize>,
-) -> usize {
-    let you_node_idx = name_map["you"];
-    let out_node_idx = name_map["out"];
-
-    dfs(you_node_idx, out_node_idx, nodes, memo)
-}
-
-fn part2(
-    nodes: &Vec<Vec<usize>>,
-    name_map: &mut NameMap,
-    memo: &mut HashMap<(usize, usize), usize>,
-) -> usize {
-    let svr_node_idx = name_map["svr"];
-    let dac_node_idx = name_map["dac"];
-    let fft_node_idx = name_map["fft"];
-    let out_node_idx = name_map["out"];
-
-    let svr2dac = dfs(svr_node_idx, dac_node_idx, nodes, memo);
-    let dac2fft = dfs(dac_node_idx, fft_node_idx, nodes, memo);
-    let fft2out = dfs(fft_node_idx, out_node_idx, nodes, memo);
-    let svr2fft = dfs(svr_node_idx, fft_node_idx, nodes, memo);
-    let fft2dac = dfs(fft_node_idx, dac_node_idx, nodes, memo);
-    let dac2out = dfs(dac_node_idx, out_node_idx, nodes, memo);
-
-    svr2dac * dac2fft * fft2out + svr2fft * fft2dac * dac2out
+fn part2(graph: &mut Graph) -> usize {
+    graph.num_paths("svr", "dac") * graph.num_paths("dac", "fft") * graph.num_paths("fft", "out")
+        + graph.num_paths("svr", "fft")
+            * graph.num_paths("fft", "dac")
+            * graph.num_paths("dac", "out")
 }
