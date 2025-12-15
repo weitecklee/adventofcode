@@ -1,3 +1,4 @@
+use lpsolve::prelude::*;
 use rayon::prelude::*;
 use std::{
     collections::{BinaryHeap, HashSet},
@@ -32,9 +33,9 @@ impl PartialOrd for Entry {
 struct Machine {
     // light: String,
     light_int: usize,
-    // buttons: Vec<Vec<usize>>,
+    buttons: Vec<Vec<usize>>,
     button_ints: Vec<usize>,
-    // joltages: Vec<usize>,
+    joltages: Vec<usize>,
 }
 
 impl Machine {
@@ -58,19 +59,19 @@ impl Machine {
             .iter()
             .map(|b| b.iter().fold(0, |a, b| a | (1 << b)))
             .collect();
-        // let joltages = parts
-        //     .last()
-        //     .unwrap()
-        //     .trim_matches(BRACKETS)
-        //     .split(',')
-        //     .map(|n| n.parse().unwrap())
-        //     .collect();
+        let joltages = parts
+            .last()
+            .unwrap()
+            .trim_matches(BRACKETS)
+            .split(',')
+            .map(|n| n.parse().unwrap())
+            .collect();
         Machine {
             // light: light.to_string(),
             light_int,
-            // buttons,
+            buttons,
             button_ints,
-            // joltages,
+            joltages,
         }
     }
 
@@ -108,7 +109,27 @@ impl Machine {
                 }
             }
         }
-        0
+        usize::MAX
+    }
+
+    fn fewest_presses_for_joltage(&self) -> f64 {
+        let n = self.buttons.len();
+        let mut lp = Problem::builder()
+            .cols(n as i32)
+            .min(&vec![1.0; n])
+            .non_negative_integers()
+            .verbosity(Important);
+        for (i, j) in self.joltages.iter().enumerate() {
+            let mut con = vec![0.0; n];
+            for (b, button) in self.buttons.iter().enumerate() {
+                if button.contains(&i) {
+                    con[b] = 1.0;
+                }
+            }
+            lp = lp.eq(&con, *j as f64);
+        }
+        let soln = lp.solve().unwrap();
+        soln.variables().unwrap().iter().sum()
     }
 }
 
@@ -117,6 +138,7 @@ fn main() {
     let machines = parse_input(&puzzle_input);
 
     println!("{}", part1(&machines));
+    println!("{}", part2(&machines));
 }
 
 fn parse_input(puzzle_input: &str) -> Vec<Machine> {
@@ -127,5 +149,12 @@ fn part1(machines: &[Machine]) -> usize {
     machines
         .par_iter()
         .map(|m| m.fewest_presses_for_lights())
+        .sum()
+}
+
+fn part2(machines: &[Machine]) -> f64 {
+    machines
+        .par_iter()
+        .map(|m| m.fewest_presses_for_joltage())
         .sum()
 }
