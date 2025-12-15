@@ -119,15 +119,29 @@ impl Machine {
             .min(&vec![1.0; n])
             .non_negative_integers()
             .verbosity(Important);
-        for (i, j) in self.joltages.iter().enumerate() {
-            let mut con = vec![0.0; n];
-            for (b, button) in self.buttons.iter().enumerate() {
-                if button.contains(&i) {
-                    con[b] = 1.0;
-                }
-            }
-            lp = lp.eq(&con, *j as f64);
+
+        let constraints: Vec<Vec<f64>> = self
+            .joltages
+            .iter()
+            .enumerate()
+            .map(|(light_idx, _)| {
+                self.buttons
+                    .iter()
+                    .map(|button| {
+                        if button.contains(&light_idx) {
+                            1.0
+                        } else {
+                            0.0
+                        }
+                    })
+                    .collect()
+            })
+            .collect();
+
+        for (constraint, &joltage) in constraints.iter().zip(&self.joltages) {
+            lp = lp.eq(constraint, joltage as f64);
         }
+
         let soln = lp.solve().unwrap();
         soln.variables().unwrap().iter().sum()
     }
